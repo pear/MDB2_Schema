@@ -219,7 +219,7 @@ class MDB2_Schema extends PEAR
      * Create a new MDB2 connection object and connect to the specified
      * database
      *
-     * @param   mixed   $dbinfo   'data source name', see the MDB2::parseDSN
+     * @param   mixed   $db       'data source name', see the MDB2::parseDSN
      *                            method for a description of the dsn format.
      *                            Can also be specified as an array of the
      *                            format returned by MDB2::parseDSN.
@@ -231,21 +231,20 @@ class MDB2_Schema extends PEAR
      * @access  public
      * @see     MDB2::parseDSN
      */
-    function connect(&$dbinfo, $options = false)
+    function connect(&$db, $options = false)
     {
-        if (is_object($this->db) && !PEAR::isError($this->db)) {
+        if (MDB2::isConnection($this->db)) {
             $this->disconnect();
         }
-        if (is_object($dbinfo)) {
-             $this->db =& $dbinfo;
-        } else {
-            $this->db =& MDB2::connect($dbinfo, $options);
-            if (PEAR::isError($this->db)) {
-                return $this->db;
-            }
+        if (!MDB2::isConnection($db)) {
+            $db =& MDB2::connect($db, $options);
         }
-        if (is_array($options)) {
-            $this->options = array_merge($options, $this->options);
+        if (PEAR::isError($db)) {
+            return $db;
+        }
+        $this->db =& $db;
+        if (is_array($options) && !empty($options)) {
+            $this->options = array_merge($this->options, $options);
         }
         $this->db->loadModule('Manager');
         return MDB2_OK;
