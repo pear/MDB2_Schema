@@ -15,6 +15,11 @@ Also the following changes were made in the process:
   (the user will now need to set the proper defaults himself)
 - do not require that not null fields have a default set in the Manager (bug #3997)
 - use MDB2::raiseError() instead of MDB2_Driver_Common::raiseError()
+- cleanedup connect() method to ensure that only MDB2 connections can be
+  assigned to the db property
+- fixed bug in connect() method that prevented overwriting of options
+- several cleanups and fixes to the example.php (used to be called
+  reverse_engineer_xml_schema.php)
 EOT;
 
 $description =<<<EOT
