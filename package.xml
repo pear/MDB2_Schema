@@ -41,7 +41,7 @@ Also the following changes were made in the process:
    <dep type="pkg" rel="ge" version="2.0.0beta3" optional="no">MDB2</dep>
   </deps>
   <filelist>
-   <dir name="/" baseinstalldir="/MDB2_Schema">
+   <dir name="/" baseinstalldir="/">
     <dir name="docs">
      <dir name="examples">
       <file role="doc" name="example.php">
