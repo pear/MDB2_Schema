@@ -5,7 +5,8 @@ require_once 'PEAR/PackageFileManager.php';
 $version = '0.1.0';
 $notes = <<<EOT
 This is the first unbundled release of the old MDB2_Tools_Manager class that was
-previously part of MDB2 until 2.0.0beta4.
+previously part of MDB2 until 2.0.0beta4. Due to the name change the package
+does not collide with previous versions of MDB2.
 
 Also the following changes were made in the process:
 - fixed index alteration in the Manager (bug #3710)
@@ -20,6 +21,8 @@ Also the following changes were made in the process:
 - fixed bug in connect() method that prevented overwriting of options
 - several cleanups and fixes to the example.php (used to be called
   reverse_engineer_xml_schema.php)
+- added apiVersion()
+- use PEAR::raiseError()
 EOT;
 
 $description =<<<EOT
