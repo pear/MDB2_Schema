@@ -80,7 +80,7 @@ class MDB2_Schema_Writer
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        return MDB2::raiseError($code, $mode, $options, $userinfo);
+        return PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Error', true);
     }
 
     // }}}
