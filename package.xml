@@ -3,11 +3,11 @@
 <package version="1.0" packagerversion="1.4.0a10">
  <name>MDB2_Schema</name>
  <summary>XML based database schema manager</summary>
- <description>PEAR::MDB2_Schema enables users to maintain RDBMS independant schema files in
-XML that can be used to create, alter and drop database entities and insert
-data into a database. Reverse engineering database schemas frm existing
-databases is also supported. The format is compatible with both PEAR::MDB
-and Metabase.
+ <description>PEAR::MDB2_Schema enables users to maintain RDBMS independant schema files
+in XML that can be used to create, alter and drop database entities and
+insert data into a database. Reverse engineering database schemas from
+existing databases is also supported. The format is compatible with both
+PEAR::MDB and Metabase.
  </description>
  <maintainers>
   <maintainer>
@@ -81,7 +81,7 @@ Also the following changes were made in the process:
     <state>beta</state>
     <notes>This is the first unbundled release of the old MDB2_Tools_Manager class that was
 previously part of MDB2 until 2.0.0beta4. Due to the name change the package
-does not collide with previous versions of MDB2
+does not collide with previous versions of MDB2.
 
 Also the following changes were made in the process:
 - fixed index alteration in the Manager (bug #3710)

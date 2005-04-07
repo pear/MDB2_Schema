@@ -26,11 +26,11 @@ Also the following changes were made in the process:
 EOT;
 
 $description =<<<EOT
-PEAR::MDB2_Schema enables users to maintain RDBMS independant schema files in
-XML that can be used to create, alter and drop database entities and insert
-data into a database. Reverse engineering database schemas frm existing
-databases is also supported. The format is compatible with both PEAR::MDB
-and Metabase.
+PEAR::MDB2_Schema enables users to maintain RDBMS independant schema files
+in XML that can be used to create, alter and drop database entities and
+insert data into a database. Reverse engineering database schemas from
+existing databases is also supported. The format is compatible with both
+PEAR::MDB and Metabase.
 EOT;
 
 $package = new PEAR_PackageFileManager();
