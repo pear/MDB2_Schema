@@ -3,9 +3,9 @@
 <package version="1.0" packagerversion="1.4.0a10">
  <name>MDB2_Schema</name>
  <summary>XML based database schema manager</summary>
- <description>PEAR::MDB2_Schema enables users to maintain RDBMS independant schema files
-in XML that can be used to create, alter and drop database entities and
-insert data into a database. Reverse engineering database schemas from
+ <description>PEAR::MDB2_Schema enables users to maintain RDBMS independant schema
+files in XML that can be used to create, alter and drop database entities
+and insert data into a database. Reverse engineering database schemas from
 existing databases is also supported. The format is compatible with both
 PEAR::MDB and Metabase.
  </description>
