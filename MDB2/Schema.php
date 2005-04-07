@@ -260,7 +260,7 @@ class MDB2_Schema extends PEAR
      */
     function disconnect()
     {
-        if (MDB2::isConnection($this->db) && !PEAR::isError($this->db)) {
+        if (MDB2::isConnection($this->db)) {
             $this->db->disconnect();
             unset($this->db);
         }
