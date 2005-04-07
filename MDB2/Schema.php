@@ -76,8 +76,7 @@ class MDB2_Schema extends PEAR
         'user' => array(),
         'is' => array(),
         'file' => array(
-            'oci' => array(),
-            'oracle' => array()
+            'oci8' => array(),
         ),
         'notify' => array(
             'pgsql' => array()
@@ -95,6 +94,20 @@ class MDB2_Schema extends PEAR
         'create' => 0,
         'tables' => array()
     );
+
+    // }}}
+    // {{{ apiVersion()
+
+    /**
+     * Return the MDB2 API version
+     *
+     * @return string     the MDB2 API version number
+     * @access public
+     */
+    function apiVersion()
+    {
+        return '@package_version@';
+    }
 
     // }}}
     // {{{ raiseError()
@@ -122,7 +135,7 @@ class MDB2_Schema extends PEAR
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        return MDB2::raiseError($code, $mode, $options, $userinfo);
+        return PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Error', true);
     }
 
     // }}}
