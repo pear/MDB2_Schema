@@ -1817,12 +1817,11 @@ class MDB2_Schema extends PEAR
             if (PEAR::isError($result)) {
                 return $result;
             }
-            if ($previous_schema_file && !copy($current_schema_file, $previous_schema_file)) {
-                return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
-                    'Could not copy the new database definition file to the current file');
-            }
         }
-
+        if ($previous_schema_file && !copy($current_schema_file, $previous_schema_file)) {
+            return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                'Could not copy the new database definition file to the current file');
+        }
         return MDB2_OK;
     }
 
