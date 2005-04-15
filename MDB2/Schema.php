@@ -1781,11 +1781,12 @@ class MDB2_Schema extends PEAR
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
             $this->db->popExpect();
-            if (!MDB2::isError($databases, $errorcodes)) {
-                return $databases;
-            }
-            if (!PEAR::isError($databases)
-                && (!is_array($databases) || !in_array($this->database_definition['name'], $databases))
+            if (PEAR::isError($databases)) {
+                if (!MDB2::isError($databases, $errorcodes)) {
+                    return $databases;
+                }
+            } elseif (!is_array($databases) ||
+                !in_array($this->database_definition['name'], $databases)
             ) {
                 return $this->raiseError(MDB2_ERROR, null, null,
                     'database to update does not exist: '.$this->database_definition['name']);
