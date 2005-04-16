@@ -56,7 +56,7 @@ define('MDB2_MANAGER_DUMP_CONTENT',      2);
  * management services like installing, altering and dumping the data
  * structures of databases.
  *
- * @package MDB2
+ * @package MDB2_Schema
  * @category Database
  * @author  Lukas Smith <smith@backendmedia.com>
  */
@@ -70,23 +70,6 @@ class MDB2_Schema extends PEAR
 
     var $options = array(
         'fail_on_invalid_names' => true,
-    );
-
-    var $invalid_names = array(
-        'user' => array(),
-        'is' => array(),
-        'file' => array(
-            'oci8' => array(),
-        ),
-        'notify' => array(
-            'pgsql' => array()
-        ),
-        'restrict' => array(
-            'mysql' => array()
-        ),
-        'password' => array(
-            'ibase' => array()
-        )
     );
 
     var $database_definition = array(
@@ -136,20 +119,6 @@ class MDB2_Schema extends PEAR
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
         return PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Error', true);
-    }
-
-    // }}}
-    // {{{ debugOutput()
-
-    /**
-     * output debug info
-     *
-     * @return string content of the debug_output class variable
-     * @access public
-     */
-    function debugOutput()
-    {
-        return $this->db->debugOutput();
     }
 
     // }}}
@@ -246,9 +215,7 @@ class MDB2_Schema extends PEAR
      */
     function connect(&$db, $options = false)
     {
-        if (MDB2::isConnection($this->db)) {
-            $this->disconnect();
-        }
+        $this->disconnect();
         if (!MDB2::isConnection($db)) {
             $db =& MDB2::connect($db, $options);
         }
@@ -257,6 +224,7 @@ class MDB2_Schema extends PEAR
         }
         $this->db =& $db;
         if (is_array($options) && !empty($options)) {
+            // todo
             $this->options = array_merge($this->options, $options);
         }
         $this->db->loadModule('Manager');
@@ -277,21 +245,6 @@ class MDB2_Schema extends PEAR
             $this->db->disconnect();
             unset($this->db);
         }
-    }
-
-    // }}}
-    // {{{ setDatabase()
-
-    /**
-     * Select a different database
-     *
-     * @param string $name name of the database that should be selected
-     * @return string name of the database previously connected to
-     * @access public
-     */
-    function setDatabase($name)
-    {
-        return $this->db->setDatabase($name);
     }
 
     // }}}
@@ -322,7 +275,7 @@ class MDB2_Schema extends PEAR
         if (PEAR::isError($result)) {
             return $result;
         }
-        if (!$result || PEAR::isError($parser->error)) {
+        if (PEAR::isError($parser->error)) {
             return $parser->error;
         }
         return $parser->database_definition;
@@ -343,7 +296,7 @@ class MDB2_Schema extends PEAR
     {
         $this->db->loadModule('Reverse');
         $database = $this->db->database_name;
-        if (strlen($database) == 0) {
+        if (empty($database)) {
             return $this->raiseError('it was not specified a valid database name');
         }
         $this->database_definition = array(
@@ -356,16 +309,15 @@ class MDB2_Schema extends PEAR
             return $tables;
         }
 
-        for ($table = 0; $table < count($tables); $table++) {
-            $table_name = $tables[$table];
+        settype($tables, 'array');
+        foreach ($tables as $table_name) {
             $fields = $this->db->manager->listTableFields($table_name);
             if (PEAR::isError($fields)) {
                 return $fields;
             }
             $this->database_definition['tables'][$table_name] = array('fields' => array());
             $table_definition =& $this->database_definition['tables'][$table_name];
-            for ($field = 0; $field < count($fields); $field++) {
-                $field_name = $fields[$field];
+            foreach ($fieldes as $field_name) {
                 $definition = $this->db->reverse->getTableFieldDefinition($table_name, $field_name);
                 if (PEAR::isError($definition)) {
                     return $definition;
@@ -407,28 +359,16 @@ class MDB2_Schema extends PEAR
             if (PEAR::isError($indexes)) {
                 return $indexes;
             }
-            if (is_array($indexes) && count($indexes) > 0
+            if (is_array($indexes) && !empty($indexes)
                 && !isset($table_definition['indexes'])
             ) {
                 $table_definition['indexes'] = array();
-            }
-            for ($index = 0, $index_cnt = count($indexes); $index < $index_cnt; $index++) {
-                $index_name = $indexes[$index];
-                $definition = $this->db->reverse->getTableIndexDefinition($table_name, $index_name);
-                if (PEAR::isError($definition)) {
-                    return $definition;
-                }
-               $table_definition['indexes'][$index_name] = $definition;
-            }
-            // ensure that all fields that have an index on them are set to NOT NULL
-            if (isset($table_definition['indexes'])
-                && is_array($table_definition['indexes'])
-                && count($table_definition['indexes'])
-            ) {
-                foreach ($table_definition['indexes'] as $index_check_null) {
-                    foreach ($index_check_null['fields'] as $field_name_check_null => $field_check_null) {
-                        $table_definition['fields'][$field_name_check_null]['notnull'] = true;
+                foreach ($indexes as $index_name) {
+                    $definition = $this->db->reverse->getTableIndexDefinition($table_name, $index_name);
+                    if (PEAR::isError($definition)) {
+                        return $definition;
                     }
+                   $table_definition['indexes'][$index_name] = $definition;
                 }
             }
         }
@@ -437,18 +377,17 @@ class MDB2_Schema extends PEAR
         if (PEAR::isError($sequences)) {
             return $sequences;
         }
-        if (is_array($sequences) && count($sequences) > 0
+        if (is_array($sequences) && !empty($sequences)
             && !isset($this->database_definition['sequences'])
         ) {
             $this->database_definition['sequences'] = array();
-        }
-        for ($sequence = 0; $sequence < count($sequences); $sequence++) {
-            $sequence_name = $sequences[$sequence];
-            $definition = $this->db->reverse->getSequenceDefinition($sequence_name);
-            if (PEAR::isError($definition)) {
-                return $definition;
+            foreach ($sequences as $sequence_name) {
+                $definition = $this->db->reverse->getSequenceDefinition($sequence_name);
+                if (PEAR::isError($definition)) {
+                    return $definition;
+                }
+                $this->database_definition['sequences'][$sequence_name] = $definition;
             }
-            $this->database_definition['sequences'][$sequence_name] = $definition;
         }
         return MDB2_OK;
     }
@@ -469,34 +408,35 @@ class MDB2_Schema extends PEAR
     function createTableIndexes($table_name, $indexes, $overwrite)
     {
         if (!$this->db->supports('indexes')) {
-            return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
-                'indexes are not supported');
+            $this->db->debug('Indexes are not supported');
+            return MDB2_OK;
         }
-        $result = MDB2_OK;
         foreach ($indexes as $index_name => $index) {
-            $this->expectError(MDB2_ERROR_ALREADY_EXISTS);
-            $result = $this->db->manager->createIndex($table_name, $index_name, $index);
-            $this->popExpect();
-            if (PEAR::isError($result)) {
-                if ($result->getCode() === MDB2_ERROR_ALREADY_EXISTS) {
-                    $this->warnings[] = 'Index already exists: '.$index_name;
-                    if ($overwrite) {
-                        $this->db->debug('Overwritting Index');
-                        $result = $this->db->manager->dropIndex($table_name, $index_name);
-                        if (!PEAR::isError($result)) {
-                            $result = $this->db->manager->createIndex($table_name, $index_name, $index);
-                        }
-                    } else {
-                        $result = MDB2_OK;
-                    }
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+            $this->db->expectError($errorcodes);
+            $indexes = $this->db->manager->listTableIndexes($table_name);
+            $this->db->popExpect();
+            if (PEAR::isError($indexes)) {
+                if (!MDB2::isError($indexes, $errorcodes)) {
+                    return $indexes;
                 }
+            } elseif (is_array($indexes) && in_array($index_name, $indexes)) {
+                if (!$overwrite) {
+                    $this->db->debug('Index already exists: '.$index_name);
+                    return MDB2_OK;
+                }
+                $result = $this->db->manager->dropIndex($table_name, $index_name);
                 if (PEAR::isError($result)) {
-                    $this->db->debug('Create index error: '.$table_name);
-                    break;
+                    return $result;
                 }
+                $this->db->debug('Overwritting index: '.$index_name);
+            }
+            $result = $this->db->manager->createIndex($table_name, $index_name, $index);
+            if (PEAR::isError($result)) {
+                return $result;
             }
         }
-        return $result;
+        return MDB2_OK;
     }
 
     // }}}
@@ -515,42 +455,46 @@ class MDB2_Schema extends PEAR
      */
     function createTable($table_name, $table, $overwrite = false)
     {
-        $this->expectError(MDB2_ERROR_ALREADY_EXISTS);
-        $result = $this->db->manager->createTable($table_name, $table['fields']);
-        $this->popExpect();
-        if (PEAR::isError($result)) {
-            if ($result->getCode() === MDB2_ERROR_ALREADY_EXISTS) {
-                $this->warnings[] = 'Table already exists: '.$table_name;
-                if ($overwrite) {
-                    $this->db->debug('Overwritting Table');
-                    $result = $this->dropTable($table_name);
-                    if (!PEAR::isError($result)) {
-                        $result = $this->db->manager->createTable($table_name, $table['fields']);
-                    }
-                } else {
-                    $result = MDB2_OK;
-                }
+        $create = true;
+        $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+        $this->db->expectError($errorcodes);
+        $tables = $this->db->manager->listTables();
+        $this->db->popExpect();
+        if (PEAR::isError($tables)) {
+            if (!MDB2::isError($tables, $errorcodes)) {
+                return $tables;
             }
+        } elseif (is_array($tables) && in_array($table_name, $tables)) {
+            if (!$overwrite) {
+                $create = false;
+                $this->db->debug('Table already exists: '.$table_name);
+            } else {
+                $result = $this->db->manager->dropTable($table_name);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+                $this->db->debug('Overwritting table: '.$table_name);
+            }
+        }
+        if ($create) {
+            $result = $this->db->manager->createTable($table_name, $table['fields']);
             if (PEAR::isError($result)) {
-                $this->db->debug('Create table error: '.$table_name);
                 return $result;
             }
         }
         if (isset($table['initialization']) && is_array($table['initialization'])) {
             $result = $this->initializeTable($table_name, $table);
-        }
-        if (!PEAR::isError($result) && isset($table['indexes']) && is_array($table['indexes'])) {
-            $result = $this->createTableIndexes($table_name, $table['indexes'], $overwrite);
-        }
-        if (PEAR::isError($result)) {
-            $result = $this->dropTable($table_name);
             if (PEAR::isError($result)) {
-                $result = $this->raiseError(MDB2_ERROR_MANAGER, null, null,
-                    'could not drop the table ('.$result->getMessage().
-                    ' ('.$result->getUserinfo().'))');
+                return $result;
             }
-            return $result;
         }
+        if (isset($table['indexes']) && is_array($table['indexes'])) {
+            $result = $this->createTableIndexes($table_name, $table['indexes'], $overwrite);
+            if (PEAR::isError($result)) {
+                return $result;
+            }
+        }
+
         return MDB2_OK;
     }
 
@@ -568,50 +512,34 @@ class MDB2_Schema extends PEAR
      */
     function initializeTable($table_name, $table)
     {
-        $result = MDB2_OK;
+        foreach ($table['fields'] as $field_name => $field) {
+            $placeholders[$field_name] = ':'.$field_name;
+            $types[$field_name] = $field['type'];
+        }
+        $fields = implode(',', array_keys($table['fields']));
+        $placeholders = implode(',', $placeholders);
+        $query = "INSERT INTO $table_name ($fields) VALUES ($placeholders)";
+        $stmt = $this->db->prepare($query, $types);
+        if (PEAR::isError($stmt)) {
+            return $stmt;
+        }
         foreach ($table['initialization'] as $instruction) {
             switch ($instruction['type']) {
             case 'insert':
-                $query_fields = $query_values = array();
                 if (isset($instruction['fields']) && is_array($instruction['fields'])) {
-                    foreach ($instruction['fields'] as $field_name => $field) {
-                        $query_fields[] = $field_name;
-                        $query_values[] = '?';
-                        $query_types[] = $table['fields'][$field_name]['type'];
-                    }
-                    $query_fields = implode(',',$query_fields);
-                    $query_values = implode(',',$query_values);
-                    $stmt = $this->db->prepare(
-                        "INSERT INTO $table_name ($query_fields) VALUES ($query_values)", $query_types);
-                    if (PEAR::isError($stmt)) {
-                        return $stmt;
-                    }
-                    $result = $stmt->bindParamArray(array_values($instruction['fields']));
+                    $result = $stmt->bindParamArray($instruction['fields']);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
                     $result = $stmt->execute();
-                    $stmt->free();
+                    if (PEAR::isError($result)) {
+                        return $result;
+                    }
                 }
                 break;
             }
         }
-        return $result;
-    }
-
-    // }}}
-    // {{{ dropTable()
-
-    /**
-     * drop a table
-     *
-     * @param string $table_name    name of the table to be dropped
-     * @return mixed MDB2_OK on success, or a MDB2 error object
-     * @access public
-     */
-    function dropTable($table_name)
-    {
-        return $this->db->manager->dropTable($table_name);
+        return $stmt->free();
     }
 
     // }}}
@@ -631,80 +559,67 @@ class MDB2_Schema extends PEAR
     function createSequence($sequence_name, $sequence, $overwrite = false)
     {
         if (!$this->db->supports('sequences')) {
-            return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
-                'sequences are not supported');
+            $this->db->debug('Sequences are not supported');
+            return MDB2_OK;
         }
-        if (!isset($sequence_name) || $sequence_name == '') {
-            return $this->raiseError(MDB2_ERROR_INVALID, null, null,
-                'no valid sequence name specified');
+
+        $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+        $this->db->expectError($errorcodes);
+        $sequences = $this->db->manager->listSequences();
+        $this->db->popExpect();
+        if (PEAR::isError($sequences)) {
+            if (!MDB2::isError($sequences, $errorcodes)) {
+                return $sequences;
+            }
+        } elseif (is_array($sequence) && in_array($sequence_name, $sequences)) {
+            if (!$overwrite) {
+                $this->db->debug('Sequence already exists: '.$sequence_name);
+                return MDB2_OK;
+            }
+            $result = $this->db->manager->dropSequence($sequence_name);
+            if (PEAR::isError($result)) {
+                return $result;
+            }
+            $this->db->debug('Overwritting sequence: '.$sequence_name);
         }
-        $this->db->debug('Create sequence: '.$sequence_name);
+
         $start = 1;
         if (isset($sequence['on'])) {
             $table = $sequence['on']['table'];
             $field = $sequence['on']['field'];
-            if ($this->db->supports('summary_functions')) {
-                $query = "SELECT MAX($field) FROM $table";
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+            $this->db->expectError($errorcodes);
+            $tables = $this->db->manager->listTables();
+            $this->db->popExpect();
+            if (PEAR::isError($tables) && !MDB2::isError($tables, $errorcodes)) {
+                 return $tables;
+            }
+            if (PEAR::isError($tables) ||
+                (is_array($table) && in_array($table, $tables))
+            ) {
+                if ($this->db->supports('summary_functions')) {
+                    $query = "SELECT MAX($field) FROM $table";
+                } else {
+                    $query = "SELECT $field FROM $table ORDER BY $field DESC";
+                }
+                $start = $this->db->queryOne($query, 'integer');
+                if (PEAR::isError($start)) {
+                    return $start;
+                }
+                $start++;
             } else {
-                $query = "SELECT $field FROM $table ORDER BY $field DESC";
+                $this->warnings[] = 'Could not sync sequence: '.$sequence_nam;
             }
-            $start = $this->db->queryOne($query, 'integer');
-            if (PEAR::isError($start)) {
-                return $start;
-            }
-            $start++;
         } elseif (isset($sequence['start']) && is_numeric($sequence['start'])) {
             $start = $sequence['start'];
         }
-        $this->expectError(MDB2_ERROR_ALREADY_EXISTS);
+
         $result = $this->db->manager->createSequence($sequence_name, $start);
-        $this->popExpect();
         if (PEAR::isError($result)) {
-            if ($result->getCode() === MDB2_ERROR_ALREADY_EXISTS) {
-                $this->warnings[] = 'Sequence already exists: '.$sequence_name;
-                if ($overwrite) {
-                    $this->db->debug('Overwritting Sequence');
-                    $result = $this->dropSequence($sequence_name);
-                    if (!PEAR::isError($result)) {
-                        $result = $this->db->manager->createSequence($sequence_name, $start);
-                    }
-                    if (PEAR::isError($result)) {
-                        return $result;
-                    }
-                } else {
-                    return MDB2_OK;
-                }
-            }
-            if (PEAR::isError($result)) {
-                $this->db->debug('Create sequence error: '.$sequence_name);
-                return $result;
-            }
+            return $result;
         }
+
         return MDB2_OK;
-    }
-
-    // }}}
-    // {{{ dropSequence()
-
-    /**
-     * drop a table
-     *
-     * @param string $sequence_name    name of the sequence to be dropped
-     * @return mixed MDB2_OK on success, or a MDB2 error object
-     * @access public
-     */
-    function dropSequence($sequence_name)
-    {
-        if (!$this->db->supports('sequences')) {
-            return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
-                'sequences are not supported');
-        }
-        $this->db->debug('Dropping sequence: '.$sequence_name);
-        if (!isset($sequence_name) || $sequence_name == '') {
-            return $this->raiseError(MDB2_ERROR_INVALID, null, null,
-                'no valid sequence name specified');
-        }
-        return $this->db->manager->dropSequence($sequence_name);
     }
 
     // }}}
@@ -729,28 +644,29 @@ class MDB2_Schema extends PEAR
         $create = (isset($this->database_definition['create']) && $this->database_definition['create']);
         $overwrite = (isset($this->database_definition['overwrite']) && $this->database_definition['overwrite']);
         if ($create) {
-            $this->db->debug('Create database: '.$this->database_definition['name']);
-            $this->expectError(MDB2_ERROR_ALREADY_EXISTS);
-            $result = $this->db->manager->createDatabase($this->database_definition['name']);
-            $this->popExpect();
-            if (PEAR::isError($result)) {
-                if ($result->getCode() === MDB2_ERROR_ALREADY_EXISTS) {
-                    $this->warnings[] = 'Database already exists: '.$this->database_definition['name'];
-                    if ($overwrite) {
-                        $this->db->debug('Overwritting Database');
-                        $result = $this->db->manager->dropDatabase($this->database_definition['name']);
-                        if (!PEAR::isError($result)) {
-                            $result = $this->db->manager->createDatabase($this->database_definition['name']);
-                        }
-                        if (PEAR::isError($result)) {
-                            return $result;
-                        }
-                    } else {
-                        $result = MDB2_OK;
-                    }
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+            $this->db->expectError($errorcodes);
+            $databases = $this->db->manager->listDatabases();
+            $this->db->popExpect();
+            if (PEAR::isError($databases)) {
+                if (!MDB2::isError($databases, $errorcodes)) {
+                    return $database;
                 }
+            } elseif (is_array($databases) && in_array($this->database_definition['name'], $databases)) {
+                if (!$overwrite) {
+                    $this->db->debug('Database already exists: '.$database_name);
+                    $create = false;
+                } else {
+                    $result = $this->db->manager->dropDatabase($this->database_definition['name']);
+                    if (PEAR::isError($result)) {
+                        return $result;
+                    }
+                    $this->db->debug('Overwritting database: '.$this->database_definition['name']);
+                }
+            }
+            if ($create) {
+                $result = $this->db->manager->createDatabase($this->database_definition['name']);
                 if (PEAR::isError($result)) {
-                    $this->db->debug('Create database error.');
                     return $result;
                 }
             }
@@ -864,7 +780,7 @@ class MDB2_Schema extends PEAR
             }
         }
         if (isset($current_definition['sequences']) && is_array($current_definition['sequences'])) {
-           $defined_sequences = array();
+            $defined_sequences = array();
             foreach ($current_definition['sequences'] as $sequence_name => $sequence) {
                 $previous_sequences = array();
                 if (isset($previous_definition['sequences']) && is_array($previous_definition)) {
@@ -1331,6 +1247,18 @@ class MDB2_Schema extends PEAR
                     $alterations++;
                 }
             }
+            if (isset($changes['removed_indexes'])) {
+                foreach ($changes['removed_indexes'] as $index_name => $index) {
+                    $result = $this->db->manager->dropIndex(
+                        $table_name,
+                        $index_name
+                    );
+                    if (PEAR::isError($result)) {
+                        return $result;
+                    }
+                    $alterations++;
+                }
+            }
         }
         return $alterations;
     }
@@ -1359,7 +1287,7 @@ class MDB2_Schema extends PEAR
                     unset($table['indexes']);
                 }
                 if (isset($table['remove'])) {
-                    $result = $this->dropTable($table_name);
+                    $result = $this->db->manager->dropTable($table_name);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
@@ -1378,10 +1306,7 @@ class MDB2_Schema extends PEAR
                     $alterations++;
                 }
                 if ($indexes) {
-                    $result = $this->alterDatabaseIndexes(
-                        $table_name,
-                        $indexes
-                    );
+                    $result = $this->alterDatabaseIndexes($table_name, $indexes);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
@@ -1417,13 +1342,13 @@ class MDB2_Schema extends PEAR
                     }
                     $alterations++;
                 } elseif (isset($sequence['remove'])) {
-                    $result = $this->dropSequence($sequence_name);
+                    $result = $this->db->manager->dropSequence($sequence_name);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
                     $alterations++;
                 } elseif (isset($sequence['change'])) {
-                    $result = $this->dropSequence($current_definition[$sequence_name]['was']);
+                    $result = $this->db->manager->dropSequence($current_definition[$sequence_name]['was']);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
@@ -1693,28 +1618,24 @@ class MDB2_Schema extends PEAR
             }
 
             // get initialization data
-            if (isset($this->database_definition['tables']) && is_array($this->database_definition['tables'])) {
+            if (isset($this->database_definition['tables']) && is_array($this->database_definition['tables'])
+                && $dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_CONTENT
+            ) {
                 foreach ($this->database_definition['tables'] as $table_name => $table) {
-                    if ($dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_CONTENT) {
-                        $types = array();
-                        foreach ($table['fields'] as $field) {
-                            $types[] = $field['type'];
-                        }
-                        $query = 'SELECT '.implode(',',array_keys($table['fields']))." FROM $table_name";
-                        $data = $this->db->queryAll($query, $types, MDB2_FETCHMODE_ASSOC);
-                        if (PEAR::isError($data)) {
-                            return $data;
-                        }
-                        $rows = count($data);
-                        if ($rows > 0) {
-                            $table['initialization'] = array();
-                            for ($row = 0; $row < $rows; $row++) {
-                                if (!is_array($data[$row])) {
-                                    break;
-                                }
-                                $instruction = array('type' => 'insert', 'fields' => $data[$row]);
-                                $this->database_definition['tables'][$table_name]['initialization'][] = $instruction;
-                            }
+                    $types = array();
+                    foreach ($table['fields'] as $field) {
+                        $types[] = $field['type'];
+                    }
+                    $query = 'SELECT '.implode(',',array_keys($table['fields']))." FROM $table_name";
+                    $data = $this->db->queryAll($query, $types, MDB2_FETCHMODE_ASSOC);
+                    if (PEAR::isError($data)) {
+                        return $data;
+                    }
+                    if (!empty($data)) {
+                        $table['initialization'] = array();
+                        foreach ($rows as $row) {
+                            $instruction = array('type' => 'insert', 'fields' => $row);
+                            $this->database_definition['tables'][$table_name]['initialization'][] = $instruction;
                         }
                     }
                 }
