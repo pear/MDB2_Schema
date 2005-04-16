@@ -50,7 +50,7 @@ require_once 'XML/Parser.php';
 /**
  * Parses an XML schema file
  *
- * @package MDB2
+ * @package MDB2_Schema
  * @category Database
  * @access private
  * @author  Christian Dickmann <dickmann@php.net>

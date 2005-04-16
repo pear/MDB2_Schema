@@ -45,10 +45,10 @@
 // $Id$
 //
 
-
 /**
+ * Writes an XML schema file
  *
- * @package MDB2
+ * @package MDB2_Schema
  * @category Database
  * @author  Lukas Smith <smith@backendmedia.com>
  */
@@ -84,7 +84,7 @@ class MDB2_Schema_Writer
     }
 
     // }}}
-    // {{{ _escapeSpecialCharacters()
+    // {{{ _escapeSpecialChars()
 
     /**
      * add escapecharacters to all special characters in a string
@@ -93,7 +93,7 @@ class MDB2_Schema_Writer
      * @return string escaped string
      * @access private
      */
-    function _escapeSpecialCharacters($string)
+    function _escapeSpecialChars($string)
     {
         if (!is_string($string)) {
             $string = strval($string);
@@ -190,6 +190,9 @@ class MDB2_Schema_Writer
      */
     function dumpDatabase($database_definition, $arguments, $dump = MDB2_MANAGER_DUMP_ALL)
     {
+        if (isset($arguments['definition']) && $arguments['definition']) {
+            $database_definition = $arguments['definition'];
+        }
         if (isset($arguments['output'])) {
             if (isset($arguments['output_mode']) && $arguments['output_mode'] == 'file') {
                 $fp = fopen($arguments['output'], 'w');
@@ -198,7 +201,7 @@ class MDB2_Schema_Writer
                 $output = $arguments['output'];
             } else {
                 return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
-                        'no valid output function specified');
+                    'no valid output function specified');
             }
         } else {
             return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
@@ -225,7 +228,8 @@ class MDB2_Schema_Writer
         }
 
         $buffer = ('<?xml version="1.0" encoding="ISO-8859-1" ?>'.$eol);
-        $buffer .= ("<database>$eol$eol <name>".$database_definition['name']."</name>$eol <create>".$database_definition['create']."</create>$eol");
+        $buffer .= ("<database>$eol$eol <name>".$database_definition['name']."</name>$eol <create>"
+            .$database_definition['create']."</create>$eol");
 
         if ($output) {
             $output($buffer);
@@ -245,7 +249,8 @@ class MDB2_Schema_Writer
                                     'it was not specified the type of the field "'.
                                     $field_name.'" of the table "'.$table_name);
                             }
-                            $buffer .=("$eol   <field>$eol    <name>$field_name</name>$eol    <type>".$field['type']."</type>$eol");
+                            $buffer .=("$eol   <field>$eol    <name>$field_name</name>$eol    <type>"
+                                .$field['type']."</type>$eol");
                             switch ($field['type']) {
                             case 'integer':
                                 if (isset($field['unsigned'])) {
@@ -256,8 +261,7 @@ class MDB2_Schema_Writer
                             case 'clob':
                             case 'blob':
                                 if (isset($field['length'])) {
-                                    $buffer .=('    <length>'.$field['length'].
-                                        "</length>$eol");
+                                    $buffer .=('    <length>'.$field['length']."</length>$eol");
                                 }
                                 break;
                             case 'boolean':
@@ -275,7 +279,8 @@ class MDB2_Schema_Writer
                                 $buffer .=("    <notnull>1</notnull>$eol");
                             }
                             if (isset($field['default'])) {
-                                $buffer .=('    <default>'.$this->_escapeSpecialCharacters($field['default'])."</default>$eol");
+                                $buffer .=('    <default>'.$this->_escapeSpecialChars($field['default'])
+                                    ."</default>$eol");
                             }
                             $buffer .=("   </field>$eol");
                         }
@@ -312,7 +317,8 @@ class MDB2_Schema_Writer
                             case 'insert':
                                 $buffer .= ("$eol   <insert>$eol");
                                 foreach ($instruction['fields'] as $field_name => $field) {
-                                    $buffer .= ("$eol    <field>$eol     <name>$field_name</name>$eol     <value>".$this->_escapeSpecialCharacters($field)."</value>$eol   </field>$eol");
+                                    $buffer .= ("$eol    <field>$eol     <name>$field_name</name>$eol     <value>"
+                                        .$this->_escapeSpecialChars($field)."</value>$eol   </field>$eol");
                                 }
                                 $buffer .= ("$eol   </insert>$eol");
                                 break;
@@ -328,11 +334,13 @@ class MDB2_Schema_Writer
                     fwrite($fp, $buffer);
                 }
                 if (isset($sequences[$table_name])) {
-                    for ($sequence = 0, $j = count($sequences[$table_name]);
-                        $sequence < $j;
-                        $sequence++
-                    ) {
-                        $result = $this->dumpSequence($database_definition['sequences'], $sequences[$table_name][$sequence], $eol, $dump);
+                    foreach ($sequences[$table_name] as $sequence) {
+                        $result = $this->dumpSequence(
+                            $database_definition['sequences'],
+                            $sequence,
+                            $eol,
+                            $dump
+                        );
                         if (PEAR::isError($result)) {
                             return $result;
                         }
@@ -346,15 +354,20 @@ class MDB2_Schema_Writer
             }
         }
         if (isset($sequences[''])) {
-            for ($sequence = 0; $sequence < count($sequences['']); $sequence++) {
-                $result = $this->dumpSequence($database_definition['sequences'], $sequences[''][$sequence], $eol, $dump);
+            foreach ($sequences[''] as $sequence) {
+                $result = $this->dumpSequence(
+                    $database_definition['sequences'],
+                    $sequence,
+                    $eol,
+                    $dump
+                );
                 if (PEAR::isError($result)) {
                     return $result;
                 }
                 if ($output) {
-                       $output($result);
-                   } else {
-                       fwrite($fp, $result);
+                    $output($result);
+                } else {
+                    fwrite($fp, $result);
                 }
             }
         }
