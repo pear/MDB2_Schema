@@ -456,7 +456,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $error .= " - Byte: $byte; Line: $line; Col: $column";
             }
             $error .= "\n";
-            $this->error = PEAR::raiseError(null, MDB2_ERROR_MANAGER_PARSE, null, null, $error, 'MDB2_Error', true);
+            $this->error = MDB2::raiseError(MDB2_ERROR_MANAGER_PARSE, null, null, $error);
         }
         return $this->error;
     }

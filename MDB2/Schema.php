@@ -118,7 +118,7 @@ class MDB2_Schema extends PEAR
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        return PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Error', true);
+        return MDB2::raiseError($code, $mode, $options, $userinfo);
     }
 
     // }}}
