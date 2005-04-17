@@ -80,7 +80,7 @@ class MDB2_Schema_Writer
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        return PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Error', true);
+        return MDB2::raiseError($code, $mode, $options, $userinfo);
     }
 
     // }}}
@@ -336,7 +336,7 @@ class MDB2_Schema_Writer
                 if (isset($sequences[$table_name])) {
                     foreach ($sequences[$table_name] as $sequence) {
                         $result = $this->dumpSequence(
-                            $database_definition['sequences'],
+                            $database_definition['sequences'][$sequence],
                             $sequence,
                             $eol,
                             $dump
@@ -356,7 +356,7 @@ class MDB2_Schema_Writer
         if (isset($sequences[''])) {
             foreach ($sequences[''] as $sequence) {
                 $result = $this->dumpSequence(
-                    $database_definition['sequences'],
+                    $database_definition['sequences'][$sequence],
                     $sequence,
                     $eol,
                     $dump
