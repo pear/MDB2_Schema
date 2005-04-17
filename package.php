@@ -2,27 +2,13 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.1.0';
+$version = '0.2.0';
 $notes = <<<EOT
-This is the first unbundled release of the old MDB2_Tools_Manager class that was
-previously part of MDB2 until 2.0.0beta4. Due to the name change the package
-does not collide with previous versions of MDB2.
-
-Also the following changes were made in the process:
-- fixed index alteration in the Manager (bug #3710)
-- fixed bug in the Manager when upgrading a database that doesnt exist
-- moved logic to compareDefinitions from the Manager into the Datatype module
-- removed default_values property from the Manager
-  (the user will now need to set the proper defaults himself)
-- do not require that not null fields have a default set in the Manager (bug #3997)
-- use MDB2::raiseError() instead of MDB2_Driver_Common::raiseError()
-- cleanedup connect() method to ensure that only MDB2 connections can be
-  assigned to the db property
-- fixed bug in connect() method that prevented overwriting of options
-- several cleanups and fixes to the example.php (used to be called
-  reverse_engineer_xml_schema.php)
-- added apiVersion()
-- use PEAR::raiseError()
+- fixed error handling in updateDatabase()
+- use MDB2::raiseError
+- always copy schema file in updateDatabase()
+- cosmetic fixes and tweaks
+- improved overwrite to check via list*() before creating (bug #3857, #4101)
 EOT;
 
 $description =<<<EOT
@@ -66,7 +52,7 @@ $package->addMaintainer('lsmith', 'lead', 'Lukas Kahwe Smith', 'smith@backendmed
 
 $package->addDependency('php', '4.2.0', 'ge', 'php', false);
 $package->addDependency('PEAR', '1.0b1', 'ge', 'pkg', false);
-$package->addDependency('MDB2', '2.0.0beta3', 'ge', 'pkg', false);
+$package->addDependency('MDB2', '2.0.0beta4', 'ge', 'pkg', false);
 $package->addDependency('XML_Parser', true, 'has', 'pkg', false);
 
 $package->addglobalreplacement('package-info', '@package_version@', 'version');
