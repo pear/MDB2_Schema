@@ -9,6 +9,8 @@ $notes = <<<EOT
 - always copy schema file in updateDatabase()
 - cosmetic fixes and tweaks
 - improved overwrite to check via list*() before creating (bug #3857, #4101)
+- updated MDB2 dependency
+- fixed sequence dumping
 EOT;
 
 $description =<<<EOT
