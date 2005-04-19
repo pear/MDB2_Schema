@@ -50,6 +50,7 @@
  *
  * @package MDB2_Schema
  * @category Database
+ * @access private
  * @author  Lukas Smith <smith@backendmedia.com>
  */
 class MDB2_Schema_Writer
@@ -91,7 +92,7 @@ class MDB2_Schema_Writer
      *
      * @param string $string string that should be escaped
      * @return string escaped string
-     * @access private
+     * @access protected
      */
     function _escapeSpecialChars($string)
     {
