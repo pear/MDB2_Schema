@@ -554,7 +554,7 @@ class MDB2_Schema extends PEAR
      * @param boolean $overwrite    determine if the sequence should be overwritten
                                     if it already exists
      * @return mixed MDB2_OK on success, or a MDB2 error object
-     * @access private
+     * @access public
      */
     function createSequence($sequence_name, $sequence, $overwrite = false)
     {
