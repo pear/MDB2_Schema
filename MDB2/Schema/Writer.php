@@ -50,7 +50,7 @@
  *
  * @package MDB2_Schema
  * @category Database
- * @access private
+ * @access protected
  * @author  Lukas Smith <smith@backendmedia.com>
  */
 class MDB2_Schema_Writer

@@ -52,7 +52,7 @@ require_once 'XML/Parser.php';
  *
  * @package MDB2_Schema
  * @category Database
- * @access private
+ * @access protected
  * @author  Christian Dickmann <dickmann@php.net>
  */
 class MDB2_Schema_Parser extends XML_Parser
