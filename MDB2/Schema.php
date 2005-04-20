@@ -70,6 +70,7 @@ class MDB2_Schema extends PEAR
 
     var $options = array(
         'fail_on_invalid_names' => true,
+        'dtd_file' => false,
     );
 
     var $database_definition = array(
@@ -213,20 +214,29 @@ class MDB2_Schema extends PEAR
      * @access  public
      * @see     MDB2::parseDSN
      */
-    function connect(&$db, $options = false)
+    function connect(&$db, $options = array())
     {
+        $db_options = array();
+        if (is_array($options) && !empty($options)) {
+            foreach ($options as $option => $value) {
+                if (array_key_exists($option, $this->options)) {
+                    $err = $this->setOption($option, $value);
+                    if (PEAR::isError($err)) {
+                        return $err;
+                    }
+                } else {
+                    $db_options[$option] = $value;
+                }
+            }
+        }
         $this->disconnect();
         if (!MDB2::isConnection($db)) {
-            $db =& MDB2::connect($db, $options);
+            $db =& MDB2::connect($db, $db_options);
         }
         if (PEAR::isError($db)) {
             return $db;
         }
         $this->db =& $db;
-        if (is_array($options) && !empty($options)) {
-            // todo
-            $this->options = array_merge($this->options, $options);
-        }
         $this->db->loadModule('Manager');
         return MDB2_OK;
     }
@@ -263,8 +273,17 @@ class MDB2_Schema extends PEAR
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function parseDatabaseDefinitionFile($input_file, $variables, $fail_on_invalid_names = true)
+    function parseDatabaseDefinitionFile($input_file, $variables = array(), $fail_on_invalid_names = true)
     {
+        $dtd_file = $this->getOption('dtd_file');
+        if ($dtd_file) {
+            require_once 'XML/DTD/XmlValidator.php';
+            $dtd =& new XML_DTD_XmlValidator;
+            if (!$dtd->isValid($dtd_file, $input_file)) {
+                return $this->raiseError(MDB2_ERROR_MANAGER_PARSE, null, null, $dtd->getMessage());
+            }
+        }
+
         require_once 'MDB2/Schema/Parser.php';
         $parser =& new MDB2_Schema_Parser($variables, $fail_on_invalid_names);
         $result = $parser->setInputFile($input_file);
