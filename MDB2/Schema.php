@@ -318,17 +318,18 @@ class MDB2_Schema extends PEAR
         if (empty($database)) {
             return $this->raiseError('it was not specified a valid database name');
         }
+
         $this->database_definition = array(
             'name' => $database,
             'create' => 1,
             'tables' => array(),
         );
+
         $tables = $this->db->manager->listTables();
         if (PEAR::isError($tables)) {
             return $tables;
         }
 
-        settype($tables, 'array');
         foreach ($tables as $table_name) {
             $fields = $this->db->manager->listTableFields($table_name);
             if (PEAR::isError($fields)) {
@@ -336,7 +337,7 @@ class MDB2_Schema extends PEAR
             }
             $this->database_definition['tables'][$table_name] = array('fields' => array());
             $table_definition =& $this->database_definition['tables'][$table_name];
-            foreach ($fieldes as $field_name) {
+            foreach ($fields as $field_name) {
                 $definition = $this->db->reverse->getTableFieldDefinition($table_name, $field_name);
                 if (PEAR::isError($definition)) {
                     return $definition;
@@ -344,8 +345,7 @@ class MDB2_Schema extends PEAR
                 $table_definition['fields'][$field_name] = $definition[0][0];
                 $field_choices = count($definition[0]);
                 if ($field_choices > 1) {
-                    $warning = "There are $field_choices type choices in the table"
-                        ."$table_name field $field_name (#1 is the default): ";
+                    $warning = "There are $field_choices type choices in the table $table_name field $field_name (#1 is the default): ";
                     $field_choice_cnt = 1;
                     $table_definition['fields'][$field_name]['choices'] = array();
                     foreach ($definition[0] as $field_choice) {
@@ -396,9 +396,7 @@ class MDB2_Schema extends PEAR
         if (PEAR::isError($sequences)) {
             return $sequences;
         }
-        if (is_array($sequences) && !empty($sequences)
-            && !isset($this->database_definition['sequences'])
-        ) {
+        if (is_array($sequences) && !empty($sequences)) {
             $this->database_definition['sequences'] = array();
             foreach ($sequences as $sequence_name) {
                 $definition = $this->db->reverse->getSequenceDefinition($sequence_name);
@@ -625,9 +623,8 @@ class MDB2_Schema extends PEAR
                 if (PEAR::isError($start)) {
                     return $start;
                 }
-                $start++;
             } else {
-                $this->warnings[] = 'Could not sync sequence: '.$sequence_nam;
+                $this->warnings[] = 'Could not sync sequence: '.$sequence_name;
             }
         } elseif (isset($sequence['start']) && is_numeric($sequence['start'])) {
             $start = $sequence['start'];
@@ -1641,21 +1638,23 @@ class MDB2_Schema extends PEAR
                 && $dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_CONTENT
             ) {
                 foreach ($this->database_definition['tables'] as $table_name => $table) {
+                    $fields = array();
                     $types = array();
-                    foreach ($table['fields'] as $field) {
+                    foreach ($table['fields'] as $field_name => $field) {
                         $types[] = $field['type'];
+                        $fields[] = $field_name;
                     }
-                    $query = 'SELECT '.implode(',',array_keys($table['fields']))." FROM $table_name";
+                    $query = 'SELECT '.implode(', ', $fields).' FROM '.$table_name;
                     $data = $this->db->queryAll($query, $types, MDB2_FETCHMODE_ASSOC);
                     if (PEAR::isError($data)) {
                         return $data;
                     }
                     if (!empty($data)) {
-                        $table['initialization'] = array();
-                        foreach ($rows as $row) {
-                            $instruction = array('type' => 'insert', 'fields' => $row);
-                            $this->database_definition['tables'][$table_name]['initialization'][] = $instruction;
+                        $initialization = array();
+                        foreach ($data as $row) {
+                            $initialization[] = array('type' => 'insert', 'fields' => $row);
                         }
+                        $this->database_definition['tables'][$table_name]['initialization'] = $initialization;
                     }
                 }
             }
