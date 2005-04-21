@@ -311,7 +311,7 @@ class MDB2_Schema_Writer
                 }
                 $buffer = '';
                 if ($dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_CONTENT) {
-                    if (isset($table['initialization']) && is_array($table['initialization'])) {
+                    if (isset($table['initialization']) && !empty($table['initialization']) && is_array($table['initialization'])) {
                         $buffer = ("$eol  <initialization>$eol");
                         foreach ($table['initialization'] as $instruction) {
                             switch ($instruction['type']) {
