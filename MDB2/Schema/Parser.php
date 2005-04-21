@@ -196,12 +196,6 @@ class MDB2_Schema_Parser extends XML_Parser
                         if (!isset($this->table['fields'][$field_name])) {
                             $this->raiseError('index field "'.$field_name.'" does not exist', null, $xp);
                         }
-                        if (!(isset($this->table['fields'][$field_name]['notnull'])
-                            && $this->table['fields'][$field_name]['notnull'] == true)
-                        ) {
-                            $this->raiseError('index field "'.$field_name.
-                                '" has to be "notnull"', null, $xp);
-                        }
                     }
                 }
             }
@@ -250,13 +244,13 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->field['was'] = $this->field_name;
             }
             if (isset($this->field['notnull']) && !$this->is_boolean($this->field['notnull'])) {
-                $this->raiseError('field  "notnull" has to be 1 or 0', null, $xp);
+                $this->raiseError('field "notnull" has to be 1 or 0', null, $xp);
             }
             if (isset($this->field['notnull']) && !isset($this->field['default'])) {
                 $this->raiseError('if field is "notnull", it needs a default value', null, $xp);
             }
             if (isset($this->field['unsigned']) && !$this->is_boolean($this->field['unsigned'])) {
-                $this->raiseError('field  "notnull" has to be 1 or 0', null, $xp);
+                $this->raiseError('field "notnull" has to be 1 or 0', null, $xp);
             }
             $this->table['fields'][$this->field_name] = $this->field;
             if (isset($this->field['default'])) {
@@ -281,7 +275,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('index "'.$this->index_name.'" already exists', null, $xp);
             }
             if (isset($this->index['unique']) && !$this->is_boolean($this->index['unique'])) {
-                $this->raiseError('field  "unique" has to be 1 or 0', null, $xp);
+                $this->raiseError('field "unique" has to be 1 or 0', null, $xp);
             }
             if (!isset($this->index['was'])) {
                 $this->index['was'] = $this->index_name;
