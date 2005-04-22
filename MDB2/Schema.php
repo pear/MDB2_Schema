@@ -1641,10 +1641,9 @@ class MDB2_Schema extends PEAR
                     $fields = array();
                     $types = array();
                     foreach ($table['fields'] as $field_name => $field) {
-                        $types[] = $field['type'];
-                        $fields[] = $field_name;
+                        $fields[$field_name] = $field['type'];
                     }
-                    $query = 'SELECT '.implode(', ', $fields).' FROM '.$table_name;
+                    $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM '.$table_name;
                     $data = $this->db->queryAll($query, $types, MDB2_FETCHMODE_ASSOC);
                     if (PEAR::isError($data)) {
                         return $data;
@@ -1652,6 +1651,16 @@ class MDB2_Schema extends PEAR
                     if (!empty($data)) {
                         $initialization = array();
                         foreach ($data as $row) {
+                            foreach($row as $key => $lob) {
+                                if (is_numeric($lob) && isset($fields[$key]) && ($fields[$key] == 'clob' || $fields[$key] == 'blob')) {
+                                    $value = '';
+                                    while (!$this->db->datatype->endOfLOB($lob)) {
+                                        $this->db->datatype->readLOB($lob, $data, 8192);
+                                        $value .= $data;
+                                    }
+                                    $row[$key] = $value;
+                                }
+                            }
                             $initialization[] = array('type' => 'insert', 'fields' => $row);
                         }
                         $this->database_definition['tables'][$table_name]['initialization'] = $initialization;
