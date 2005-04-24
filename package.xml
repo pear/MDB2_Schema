@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.0a10">
+<package version="1.0" packagerversion="1.4.0a11">
  <name>MDB2_Schema</name>
  <summary>XML based database schema manager</summary>
  <description>PEAR::MDB2_Schema enables users to maintain RDBMS independant schema
@@ -19,7 +19,7 @@ PEAR::MDB and Metabase.
   </maintainers>
  <release>
   <version>0.2.0</version>
-  <date>2005-04-17</date>
+  <date>2005-04-21</date>
   <license>BSD License</license>
   <state>beta</state>
   <notes>- fixed error handling in updateDatabase()
@@ -27,12 +27,15 @@ PEAR::MDB and Metabase.
 - always copy schema file in updateDatabase()
 - cosmetic fixes and tweaks
 - improved overwrite to check via list*() before creating (bug #3857, #4101)
+- updated MDB2 dependency
+- fixed sequence dumping
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.2.0" optional="no"/>
    <dep type="pkg" rel="ge" version="1.0b1" optional="no">PEAR</dep>
    <dep type="pkg" rel="has" optional="no">XML_Parser</dep>
    <dep type="pkg" rel="ge" version="2.0.0beta4" optional="no">MDB2</dep>
+   <dep type="pkg" rel="has" optional="yes">XML_DTD</dep>
   </deps>
   <filelist>
    <dir name="/" baseinstalldir="/">
@@ -42,6 +45,15 @@ PEAR::MDB and Metabase.
        <replace type="package-info" from="@package_version@" to="version"/>
       </file>
      </dir> <!-- /docs/examples -->
+     <file role="doc" name="MDB.dtd">
+      <replace type="package-info" from="@package_version@" to="version"/>
+     </file>
+     <file role="doc" name="MDB.xsl">
+      <replace type="package-info" from="@package_version@" to="version"/>
+     </file>
+     <file role="doc" name="xml_schema_documentation.html">
+      <replace type="package-info" from="@package_version@" to="version"/>
+     </file>
     </dir> <!-- /docs -->
     <dir name="MDB2">
      <dir name="Schema">
@@ -62,7 +74,7 @@ PEAR::MDB and Metabase.
  <changelog>
    <release>
     <version>0.2.0</version>
-    <date>2005-04-17</date>
+    <date>2005-04-21</date>
     <license>BSD License</license>
     <state>beta</state>
     <notes>- fixed error handling in updateDatabase()
@@ -70,6 +82,8 @@ PEAR::MDB and Metabase.
 - always copy schema file in updateDatabase()
 - cosmetic fixes and tweaks
 - improved overwrite to check via list*() before creating (bug #3857, #4101)
+- updated MDB2 dependency
+- fixed sequence dumping
     </notes>
    </release>
    <release>
