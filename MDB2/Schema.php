@@ -1667,19 +1667,98 @@ class MDB2_Schema extends PEAR
                     }
                 }
             }
-            $previous_database_name = ($this->database_definition['name'] != '')
-                ? $this->db->setDatabase($this->database_definition['name']) : '';
         }
 
         require_once 'MDB2/Schema/Writer.php';
         $writer =& new MDB2_Schema_Writer();
-        $return = $writer->dumpDatabase($this->database_definition, $arguments, $dump);
+        return $writer->dumpDatabase($this->database_definition, $arguments, $dump);
+    }
 
-        if (isset($previous_database_name) && $previous_database_name != '') {
+    // }}}
+    // {{{ writeInitialization()
+
+    /**
+     * write initialization and sequences
+     *
+     * @param string $data_file
+     * @param string $structure_file
+     * @param array $variables an associative array that is passed to the argument
+     * of the same name to the parseDatabaseDefinitionFile function. (there third
+     * param)
+     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @access public
+     */
+    function writeInitialization($data_file, $structure_file = false, $variables = array())
+    {
+        $data_definition = $this->parseDatabaseDefinitionFile(
+            $data_file,
+            $variables
+        );
+        if (PEAR::isError($data_definition)) {
+            return $data_definition;
+        }
+        if ($structure_file) {
+            $structure_definition = $this->parseDatabaseDefinitionFile(
+                $structure_file,
+                $variables
+            );
+            if (PEAR::isError($structure_definition)) {
+                return $structure_definition;
+            }
+        } else {
+            $structure_definition = $data_definition;
+        }
+
+        $previous_database_name = null;
+        if (isset($data_definition['name'])) {
+            $previous_database_name = $this->db->setDatabase($data_definition['name']);
+        } elseif(isset($structure_definition['name'])) {
+            $previous_database_name = $this->db->setDatabase($structure_definition['name']);
+        }
+
+        if (isset($data_definition['tables']) && is_array($data_definition['tables'])) {
+            foreach ($data_definition['tables'] as $table_name => $table) {
+                if (!isset($table['initialization'])) {
+                    continue;
+                }
+                if (!isset($structure_definition['tables'][$table_name]['fields'])) {
+                    return $this->raiseError();
+                }
+                $table['fields'] = $structure_definition['tables'][$table_name]['fields'];
+                $result = $this->initializeTable($table_name, $table);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+            }
+        }
+        if (isset($structure_definition['sequences']) && is_array($structure_definition['sequences'])) {
+            foreach ($structure_definition['sequences'] as $sequence_name => $sequence) {
+                if (isset($data_definition['sequences'][$sequence_name])
+                    || !isset($sequence['on']['table'])
+                    || !isset($data_definition['tables'][$sequence['on']['table']])
+                ) {
+                    continue;
+                }
+                $result = $this->createSequence($sequence_name, $sequence, true);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+            }
+        }
+        if (isset($data_definition['sequences']) && is_array($data_definition['sequences'])) {
+            foreach ($data_definition['sequences'] as $sequence_name => $sequence) {
+                $result = $this->createSequence($sequence_name, $sequence, true);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+            }
+        }
+
+        if (isset($previous_database_name)) {
             $this->db->setDatabase($previous_database_name);
         }
 
-        return $return;
+        return MDB2_OK;
     }
 
     // }}}
