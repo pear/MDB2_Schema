@@ -11,6 +11,14 @@ $notes = <<<EOT
 - improved overwrite to check via list*() before creating (bug #3857, #4101)
 - updated MDB2 dependency
 - fixed sequence dumping
+- moved schema documentation, xml_reverse_engineering.php, MDB.dtd
+  and MDB.xls from MDB package
+- added optional support for PEAR::XML_DTD based validation of schema files
+- index can be defined on fields that dont explicity prohibit null values
+- dont disable sequence dumping when implicit sequences have been found
+- added code to support dumping of lobs (MDB2 really should move to streams)
+- added writeInitialization() method (untested)
+- is_boolean() => isBoolean() in parser (CS fix)
 EOT;
 
 $description =<<<EOT
