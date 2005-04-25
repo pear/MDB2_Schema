@@ -623,6 +623,7 @@ class MDB2_Schema extends PEAR
                 if (PEAR::isError($start)) {
                     return $start;
                 }
+                ++$start;
             } else {
                 $this->warnings[] = 'Could not sync sequence: '.$sequence_name;
             }
