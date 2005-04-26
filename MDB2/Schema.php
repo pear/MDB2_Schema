@@ -1694,7 +1694,8 @@ class MDB2_Schema extends PEAR
      */
     function writeInitialization($data_file, $structure_file = false, $variables = array())
     {
-        if ($structure) {
+        $structure = false;
+        if ($structure_file) {
             $structure = $this->parseDatabaseDefinitionFile(
                 $structure_file,
                 $variables
