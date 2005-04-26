@@ -94,12 +94,14 @@ class MDB2_Schema_Parser extends XML_Parser
         )
     );
     var $fail_on_invalid_names = true;
+    var $structure = false;
 
-    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true)
+    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false)
     {
         $this->XML_Parser();
         $this->variables = $variables;
         $this->fail_on_invalid_names = $fail_on_invalid_names;
+        $this->structure = $structure;
     }
 
     function startHandler($xp, $element, $attribs)
@@ -291,6 +293,11 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('sorting type unknown', null, $xp);
             }
             $this->index['fields'][$this->field_name] = $this->field;
+            break;
+        case 'database-table-name':
+            if (isset($this->structure['tables'][$this->table_name])) {
+                $this->table = $this->structure['tables'][$this->table_name];
+            }
             break;
 
         /* Sequence declaration */
