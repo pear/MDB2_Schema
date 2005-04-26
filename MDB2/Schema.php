@@ -1692,7 +1692,7 @@ class MDB2_Schema extends PEAR
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function writeInitialization($data, $structure = false, $variables = array())
+    function writeInitialization($data_file, $structure_file = false, $variables = array())
     {
         if ($structure) {
             $structure = $this->parseDatabaseDefinitionFile(
