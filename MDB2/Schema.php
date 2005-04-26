@@ -273,7 +273,8 @@ class MDB2_Schema extends PEAR
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function parseDatabaseDefinitionFile($input_file, $variables = array(), $fail_on_invalid_names = true)
+    function parseDatabaseDefinitionFile($input_file, $variables = array(),
+        $fail_on_invalid_names = true, $structure = false)
     {
         $dtd_file = $this->getOption('dtd_file');
         if ($dtd_file) {
@@ -285,7 +286,7 @@ class MDB2_Schema extends PEAR
         }
 
         require_once 'MDB2/Schema/Parser.php';
-        $parser =& new MDB2_Schema_Parser($variables, $fail_on_invalid_names);
+        $parser =& new MDB2_Schema_Parser($variables, $fail_on_invalid_names, $structure);
         $result = $parser->setInputFile($input_file);
         if (PEAR::isError($result)) {
             return $result;
@@ -1653,7 +1654,9 @@ class MDB2_Schema extends PEAR
                         $initialization = array();
                         foreach ($data as $row) {
                             foreach($row as $key => $lob) {
-                                if (is_numeric($lob) && isset($fields[$key]) && ($fields[$key] == 'clob' || $fields[$key] == 'blob')) {
+                                if (is_numeric($lob) && isset($fields[$key])
+                                    && ($fields[$key] == 'clob' || $fields[$key] == 'blob')
+                                ) {
                                     $value = '';
                                     while (!$this->db->datatype->endOfLOB($lob)) {
                                         $this->db->datatype->readLOB($lob, $data, 8192);
@@ -1689,54 +1692,52 @@ class MDB2_Schema extends PEAR
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function writeInitialization($data_file, $structure_file = false, $variables = array())
+    function writeInitialization($data, $structure = false, $variables = array())
     {
-        $data_definition = $this->parseDatabaseDefinitionFile(
-            $data_file,
-            $variables
-        );
-        if (PEAR::isError($data_definition)) {
-            return $data_definition;
-        }
-        if ($structure_file) {
-            $structure_definition = $this->parseDatabaseDefinitionFile(
+        if ($structure) {
+            $structure = $this->parseDatabaseDefinitionFile(
                 $structure_file,
                 $variables
             );
-            if (PEAR::isError($structure_definition)) {
-                return $structure_definition;
+            if (PEAR::isError($structure)) {
+                return $structure;
             }
-        } else {
-            $structure_definition = $data_definition;
+        }
+
+        $data = $this->parseDatabaseDefinitionFile(
+            $data_file,
+            $variables,
+            false,
+            $structure
+        );
+        if (PEAR::isError($data)) {
+            return $data;
         }
 
         $previous_database_name = null;
-        if (isset($data_definition['name'])) {
-            $previous_database_name = $this->db->setDatabase($data_definition['name']);
-        } elseif(isset($structure_definition['name'])) {
-            $previous_database_name = $this->db->setDatabase($structure_definition['name']);
+        if (isset($data['name'])) {
+            $previous_database_name = $this->db->setDatabase($data['name']);
+        } elseif(isset($structure['name'])) {
+            $previous_database_name = $this->db->setDatabase($structure['name']);
         }
 
-        if (isset($data_definition['tables']) && is_array($data_definition['tables'])) {
-            foreach ($data_definition['tables'] as $table_name => $table) {
+        if (isset($data['tables']) && is_array($data['tables'])) {
+            foreach ($data['tables'] as $table_name => $table) {
                 if (!isset($table['initialization'])) {
                     continue;
                 }
-                if (!isset($structure_definition['tables'][$table_name]['fields'])) {
-                    return $this->raiseError();
-                }
-                $table['fields'] = $structure_definition['tables'][$table_name]['fields'];
+                $table['fields'] = $structure['tables'][$table_name]['fields'];
                 $result = $this->initializeTable($table_name, $table);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
             }
         }
-        if (isset($structure_definition['sequences']) && is_array($structure_definition['sequences'])) {
-            foreach ($structure_definition['sequences'] as $sequence_name => $sequence) {
-                if (isset($data_definition['sequences'][$sequence_name])
+        if (isset($structure['sequences']) && is_array($structure['sequences'])) {
+            foreach ($structure['sequences'] as $sequence_name => $sequence) {
+                if (isset($data['sequences'][$sequence_name])
                     || !isset($sequence['on']['table'])
-                    || !isset($data_definition['tables'][$sequence['on']['table']])
+                    || !isset($data['tables'][$sequence['on']['table']])
                 ) {
                     continue;
                 }
@@ -1746,8 +1747,8 @@ class MDB2_Schema extends PEAR
                 }
             }
         }
-        if (isset($data_definition['sequences']) && is_array($data_definition['sequences'])) {
-            foreach ($data_definition['sequences'] as $sequence_name => $sequence) {
+        if (isset($data['sequences']) && is_array($data['sequences'])) {
+            foreach ($data['sequences'] as $sequence_name => $sequence) {
                 $result = $this->createSequence($sequence_name, $sequence, true);
                 if (PEAR::isError($result)) {
                     return $result;
