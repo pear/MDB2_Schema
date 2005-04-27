@@ -196,6 +196,35 @@ class MDB2_Schema extends PEAR
     }
 
     // }}}
+    // {{{ factory()
+
+    /**
+     * Create a new MDB2 object for the specified database type
+     * type
+     *
+     * @param   mixed   $db       'data source name', see the MDB2::parseDSN
+     *                            method for a description of the dsn format.
+     *                            Can also be specified as an array of the
+     *                            format returned by MDB2::parseDSN.
+     *                            Finally you can also pass an existing db
+     *                            object to be used.
+     * @param   mixed   $options  An associative array of option names and
+     *                            their values.
+     * @return  mixed MDB2_OK on success, or a MDB2 error object
+     * @access  public
+     * @see     MDB2::parseDSN
+     */
+    function &factory(&$db, $options = array())
+    {
+        $obj =& new MDB2_Schema();
+        $err = $obj->connect($db, $options);
+        if (PEAR::isError($err)) {
+            return $err;
+        }
+        return $obj;
+    }
+
+    // }}}
     // {{{ connect()
 
     /**
