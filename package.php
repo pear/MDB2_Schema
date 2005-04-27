@@ -19,6 +19,7 @@ $notes = <<<EOT
 - added code to support dumping of lobs (MDB2 really should move to streams)
 - added writeInitialization() method (untested)
 - is_boolean() => isBoolean() in parser (CS fix)
+- added MDB2_Schema::factory()
 EOT;
 
 $description =<<<EOT
