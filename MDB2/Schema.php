@@ -701,7 +701,7 @@ class MDB2_Schema extends PEAR
                 }
             } elseif (is_array($databases) && in_array($this->database_definition['name'], $databases)) {
                 if (!$overwrite) {
-                    $this->db->debug('Database already exists: '.$database_name);
+                    $this->db->debug('Database already exists: ' . $this->database_definition['name']);
                     $create = false;
                 } else {
                     $result = $this->db->manager->dropDatabase($this->database_definition['name']);
