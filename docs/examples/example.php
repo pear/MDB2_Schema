@@ -62,10 +62,9 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
     @include_once 'Var_Dump.php';
     $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
 
-    $manager =& new MDB2_Schema;
-    $err = $manager->connect($dsn, array('debug' => true, 'log_line_break' => '<br>'));
-    if (PEAR::isError($err)) {
-        $error = $err->getMessage();
+    $manager =& MDB2_Schema::factory($dsn, array('debug' => true, 'log_line_break' => '<br>'));
+    if (PEAR::isError($manager)) {
+        $error = $manager->getMessage();
     } else {
         if ($_REQUEST['action']) {
             set_time_limit(0);
