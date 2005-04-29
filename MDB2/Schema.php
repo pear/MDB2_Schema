@@ -1432,8 +1432,6 @@ class MDB2_Schema extends PEAR
 
         if (isset($current_definition['name'])) {
             $previous_database_name = $this->db->setDatabase($current_definition['name']);
-        } else {
-            $previous_database_name = $this->db->getDatabase();
         }
         if (($support_transactions = $this->db->supports('transactions'))
             && PEAR::isError($result = $this->db->beginTransaction())
@@ -1477,7 +1475,9 @@ class MDB2_Schema extends PEAR
                     $result->getMessage().' ('.$result->getUserinfo().'))');
             }
         }
-        $this->db->setDatabase($previous_database_name);
+        if (isset($previous_database_name)) {
+            $this->db->setDatabase($previous_database_name);
+        }
         return $result;
     }
 
