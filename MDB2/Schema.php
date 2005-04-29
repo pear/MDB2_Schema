@@ -641,8 +641,8 @@ class MDB2_Schema extends PEAR
             if (PEAR::isError($tables) && !MDB2::isError($tables, $errorcodes)) {
                  return $tables;
             }
-            if (PEAR::isError($tables) ||
-                (is_array($table) && in_array($table, $tables))
+            if (!PEAR::isError($tables) &&
+                is_array($tables) && in_array($table, $tables)
             ) {
                 if ($this->db->supports('summary_functions')) {
                     $query = "SELECT MAX($field) FROM $table";
@@ -1756,7 +1756,6 @@ class MDB2_Schema extends PEAR
                 if (!isset($table['initialization'])) {
                     continue;
                 }
-                $table['fields'] = $structure['tables'][$table_name]['fields'];
                 $result = $this->initializeTable($table_name, $table);
                 if (PEAR::isError($result)) {
                     return $result;
