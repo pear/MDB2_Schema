@@ -20,6 +20,7 @@ $notes = <<<EOT
 - added writeInitialization() method (untested)
 - is_boolean() => isBoolean() in parser (CS fix)
 - added MDB2_Schema::factory()
+- Parser: if set grab definition of a table from the strucure property if set
 EOT;
 
 $description =<<<EOT

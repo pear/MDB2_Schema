@@ -19,7 +19,7 @@ PEAR::MDB and Metabase.
   </maintainers>
  <release>
   <version>0.2.0</version>
-  <date>2005-04-27</date>
+  <date>2005-04-29</date>
   <license>BSD License</license>
   <state>beta</state>
   <notes>- fixed error handling in updateDatabase()
@@ -38,6 +38,7 @@ PEAR::MDB and Metabase.
 - added writeInitialization() method (untested)
 - is_boolean() =&gt; isBoolean() in parser (CS fix)
 - added MDB2_Schema::factory()
+- Parser: if set grab definition of a table from the strucure property if set
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.2.0" optional="no"/>
@@ -83,7 +84,7 @@ PEAR::MDB and Metabase.
  <changelog>
    <release>
     <version>0.2.0</version>
-    <date>2005-04-27</date>
+    <date>2005-04-29</date>
     <license>BSD License</license>
     <state>beta</state>
     <notes>- fixed error handling in updateDatabase()
@@ -102,6 +103,7 @@ PEAR::MDB and Metabase.
 - added writeInitialization() method (untested)
 - is_boolean() =&gt; isBoolean() in parser (CS fix)
 - added MDB2_Schema::factory()
+- Parser: if set grab definition of a table from the strucure property if set
     </notes>
    </release>
    <release>
