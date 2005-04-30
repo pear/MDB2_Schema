@@ -697,7 +697,7 @@ class MDB2_Schema extends PEAR
             $this->db->popExpect();
             if (PEAR::isError($databases)) {
                 if (!MDB2::isError($databases, $errorcodes)) {
-                    return $database;
+                    return $databases;
                 }
             } elseif (is_array($databases) && in_array($this->database_definition['name'], $databases)) {
                 if (!$overwrite) {
