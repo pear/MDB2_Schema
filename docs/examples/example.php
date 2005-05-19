@@ -127,7 +127,7 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
         echo($error.'<br>');
     }
 ?>
-    <form action="<?= $_SERVER['PHP_SELF'];?>" method="GET">
+    <form action="<?php echo $_SERVER['SCRIPT_NAME']; ?>" method="GET">
     Database Type:
     <select name="type">
         <option value="mysql"<?php if (isset($_REQUEST['type']) && $_REQUEST['type'] == 'mysql') {echo (' selected="selected"');} ?>>MySQL</option>
