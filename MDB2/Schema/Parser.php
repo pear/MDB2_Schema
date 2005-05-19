@@ -219,10 +219,8 @@ class MDB2_Schema_Parser extends XML_Parser
             /* Type check */
             switch ($this->field['type']) {
             case 'integer':
-                if (isset($this->field['unsigned'])
-                    && $this->field['unsigned'] !== '1' && $this->field['unsigned'] !== '0'
-                ) {
-                    $this->raiseError('unsigned has to be 1 or 0', null, $xp);
+                if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
+                    $this->raiseError('unsigned has to be a boolean value', null, $xp);
                 }
                 break;
             case 'text':
@@ -245,14 +243,16 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!isset($this->field['was'])) {
                 $this->field['was'] = $this->field_name;
             }
-            if (isset($this->field['notnull']) && !$this->isBoolean($this->field['notnull'])) {
-                $this->raiseError('field "notnull" has to be 1 or 0', null, $xp);
-            }
-            if (isset($this->field['notnull']) && !isset($this->field['default'])) {
-                $this->raiseError('if field is "notnull", it needs a default value', null, $xp);
+            if (isset($this->field['notnull'])) {
+                if (!$this->isBoolean($this->field['notnull'])) {
+                    $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
+                }
+                if ($this->field['notnull'] && !isset($this->field['default'])) {
+                    $this->raiseError('if field is "notnull", it needs a default value', null, $xp);
+                }
             }
             if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
-                $this->raiseError('field "notnull" has to be 1 or 0', null, $xp);
+                $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
             $this->table['fields'][$this->field_name] = $this->field;
             if (isset($this->field['default'])) {
@@ -277,7 +277,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('index "'.$this->index_name.'" already exists', null, $xp);
             }
             if (isset($this->index['unique']) && !$this->isBoolean($this->index['unique'])) {
-                $this->raiseError('field "unique" has to be 1 or 0', null, $xp);
+                $this->raiseError('field "unique" has to be a boolean value', null, $xp);
             }
             if (!isset($this->index['was'])) {
                 $this->index['was'] = $this->index_name;
@@ -327,12 +327,12 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->database_definition['create'])
                 && !$this->isBoolean($this->database_definition['create'])
             ) {
-                $this->raiseError('field "create" has to be 1 or 0', null, $xp);
+                $this->raiseError('field "create" has to be a boolean value', null, $xp);
             }
             if (isset($this->database_definition['overwrite'])
                 && !$this->isBoolean($this->database_definition['overwrite'])
             ) {
-                $this->raiseError('field "overwrite" has to be 1 or 0', null, $xp);
+                $this->raiseError('field "overwrite" has to be a boolean value', null, $xp);
             }
             if (!isset($this->database_definition['name'])
                 || !$this->database_definition['name']
