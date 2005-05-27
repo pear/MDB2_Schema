@@ -1548,7 +1548,7 @@ class MDB2_Schema extends PEAR
                             if (isset($field['changed_not_null'])) {
                                 $this->db->debug(
                                    "\tChanged field '$field_name' notnull to ".
-                                    (isset($field['notnull'] && $field['notnull']) ? "'1'" : '0')
+                                    (isset($field['notnull']) && $field['notnull'] ? "'1'" : '0')
                                 );
                             }
                         }
