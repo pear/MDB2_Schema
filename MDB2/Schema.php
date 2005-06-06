@@ -353,6 +353,7 @@ class MDB2_Schema extends PEAR
             'name' => $database,
             'create' => 1,
             'tables' => array(),
+            'sequences' => array(),
         );
 
         $tables = $this->db->manager->listTables();
@@ -427,7 +428,6 @@ class MDB2_Schema extends PEAR
             return $sequences;
         }
         if (is_array($sequences) && !empty($sequences)) {
-            $this->database_definition['sequences'] = array();
             foreach ($sequences as $sequence_name) {
                 $definition = $this->db->reverse->getSequenceDefinition($sequence_name);
                 if (PEAR::isError($definition)) {
