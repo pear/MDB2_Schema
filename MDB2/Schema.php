@@ -663,6 +663,8 @@ class MDB2_Schema extends PEAR
         }
 
         $start = 1;
+        $autoinc = false;
+        $field = '';
         if (isset($sequence['on'])) {
             if (isset($sequence['on']['autoincrement'])) {
                 if (!$this->db->supports('auto_increment')) {
