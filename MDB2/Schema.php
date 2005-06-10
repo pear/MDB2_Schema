@@ -327,6 +327,7 @@ class MDB2_Schema extends PEAR
         if (PEAR::isError($parser->error)) {
             return $parser->error;
         }
+
         return $parser->database_definition;
     }
 
@@ -452,12 +453,14 @@ class MDB2_Schema extends PEAR
                                   overwritten if it already exists
      * @access public
      */
-    function createTableIndexes($table_name, $indexes, $overwrite)
+    function createTableIndexes($table_name, $indexes, $overwrite = false)
     {
         if (!$this->db->supports('indexes')) {
             $this->db->debug('Indexes are not supported');
             return MDB2_OK;
         }
+
+        $supports_primary_key = $this->db->supports('primary_key');
         foreach ($indexes as $index_name => $index) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
@@ -478,6 +481,31 @@ class MDB2_Schema extends PEAR
                 }
                 $this->db->debug('Overwritting index: '.$index_name);
             }
+
+            // check if primary is being used and if it's supported
+            if (isset($index['primary']) && !$supports_primary_key) {
+                /**
+                 * Primary not supported so we fallback to UNIQUE
+                 * and making the field NOT NULL
+                 */
+                unset($index['primary']);
+                $index['unique'] = true;
+                $fields = $index['fields'];
+
+                $this->db->loadModule('Reverse');
+                $changes = array();
+                foreach ($fields as $field => $empty) {
+                    $field_info = $this->db->reverse->getTableFieldDefinition($table_name, $field);
+                    if (PEAR::isError($field_info)) {
+                        return $field_info;
+                    }
+
+                	$changes['changed_fields'][$field] = $field_info[0][0];
+                    $changes['changed_fields'][$field]['notnull'] = true;
+                }
+                $this->db->manager->alterTable($table_name, $changes, false);
+            }
+
             $result = $this->db->manager->createIndex($table_name, $index_name, $index);
             if (PEAR::isError($result)) {
                 return $result;
@@ -523,18 +551,21 @@ class MDB2_Schema extends PEAR
                 $this->db->debug('Overwritting table: '.$table_name);
             }
         }
+
         if ($create) {
             $result = $this->db->manager->createTable($table_name, $table['fields']);
             if (PEAR::isError($result)) {
                 return $result;
             }
         }
+
         if (isset($table['initialization']) && is_array($table['initialization'])) {
             $result = $this->initializeTable($table_name, $table);
             if (PEAR::isError($result)) {
                 return $result;
             }
         }
+
         if (isset($table['indexes']) && is_array($table['indexes'])) {
             $result = $this->createTableIndexes($table_name, $table['indexes'], $overwrite);
             if (PEAR::isError($result)) {
@@ -623,6 +654,7 @@ class MDB2_Schema extends PEAR
                 $this->db->debug('Sequence already exists: '.$sequence_name);
                 return MDB2_OK;
             }
+
             $result = $this->db->manager->dropSequence($sequence_name);
             if (PEAR::isError($result)) {
                 return $result;
@@ -632,8 +664,16 @@ class MDB2_Schema extends PEAR
 
         $start = 1;
         if (isset($sequence['on'])) {
+            if (isset($sequence['on']['autoincrement'])) {
+                if (!$this->db->supports('auto_increment')) {
+                    $this->db->debug('Auto increment is not supported');
+                    return MDB2_OK;
+                }
+                $autoinc = $sequence['on']['autoincrement'];
+            }
             $table = $sequence['on']['table'];
             $field = $sequence['on']['field'];
+
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $tables = $this->db->manager->listTables();
@@ -641,6 +681,7 @@ class MDB2_Schema extends PEAR
             if (PEAR::isError($tables) && !MDB2::isError($tables, $errorcodes)) {
                  return $tables;
             }
+
             if (!PEAR::isError($tables) &&
                 is_array($tables) && in_array($table, $tables)
             ) {
@@ -659,9 +700,10 @@ class MDB2_Schema extends PEAR
             }
         } elseif (isset($sequence['start']) && is_numeric($sequence['start'])) {
             $start = $sequence['start'];
+            $table = '';
         }
 
-        $result = $this->db->manager->createSequence($sequence_name, $start);
+        $result = $this->db->manager->createSequence($sequence_name, $start, $autoinc, $field);
         if (PEAR::isError($result)) {
             return $result;
         }
@@ -884,13 +926,9 @@ class MDB2_Schema extends PEAR
                 }
                 if (isset($previous_definition[$was_field_name])) {
                     if ($was_field_name != $field_name) {
-                        $declaration = $this->db->getDeclaration($field['type'], $field_name, $field);
-                        if (PEAR::isError($declaration)) {
-                            return $declaration;
-                        }
+
                         $changes['renamed_fields'][$was_field_name] = array(
                             'name' => $field_name,
-                            'declaration' => $declaration,
                         );
                     }
                     if (isset($defined_fields[$was_field_name])) {
@@ -904,11 +942,7 @@ class MDB2_Schema extends PEAR
                         return $change;
                     }
                     if (!empty($change)) {
-                        $declaration = $this->db->getDeclaration($field['type'], $field_name, $field);
-                        if (PEAR::isError($declaration)) {
-                            return $declaration;
-                        }
-                        $change['declaration'] = $declaration;
+
                         $change['definition'] = $field;
                         $changes['changed_fields'][$field_name] = $change;
                     }
@@ -919,11 +953,7 @@ class MDB2_Schema extends PEAR
                             $was_field_name.'") for field "'.$field_name.'" of table "'.
                             $table_name.'" that does not exist');
                     }
-                    $declaration = $this->db->getDeclaration($field['type'], $field_name, $field);
-                    if (PEAR::isError($declaration)) {
-                        return $declaration;
-                    }
-                    $change['declaration'] = $declaration;
+
                     $changes['added_fields'][$field_name] = $change;
                 }
             }

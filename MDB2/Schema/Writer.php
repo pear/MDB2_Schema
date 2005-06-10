@@ -150,12 +150,19 @@ class MDB2_Schema_Writer
                 $buffer .= "  <start>$start</start>$eol";
             }
         }
+
         if (isset($sequence_definition['on'])) {
-            $buffer .= "  <on>$eol   <table>".$sequence_definition['on']['table'].
+            $buffer .= "  <on>$eol";
+            if (isset($sequence_definition['on']['autoincrement'])) {
+                $buffer .= "  <autoincrement>" . $sequence_definition['autoincrement'] . 
+                    "</autoincrement>$eol"
+            }
+            $buffer .= "   <table>".$sequence_definition['on']['table'].
                 "</table>$eol   <field>".$sequence_definition['on']['field'].
                 "</field>$eol  </on>$eol";
         }
         $buffer .= " </sequence>$eol";
+
         return $buffer;
     }
 
@@ -277,7 +284,7 @@ class MDB2_Schema_Writer
                                     '" is not yet supported');
                             }
                             if (isset($field['notnull']) && $field['notnull']) {
-                                $buffer .=("    <notnull>1</notnull>$eol");
+                                $buffer .=("    <notnull>true</notnull>$eol");
                             }
                             if (isset($field['default'])) {
                                 $buffer .=('    <default>'.$this->_escapeSpecialChars($field['default'])
@@ -290,8 +297,13 @@ class MDB2_Schema_Writer
                         foreach ($table['indexes'] as $index_name => $index) {
                             $buffer .=("$eol   <index>$eol    <name>$index_name</name>$eol");
                             if (isset($index['unique'])) {
-                                $buffer .=("    <unique>1</unique>$eol");
+                                $buffer .=("    <unique>true</unique>$eol");
                             }
+
+                            if (isset($index['primary'])) {
+                                $buffer .=("    <primary>true</primary>$eol");
+                            }
+
                             foreach ($index['fields'] as $field_name => $field) {
                                 $buffer .=("    <field>$eol     <name>$field_name</name>$eol");
                                 if (is_array($field) && isset($field['sorting'])) {

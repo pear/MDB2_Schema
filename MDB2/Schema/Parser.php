@@ -254,6 +254,7 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
                 $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
+
             $this->table['fields'][$this->field_name] = $this->field;
             if (isset($this->field['default'])) {
                 if ($this->field['type'] == 'clob' || $this->field['type'] == 'blob') {
@@ -279,6 +280,11 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->index['unique']) && !$this->isBoolean($this->index['unique'])) {
                 $this->raiseError('field "unique" has to be a boolean value', null, $xp);
             }
+
+            if (isset($this->index['primary']) && !$this->isBoolean($this->index['primary'])) {
+                $this->raiseError('field "primary" has to be a boolean value', null, $xp);
+            }
+
             if (!isset($this->index['was'])) {
                 $this->index['was'] = $this->index_name;
             }
@@ -308,10 +314,17 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->database_definition['sequences'][$this->seq_name])) {
                 $this->raiseError('sequence "'.$this->seq_name.'" already exists', null, $xp);
             }
+
             if (!isset($this->seq['was'])) {
                 $this->seq['was'] = $this->seq_name;
             }
             if (isset($this->seq['on'])) {
+                if (isset($this->seq['on']['autoincrement']) && 
+                    (!$this->isBoolean($this->seq['on']['autoincrement']) && $this->seq['on']['autoincrement'] != 'force')
+                ) {
+                    $this->raiseError('Auto increment has to be either a boolean value or "force"', null, $xp);
+                }
+
                 if ((!isset($this->seq['on']['table']) || !$this->seq['on']['table'])
                     || (!isset($this->seq['on']['field']) || !$this->seq['on']['field'])
                 ) {
@@ -613,6 +626,13 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->index_name = $data;
             }
             break;
+        case 'database-table-declaration-index-primary':
+            if (isset($this->index['primary'])) {
+                $this->index['primary'] .= $data;
+            } else {
+                $this->index['primary'] = $data;
+            }
+            break;
         case 'database-table-declaration-index-unique':
             if (isset($this->index['unique'])) {
                 $this->index['unique'] .= $data;
@@ -662,6 +682,13 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->seq['start'] .= $data;
             } else {
                 $this->seq['start'] = $data;
+            }
+            break;
+        case 'database-sequence-on-autoincrement':
+            if (isset($this->seq['on']['autoincrement'])) {
+                $this->seq['on']['autoincrement'] .= $data;
+            } else {
+                $this->seq['on']['autoincrement'] = $data;
             }
             break;
         case 'database-sequence-on-table':
