@@ -2,25 +2,9 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.2.0';
+$version = '0.3.0';
 $notes = <<<EOT
-- fixed error handling in updateDatabase()
-- use MDB2::raiseError
-- always copy schema file in updateDatabase()
-- cosmetic fixes and tweaks
-- improved overwrite to check via list*() before creating (bug #3857, #4101)
-- updated MDB2 dependency
-- fixed sequence dumping
-- moved schema documentation, xml_reverse_engineering.php, MDB.dtd
-  and MDB.xls from MDB package
-- added optional support for PEAR::XML_DTD based validation of schema files
-- index can be defined on fields that dont explicity prohibit null values
-- dont disable sequence dumping when implicit sequences have been found
-- added code to support dumping of lobs (MDB2 really should move to streams)
-- added writeInitialization() method (untested)
-- is_boolean() => isBoolean() in parser (CS fix)
-- added MDB2_Schema::factory()
-- Parser: if set grab definition of a table from the strucure property if set
+- use MDB2::factory() by default instead of MDB2::connect()
 EOT;
 
 $description =<<<EOT
@@ -64,7 +48,7 @@ $package->addMaintainer('lsmith', 'lead', 'Lukas Kahwe Smith', 'smith@backendmed
 
 $package->addDependency('php',       '4.2.0', 'ge',  'php', false);
 $package->addDependency('PEAR',      '1.0b1', 'ge',  'pkg', false);
-$package->addDependency('MDB2', '2.0.0beta4', 'ge',  'pkg', false);
+$package->addDependency('MDB2', '2.0.0beta6', 'ge',  'pkg', false);
 $package->addDependency('XML_Parser',   true, 'has', 'pkg', false);
 $package->addDependency('XML_DTD',      true, 'has', 'pkg', true);
 
