@@ -5,6 +5,10 @@ require_once 'PEAR/PackageFileManager.php';
 $version = '0.3.0';
 $notes = <<<EOT
 - use MDB2::factory() by default instead of MDB2::connect()
+- added support for auto increment and primary key in schema. (mysql[i])
+- alterTable (Manager) now needs the full definition to work (use getTableFieldDefinition
+ from Reverse module if you do not have a definition at hand) this eliminates the need
+ of the declaration part in the alterTable array.
 EOT;
 
 $description =<<<EOT
