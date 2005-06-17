@@ -500,7 +500,7 @@ class MDB2_Schema extends PEAR
                         return $field_info;
                     }
 
-                	$changes['changed_fields'][$field] = $field_info[0][0];
+                    $changes['changed_fields'][$field] = $field_info[0][0];
                     $changes['changed_fields'][$field]['notnull'] = true;
                 }
                 $this->db->manager->alterTable($table_name, $changes, false);
@@ -666,15 +666,15 @@ class MDB2_Schema extends PEAR
         $autoinc = false;
         $field = '';
         if (isset($sequence['on'])) {
+            $table = $sequence['on']['table'];
+            $field = $sequence['on']['field'];
             if (isset($sequence['on']['autoincrement'])) {
                 if (!$this->db->supports('auto_increment')) {
                     $this->db->debug('Auto increment is not supported');
                     return MDB2_OK;
                 }
-                $autoinc = $sequence['on']['autoincrement'];
+                $autoinc = $field;
             }
-            $table = $sequence['on']['table'];
-            $field = $sequence['on']['field'];
 
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
@@ -705,7 +705,7 @@ class MDB2_Schema extends PEAR
             $table = '';
         }
 
-        $result = $this->db->manager->createSequence($sequence_name, $start, $autoinc, $field);
+        $result = $this->db->manager->createSequence($sequence_name, $start, $autoinc);
         if (PEAR::isError($result)) {
             return $result;
         }
