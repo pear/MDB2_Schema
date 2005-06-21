@@ -154,7 +154,7 @@ class MDB2_Schema_Writer
         if (isset($sequence_definition['on'])) {
             $buffer .= "  <on>$eol";
             if (isset($sequence_definition['on']['autoincrement'])) {
-                $buffer .= "  <autoincrement>" . $sequence_definition['autoincrement'] . 
+                $buffer .= "  <autoincrement>" . $sequence_definition['autoincrement'] .
                     "</autoincrement>$eol";
             }
             $buffer .= "   <table>".$sequence_definition['on']['table'].

@@ -165,7 +165,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('field "'.$this->init_name.'" already filled', null, $xp);
             }
             if (!isset($this->table['fields'][$this->init_name])) {
-                $this->raiseError('unkown field "'.$this->init_name.'"', null, $xp);
+                $this->raiseError('unknown field "'.$this->init_name.'"', null, $xp);
             }
             if ($this->init_value !== ''
                 && !$this->validateFieldValue($this->init_name, $this->init_value, $xp)
@@ -319,7 +319,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->seq['was'] = $this->seq_name;
             }
             if (isset($this->seq['on'])) {
-                if (isset($this->seq['on']['autoincrement']) && 
+                if (isset($this->seq['on']['autoincrement']) &&
                     (!$this->isBoolean($this->seq['on']['autoincrement']) && $this->seq['on']['autoincrement'] != 'force')
                 ) {
                     $this->raiseError('Auto increment has to be either a boolean value or "force"', null, $xp);
