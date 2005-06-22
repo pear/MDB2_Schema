@@ -153,10 +153,6 @@ class MDB2_Schema_Writer
 
         if (isset($sequence_definition['on'])) {
             $buffer .= "  <on>$eol";
-            if (isset($sequence_definition['on']['autoincrement'])) {
-                $buffer .= "  <autoincrement>" . $sequence_definition['autoincrement'] .
-                    "</autoincrement>$eol";
-            }
             $buffer .= "   <table>".$sequence_definition['on']['table'].
                 "</table>$eol   <field>".$sequence_definition['on']['field'].
                 "</field>$eol  </on>$eol";
@@ -290,6 +286,12 @@ class MDB2_Schema_Writer
                                 $buffer .=('    <default>'.$this->_escapeSpecialChars($field['default'])
                                     ."</default>$eol");
                             }
+
+                            if (isset($field['autoincrement'])) {
+                                $buffer .= "  <autoincrement>" . $field['autoincrement'] .
+                                    "</autoincrement>$eol";
+                            }
+
                             $buffer .=("   </field>$eol");
                         }
                     }

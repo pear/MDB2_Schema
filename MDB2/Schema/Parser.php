@@ -255,6 +255,12 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
 
+            if (isset($this->field['autoincrement']) && 
+                (!$this->isBoolean($this->field['autoincrement']) && $this->field['autoincrement'] != 'force')
+            ) {
+                $this->raiseError('Auto increment has to be either a boolean value or "force"', null, $xp);
+            }
+
             $this->table['fields'][$this->field_name] = $this->field;
             if (isset($this->field['default'])) {
                 if ($this->field['type'] == 'clob' || $this->field['type'] == 'blob') {
@@ -318,13 +324,8 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!isset($this->seq['was'])) {
                 $this->seq['was'] = $this->seq_name;
             }
-            if (isset($this->seq['on'])) {
-                if (isset($this->seq['on']['autoincrement']) &&
-                    (!$this->isBoolean($this->seq['on']['autoincrement']) && $this->seq['on']['autoincrement'] != 'force')
-                ) {
-                    $this->raiseError('Auto increment has to be either a boolean value or "force"', null, $xp);
-                }
 
+            if (isset($this->seq['on'])) {
                 if ((!isset($this->seq['on']['table']) || !$this->seq['on']['table'])
                     || (!isset($this->seq['on']['field']) || !$this->seq['on']['field'])
                 ) {
@@ -603,6 +604,13 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->field['unsigned'] = $data;
             }
             break;
+        case 'database-table-declaration-field-autoincrement':
+            if (isset($this->field['autoincrement'])) {
+                $this->field['autoincrement'] .= $data;
+            } else {
+                $this->field['autoincrement'] = $data;
+            }
+            break;
         case 'database-table-declaration-field-default':
             if (isset($this->field['default'])) {
                 $this->field['default'] .= $data;
@@ -682,13 +690,6 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->seq['start'] .= $data;
             } else {
                 $this->seq['start'] = $data;
-            }
-            break;
-        case 'database-sequence-on-autoincrement':
-            if (isset($this->seq['on']['autoincrement'])) {
-                $this->seq['on']['autoincrement'] .= $data;
-            } else {
-                $this->seq['on']['autoincrement'] = $data;
             }
             break;
         case 'database-sequence-on-table':
