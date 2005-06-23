@@ -189,14 +189,44 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->database_definition['tables'][$this->table_name])) {
                 $this->raiseError('table "'.$this->table_name.'" already exists', null, $xp);
             }
+            $primary = false;
             if (!isset($this->table['fields'])) {
                 $this->raiseError('tables need one or more fields', null, $xp);
+            } else {
+                foreach ($this->table['fields'] as $field) {
+                    if (isset($field['autoincrement']) && $field['autoincrement']) {
+                        if ($primary) {
+                            $this->raiseError('there was already an autoincrement field in "'.$this->table_name.'" before "'.$field_name.'"', null, $xp);
+                        } else {
+                            $primary = true;
+                        }
+                        if(!$this->table['fields'][$field_name]['notnull']) {
+                            $this->raiseError('all autoincrement fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
+                        }
+                        if (!isset($this->table['fields'][$field_name]['default'])) {
+                            $this->table['fields'][$field_name]['default'] = '0';
+                        } elseif($this->table['fields'][$field_name]['notnull'] !== '0') {
+                            $this->raiseError('all autoincrement fields must be defined default "0" in "'.$this->table_name.'"', null, $xp);
+                        }
+                    }
+                }
             }
             if (isset($this->table['indexes'])) {
                 foreach ($this->table['indexes'] as $index) {
+                    if (isset($index['primary']) && $index['primary']) {
+                        if ($primary) {
+                            $this->raiseError('there was already an primary index or autoincrement field in "'.$this->table_name.'" before "'.$index['name'].'"', null, $xp);
+                        } else {
+                            $primary = true;
+                        }
+                    }
                     foreach ($index['fields'] as $field_name => $field) {
                         if (!isset($this->table['fields'][$field_name])) {
                             $this->raiseError('index field "'.$field_name.'" does not exist', null, $xp);
+                        } elseif (isset($index['primary']) && $index['primary']) {
+                            if(!$this->table['fields'][$field_name]['notnull']) {
+                                $this->raiseError('all primary key fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
+                            }
                         }
                     }
                 }
@@ -222,7 +252,6 @@ class MDB2_Schema_Parser extends XML_Parser
                 if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
                     $this->raiseError('unsigned has to be a boolean value', null, $xp);
                 }
-                break;
             case 'text':
             case 'clob':
             case 'blob':
@@ -243,22 +272,17 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!isset($this->field['was'])) {
                 $this->field['was'] = $this->field_name;
             }
-            if (isset($this->field['notnull'])) {
-                if (!$this->isBoolean($this->field['notnull'])) {
-                    $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
-                }
-                if ($this->field['notnull'] && !isset($this->field['default'])) {
-                    $this->raiseError('if field is "notnull", it needs a default value', null, $xp);
-                }
+            if (!isset($this->field['notnull'])) {
+                $this->field['notnull'] = 1;
             }
-            if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
+            if (!$this->isBoolean($this->field['notnull'])) {
                 $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
-
-            if (isset($this->field['autoincrement']) && 
-                (!$this->isBoolean($this->field['autoincrement']) && $this->field['autoincrement'] != 'force')
-            ) {
-                $this->raiseError('Auto increment has to be either a boolean value or "force"', null, $xp);
+            if ($this->field['notnull'] && !isset($this->field['default'])) {
+                $this->raiseError('if field is "notnull", it needs a default value', null, $xp);
+            }
+            if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
+                $this->raiseError('field "unsigned" has to be a boolean value', null, $xp);
             }
 
             $this->table['fields'][$this->field_name] = $this->field;
@@ -286,7 +310,6 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->index['unique']) && !$this->isBoolean($this->index['unique'])) {
                 $this->raiseError('field "unique" has to be a boolean value', null, $xp);
             }
-
             if (isset($this->index['primary']) && !$this->isBoolean($this->index['primary'])) {
                 $this->raiseError('field "primary" has to be a boolean value', null, $xp);
             }
