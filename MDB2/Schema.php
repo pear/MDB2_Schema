@@ -47,9 +47,24 @@
 
 require_once 'MDB2.php';
 
-define('MDB2_MANAGER_DUMP_ALL',          0);
-define('MDB2_MANAGER_DUMP_STRUCTURE',    1);
-define('MDB2_MANAGER_DUMP_CONTENT',      2);
+define('MDB2_SCHEMA_DUMP_ALL',          0);
+define('MDB2_SCHEMA_DUMP_STRUCTURE',    1);
+define('MDB2_SCHEMA_DUMP_CONTENT',      2);
+
+/**
+ * The method mapErrorCode in each MDB2_Schema_dbtype implementation maps
+ * native error codes to one of these.
+ *
+ * If you add an error code here, make sure you also add a textual
+ * version of it in MDB2_Schema::errorMessage().
+ */
+
+define('MDB2_SCHEMA_ERROR',              -1);
+define('MDB2_SCHEMA_ERROR_PARSE',        -2);
+define('MDB2_SCHEMA_ERROR_NOT_CAPABLE',  -3);
+define('MDB2_SCHEMA_ERROR_UNSUPPORTED',  -4);    // Driver does not support this function
+define('MDB2_SCHEMA_ERROR_INVALID',      -5);    // Invalid attribute value
+define('MDB2_SCHEMA_ERROR_NODBSELECTED', -6);
 
 /**
  * The database manager is a class that provides a set of database
@@ -91,35 +106,6 @@ class MDB2_Schema extends PEAR
     function apiVersion()
     {
         return '@package_version@';
-    }
-
-    // }}}
-    // {{{ raiseError()
-
-    /**
-     * This method is used to communicate an error and invoke error
-     * callbacks etc.  Basically a wrapper for PEAR::raiseError
-     * without the message string.
-     *
-     * @param mixed $code integer error code, or a PEAR error object (all
-     *      other parameters are ignored if this parameter is an object
-     * @param int $mode error mode, see PEAR_Error docs
-     * @param mixed $options If error mode is PEAR_ERROR_TRIGGER, this is the
-     *      error level (E_USER_NOTICE etc).  If error mode is
-     *      PEAR_ERROR_CALLBACK, this is the callback function, either as a
-     *      function name, or as an array of an object and method name. For
-     *      other error modes this parameter is ignored.
-     * @param string $userinfo Extra debug information.  Defaults to the last
-     *      query and native error code.
-     * @param mixed $nativecode Native error code, integer or string depending
-     *      the backend.
-     * @return object a PEAR error object
-     * @access public
-     * @see PEAR_Error
-     */
-    function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
-    {
-        return MDB2::raiseError($code, $mode, $options, $userinfo);
     }
 
     // }}}
@@ -166,13 +152,13 @@ class MDB2_Schema extends PEAR
     {
         if (isset($this->options[$option])) {
             if (is_null($value)) {
-                return $this->raiseError(MDB2_ERROR, null, null,
+                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'may not set an option to value null');
             }
             $this->options[$option] = $value;
             return MDB2_OK;
         }
-        return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
+        return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
             "unknown option $option");
     }
 
@@ -191,7 +177,7 @@ class MDB2_Schema extends PEAR
         if (isset($this->options[$option])) {
             return $this->options[$option];
         }
-        return $this->raiseError(MDB2_ERROR_UNSUPPORTED,
+        return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED,
             null, null, "unknown option $option");
     }
 
@@ -310,7 +296,7 @@ class MDB2_Schema extends PEAR
             require_once 'XML/DTD/XmlValidator.php';
             $dtd =& new XML_DTD_XmlValidator;
             if (!$dtd->isValid($dtd_file, $input_file)) {
-                return $this->raiseError(MDB2_ERROR_MANAGER_PARSE, null, null, $dtd->getMessage());
+                return $this->raiseError(MDB2_SCHEMA_ERROR_PARSE, null, null, $dtd->getMessage());
             }
         }
 
@@ -444,12 +430,12 @@ class MDB2_Schema extends PEAR
 
         $supports_primary_key = $this->db->supports('primary_key');
         foreach ($indexes as $index_name => $index) {
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $indexes = $this->db->manager->listTableIndexes($table_name);
             $this->db->popExpect();
             if (PEAR::isError($indexes)) {
-                if (!MDB2::isError($indexes, $errorcodes)) {
+                if (!MDB2_Schema::isError($indexes, $errorcodes)) {
                     return $indexes;
                 }
             } elseif (is_array($indexes) && in_array($index_name, $indexes)) {
@@ -513,12 +499,12 @@ class MDB2_Schema extends PEAR
     function createTable($table_name, $table, $overwrite = false)
     {
         $create = true;
-        $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+        $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
         $this->db->expectError($errorcodes);
         $tables = $this->db->manager->listTables();
         $this->db->popExpect();
         if (PEAR::isError($tables)) {
-            if (!MDB2::isError($tables, $errorcodes)) {
+            if (!MDB2_Schema::isError($tables, $errorcodes)) {
                 return $tables;
             }
         } elseif (is_array($tables) && in_array($table_name, $tables)) {
@@ -623,12 +609,12 @@ class MDB2_Schema extends PEAR
             return MDB2_OK;
         }
 
-        $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+        $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
         $this->db->expectError($errorcodes);
         $sequences = $this->db->manager->listSequences();
         $this->db->popExpect();
         if (PEAR::isError($sequences)) {
-            if (!MDB2::isError($sequences, $errorcodes)) {
+            if (!MDB2_Schema::isError($sequences, $errorcodes)) {
                 return $sequences;
             }
         } elseif (is_array($sequence) && in_array($sequence_name, $sequences)) {
@@ -651,11 +637,11 @@ class MDB2_Schema extends PEAR
             $table = $sequence['on']['table'];
             $field = $sequence['on']['field'];
 
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $tables = $this->db->manager->listTables();
             $this->db->popExpect();
-            if (PEAR::isError($tables) && !MDB2::isError($tables, $errorcodes)) {
+            if (PEAR::isError($tables) && !MDB2_Schema::isError($tables, $errorcodes)) {
                  return $tables;
             }
 
@@ -704,18 +690,18 @@ class MDB2_Schema extends PEAR
     function createDatabase()
     {
         if (!isset($this->database_definition['name']) || !$this->database_definition['name']) {
-            return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                 'no valid database name specified');
         }
         $create = (isset($this->database_definition['create']) && $this->database_definition['create']);
         $overwrite = (isset($this->database_definition['overwrite']) && $this->database_definition['overwrite']);
         if ($create) {
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
             $this->db->popExpect();
             if (PEAR::isError($databases)) {
-                if (!MDB2::isError($databases, $errorcodes)) {
+                if (!MDB2_Schema::isError($databases, $errorcodes)) {
                     return $databases;
                 }
             } elseif (is_array($databases) && in_array($this->database_definition['name'], $databases)) {
@@ -775,11 +761,11 @@ class MDB2_Schema extends PEAR
                 if ($support_transactions) {
                     $res = $this->db->rollback();
                     if (PEAR::isError($res))
-                        $result = $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                        $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                             'Could not rollback the partially created database alterations ('.
                             $result->getMessage().' ('.$result->getUserinfo().'))');
                 } else {
-                    $result = $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                    $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                         'the database was only partially created ('.
                         $result->getMessage().' ('.$result->getUserinfo().'))');
                 }
@@ -788,7 +774,7 @@ class MDB2_Schema extends PEAR
             if ($support_transactions) {
                 $res = $this->db->commit();
                 if (PEAR::isError($res))
-                    $result = $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                    $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                         'Could not end transaction after successfully created the database ('.
                         $res->getMessage().' ('.$res->getUserinfo().'))');
             }
@@ -799,7 +785,7 @@ class MDB2_Schema extends PEAR
         if (PEAR::isError($result) && $create
             && PEAR::isError($result2 = $this->db->manager->dropDatabase($this->database_definition['name']))
         ) {
-            return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+            return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'Could not drop the created database after unsuccessful creation attempt ('.
                 $result2->getMessage().' ('.$result2->getUserinfo().'))');
         }
@@ -909,7 +895,7 @@ class MDB2_Schema extends PEAR
                         );
                     }
                     if (isset($defined_fields[$was_field_name])) {
-                        return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                        return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'the field "'.$was_field_name.
                             '" was specified as base of more than one field of table');
                     }
@@ -925,7 +911,7 @@ class MDB2_Schema extends PEAR
                     }
                 } else {
                     if ($field_name != $was_field_name) {
-                        return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                        return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'it was specified a previous field name ("'.
                             $was_field_name.'") for field "'.$field_name.'" of table "'.
                             $table_name.'" that does not exist');
@@ -976,7 +962,7 @@ class MDB2_Schema extends PEAR
                         $change['name'] = $was_index_name;
                     }
                     if (isset($defined_indexes[$was_index_name])) {
-                        return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                        return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'the index "'.$was_index_name.'" was specified as base of'.
                             ' more than one index of table "'.$table_name.'"');
                     }
@@ -1019,7 +1005,7 @@ class MDB2_Schema extends PEAR
                     }
                 } else {
                     if ($index_name != $was_index_name) {
-                        return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                        return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'it was specified a previous index name ("'.$was_index_name.
                             ') for index "'.$index_name.'" of table "'.$table_name.'" that does not exist');
                     }
@@ -1063,7 +1049,7 @@ class MDB2_Schema extends PEAR
                     $changes[$was_table_name]+= array('name' => $table_name);
                 }
                 if (isset($defined_tables[$was_table_name])) {
-                    return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'the table "'.$was_table_name.
                         '" was specified as base of more than of table of the database');
                 }
@@ -1119,7 +1105,7 @@ class MDB2_Schema extends PEAR
                 }
             } else {
                 if ($table_name != $was_table_name) {
-                    return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'it was specified a previous table name ("'.
                         $was_table_name.'") for table "'.$table_name.
                         '" that does not exist');
@@ -1161,7 +1147,7 @@ class MDB2_Schema extends PEAR
                     $changes[$was_sequence_name]['name'] = $sequence_name;
                 }
                 if (isset($defined_sequences[$was_sequence_name])) {
-                    return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'the sequence "'.$was_sequence_name.'" was specified as base'.
                         ' of more than of sequence of the database');
                 }
@@ -1187,7 +1173,7 @@ class MDB2_Schema extends PEAR
                 }
             } else {
                 if ($sequence_name != $was_sequence_name) {
-                    return $this->raiseError(MDB2_ERROR_INVALID, null, null,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'it was specified a previous sequence name ("'.$was_sequence_name.
                         '") for sequence "'.$sequence_name.'" that does not exist');
                 }
@@ -1216,7 +1202,7 @@ class MDB2_Schema extends PEAR
                 }
                 if (isset($table['indexes']) && is_array($table['indexes'])) {
                     if (!$this->db->supports('indexes')) {
-                        return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
+                        return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
                             'indexes are not supported');
                     }
                     foreach ($table['indexes'] as $index) {
@@ -1231,7 +1217,7 @@ class MDB2_Schema extends PEAR
                             $table_changes--;
                         }
                         if ($table_changes) {
-                            return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
+                            return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
                                 'index alteration not yet supported: '.implode(', ', array_keys($index)));
                         }
                     }
@@ -1244,14 +1230,14 @@ class MDB2_Schema extends PEAR
         }
         if (isset($changes['sequences']) && is_array($changes['sequences'])) {
             if (!$this->db->supports('sequences')) {
-                return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
                     'sequences are not supported');
             }
             foreach ($changes['sequences'] as $sequence) {
                 if (isset($sequence['add']) || isset($sequence['remove']) || isset($sequence['change'])) {
                     continue;
                 }
-                return $this->raiseError(MDB2_ERROR_UNSUPPORTED, null, null,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
                     'some sequences changes are not yet supported');
             }
         }
@@ -1480,11 +1466,11 @@ class MDB2_Schema extends PEAR
             if ($support_transactions) {
                 $res = $this->db->rollback();
                 if (PEAR::isError($res))
-                    $result = $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                    $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                         'Could not rollback the partially created database alterations ('.
                         $result->getMessage().' ('.$result->getUserinfo().'))');
             } else {
-                $result = $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'the requested database alterations were only partially implemented ('.
                     $result->getMessage().' ('.$result->getUserinfo().'))');
             }
@@ -1492,7 +1478,7 @@ class MDB2_Schema extends PEAR
         if ($support_transactions) {
             $result = $this->db->commit();
             if (PEAR::isError($result)) {
-                $result = $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'Could not end transaction after successfully implemented the requested database alterations ('.
                     $result->getMessage().' ('.$result->getUserinfo().'))');
             }
@@ -1668,17 +1654,17 @@ class MDB2_Schema extends PEAR
      *                         default: "\n"
      *                 );
      * @param integer $dump constant that determines what data to dump
-     *                      MDB2_MANAGER_DUMP_ALL       : the entire db
-     *                      MDB2_MANAGER_DUMP_STRUCTURE : only the structure of the db
-     *                      MDB2_MANAGER_DUMP_CONTENT   : only the content of the db
+     *                      MDB2_SCHEMA_DUMP_ALL       : the entire db
+     *                      MDB2_SCHEMA_DUMP_STRUCTURE : only the structure of the db
+     *                      MDB2_SCHEMA_DUMP_CONTENT   : only the content of the db
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function dumpDatabase($arguments, $dump = MDB2_MANAGER_DUMP_ALL)
+    function dumpDatabase($arguments, $dump = MDB2_SCHEMA_DUMP_ALL)
     {
         if (!isset($arguments['definition']) || !$arguments['definition']) {
             if (!$this->db) {
-                return $this->raiseError(MDB2_ERROR_NODBSELECTED,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_NODBSELECTED,
                     null, null, 'please connect to a RDBMS first');
             }
             $error = $this->getDefinitionFromDatabase();
@@ -1688,7 +1674,7 @@ class MDB2_Schema extends PEAR
 
             // get initialization data
             if (isset($this->database_definition['tables']) && is_array($this->database_definition['tables'])
-                && $dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_CONTENT
+                && $dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT
             ) {
                 foreach ($this->database_definition['tables'] as $table_name => $table) {
                     $fields = array();
@@ -1857,18 +1843,18 @@ class MDB2_Schema extends PEAR
 
         $this->database_definition = $database_definition;
         if ($previous_schema_file && file_exists($previous_schema_file)) {
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
             $this->db->popExpect();
             if (PEAR::isError($databases)) {
-                if (!MDB2::isError($databases, $errorcodes)) {
+                if (!MDB2_Schema::isError($databases, $errorcodes)) {
                     return $databases;
                 }
             } elseif (!is_array($databases) ||
                 !in_array($this->database_definition['name'], $databases)
             ) {
-                return $this->raiseError(MDB2_ERROR, null, null,
+                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'database to update does not exist: '.$this->database_definition['name']);
             }
             $previous_definition = $this->parseDatabaseDefinitionFile($previous_schema_file, $variables, 0);
@@ -1899,12 +1885,135 @@ class MDB2_Schema extends PEAR
             }
         }
         if ($previous_schema_file && !copy($current_schema_file, $previous_schema_file)) {
-            return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+            return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'Could not copy the new database definition file to the current file');
         }
         return MDB2_OK;
     }
 
     // }}}
+    // {{{ errorMessage()
+
+    /**
+     * Return a textual error message for a MDB2_Schema error code
+     *
+     * @param   int     $value error code
+     * @return  string  error message, or false if the error code was
+     *                  not recognized
+     * @access public
+     */
+    function errorMessage($value)
+    {
+        static $errorMessages;
+        if (!isset($errorMessages)) {
+            $errorMessages = array(
+                MDB2_SCHEMA_ERROR              => 'unknown error',
+                MDB2_SCHEMA_ERROR_PARSE        => 'schema parse error',
+                MDB2_SCHEMA_ERROR_INVALID      => 'invalid',
+                MDB2_SCHEMA_ERROR_UNSUPPORTED  => 'not supported',
+                MDB2_SCHEMA_ERROR_NOT_CAPABLE  => 'MDB2_Schema backend not capable',
+                MDB2_SCHEMA_ERROR_NODBSELECTED => 'no database selected',
+            );
+        }
+
+        if (PEAR::isError($value)) {
+            $value = $value->getCode();
+        }
+
+        return isset($errorMessages[$value]) ?
+           $errorMessages[$value] : $errorMessages[MDB2_SCHEMA_ERROR];
+    }
+
+    // }}}
+    // {{{ raiseError()
+
+    /**
+     * This method is used to communicate an error and invoke error
+     * callbacks etc.  Basically a wrapper for PEAR::raiseError
+     * without the message string.
+     *
+     * @param mixed    integer error code
+     *
+     * @param int      error mode, see PEAR_Error docs
+     *
+     * @param mixed    If error mode is PEAR_ERROR_TRIGGER, this is the
+     *                 error level (E_USER_NOTICE etc).  If error mode is
+     *                 PEAR_ERROR_CALLBACK, this is the callback function,
+     *                 either as a function name, or as an array of an
+     *                 object and method name.  For other error modes this
+     *                 parameter is ignored.
+     *
+     * @param string   Extra debug information.  Defaults to the last
+     *                 query and native error code.
+     *
+     * @return object  a PEAR error object
+     *
+     * @see PEAR_Error
+     */
+    function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
+    {
+        return PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Schema_Error', true);
+    }
+
+    // }}}
+    // {{{ isError()
+
+    /**
+     * Tell whether a value is a MDB2_Schema error.
+     *
+     * @param   mixed $data   the value to test
+     * @param   int   $code   if $data is an error object, return true
+     *                        only if $code is a string and
+     *                        $db->getMessage() == $code or
+     *                        $code is an integer and $db->getCode() == $code
+     * @access  public
+     * @return  bool    true if parameter is an error
+     */
+    function isError($data, $code = null)
+    {
+        if (is_a($data, 'MDB2_Schema_Error')) {
+            if (is_null($code)) {
+                return true;
+            } elseif (is_string($code)) {
+                return $data->getMessage() === $code;
+            } else {
+                $code = (array)$code;
+                return in_array($data->getCode(), $code);
+            }
+        }
+        return false;
+    }
+
+    // }}}
+}
+
+/**
+ * MDB2_Schema_Error implements a class for reporting portable database error
+ * messages.
+ *
+ * @package MDB2_Schema
+ * @category Database
+ * @author  Stig Bakken <ssb@fast.no>
+ */
+class MDB2_Schema_Error extends PEAR_Error
+{
+    // }}}
+    // {{{ constructor
+
+    /**
+     * MDB2_Schema_Error constructor.
+     *
+     * @param mixed   $code      MDB error code, or string with error message.
+     * @param integer $mode      what 'error mode' to operate in
+     * @param integer $level     what error level to use for
+     *                           $mode & PEAR_ERROR_TRIGGER
+     * @param smixed  $debuginfo additional debug info, such as the last query
+     */
+    function MDB2_Schema_Error($code = MDB2_SCHEMA_ERROR, $mode = PEAR_ERROR_RETURN,
+              $level = E_USER_NOTICE, $debuginfo = null)
+    {
+        $this->PEAR_Error('MDB2_Schema Error: ' . MDB2_Schema::errorMessage($code), $code,
+            $mode, $level, $debuginfo);
+    }
 }
 ?>
