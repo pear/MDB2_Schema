@@ -74,8 +74,7 @@ class MDB2_Schema_Parser extends XML_Parser
     var $variables = array();
     var $seq = array();
     var $seq_name = '';
-    var $error = null;
-
+    var $error;
     var $invalid_names = array(
         'user' => array(),
         'is' => array(),
@@ -96,12 +95,17 @@ class MDB2_Schema_Parser extends XML_Parser
     var $fail_on_invalid_names = true;
     var $structure = false;
 
-    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false)
+    function __construct($variables, $fail_on_invalid_names = true, $structure = false)
     {
-        $this->XML_Parser();
+        parent::XML_Parser();
         $this->variables = $variables;
         $this->fail_on_invalid_names = $fail_on_invalid_names;
         $this->structure = $structure;
+    }
+
+    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false)
+    {
+        $this->__construct($variables, $fail_on_invalid_names, $structure);
     }
 
     function startHandler($xp, $element, $attribs)
@@ -272,13 +276,18 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!isset($this->field['was'])) {
                 $this->field['was'] = $this->field_name;
             }
+/*
             if (!isset($this->field['notnull'])) {
                 $this->field['notnull'] = 1;
+                if (!isset($this->field['default'])) {
+                    $this->field['default'] = '';
+                }
             }
-            if (!$this->isBoolean($this->field['notnull'])) {
+*/
+            if (isset($this->field['notnull']) && !$this->isBoolean($this->field['notnull'])) {
                 $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
-            if ($this->field['notnull'] && !isset($this->field['default'])) {
+            if (isset($this->field['notnull']) && $this->field['notnull'] && !isset($this->field['default'])) {
                 $this->raiseError('if field is "notnull", it needs a default value', null, $xp);
             }
             if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
@@ -286,6 +295,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
 
             $this->table['fields'][$this->field_name] = $this->field;
+
             if (isset($this->field['default'])) {
                 if ($this->field['type'] == 'clob' || $this->field['type'] == 'blob') {
                     $this->raiseError('"'.$this->field['type'].
@@ -297,6 +307,7 @@ class MDB2_Schema_Parser extends XML_Parser
                     $this->raiseError('default value of "'.$this->field_name.'" is of wrong type', null, $xp);
                 }
             }
+
             break;
 
         /* Index declaration */
@@ -471,7 +482,7 @@ class MDB2_Schema_Parser extends XML_Parser
         return true;
     }
 
-    function raiseError($msg = null, $ecode = 0, $xp = null)
+    function &raiseError($msg = null, $ecode = 0, $xp = null)
     {
         if (is_null($this->error)) {
             $error = '';
@@ -484,7 +495,7 @@ class MDB2_Schema_Parser extends XML_Parser
                     $xp = $this->parser;
                 }
             }
-            if (($error_string = xml_error_string($ecode))) {
+            if ($error_string = xml_error_string($ecode)) {
                 $error .= ' - '.$error_string;
             }
             if (is_resource($xp)) {
@@ -494,7 +505,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $error .= " - Byte: $byte; Line: $line; Col: $column";
             }
             $error .= "\n";
-            $this->error = MDB2::raiseError(MDB2_ERROR_MANAGER_PARSE, null, null, $error);
+            $this->error =& MDB2::raiseError(MDB2_ERROR_MANAGER_PARSE, null, null, $error);
         }
         return $this->error;
     }
