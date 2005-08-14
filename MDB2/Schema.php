@@ -650,13 +650,6 @@ class MDB2_Schema extends PEAR
         if (isset($sequence['on'])) {
             $table = $sequence['on']['table'];
             $field = $sequence['on']['field'];
-            if (isset($sequence['on']['autoincrement'])) {
-                if (!$this->db->supports('auto_increment')) {
-                    $this->db->debug('Auto increment is not supported');
-                    return MDB2_OK;
-                }
-                $autoinc = $field;
-            }
 
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
