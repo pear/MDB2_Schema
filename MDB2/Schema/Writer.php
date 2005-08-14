@@ -396,7 +396,7 @@ class MDB2_Schema_Writer
             fclose($fp);
         }
 
-        return MDB2_SCHEMA_OK;
+        return MDB2_OK;
     }
 }
 ?>
