@@ -142,10 +142,10 @@ class MDB2_Schema_Writer
      * @return mixed string with xml seqeunce definition on success, or a MDB2 error object
      * @access public
      */
-    function dumpSequence($sequence_definition, $sequence_name, $eol, $dump = MDB2_MANAGER_DUMP_ALL)
+    function dumpSequence($sequence_definition, $sequence_name, $eol, $dump = MDB2_SCHEMA_DUMP_ALL)
     {
         $buffer = "$eol <sequence>$eol  <name>$sequence_name</name>$eol";
-        if ($dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_CONTENT) {
+        if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT) {
             if (isset($sequence_definition['start'])) {
                 $start = $sequence_definition['start'];
                 $buffer .= "  <start>$start</start>$eol";
@@ -187,13 +187,13 @@ class MDB2_Schema_Writer
      *                         default: "\n"
      *                 );
      * @param integer $dump constant that determines what data to dump
-     *                      MDB2_MANAGER_DUMP_ALL       : the entire db
-     *                      MDB2_MANAGER_DUMP_STRUCTURE : only the structure of the db
-     *                      MDB2_MANAGER_DUMP_CONTENT   : only the content of the db
+     *                      MDB2_SCHEMA_DUMP_ALL       : the entire db
+     *                      MDB2_SCHEMA_DUMP_STRUCTURE : only the structure of the db
+     *                      MDB2_SCHEMA_DUMP_CONTENT   : only the content of the db
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function dumpDatabase($database_definition, $arguments, $dump = MDB2_MANAGER_DUMP_ALL)
+    function dumpDatabase($database_definition, $arguments, $dump = MDB2_SCHEMA_DUMP_ALL)
     {
         if (isset($arguments['definition']) && $arguments['definition']) {
             $database_definition = $arguments['definition'];
@@ -205,11 +205,11 @@ class MDB2_Schema_Writer
             } elseif (function_exists($arguments['output'])) {
                 $output = $arguments['output'];
             } else {
-                return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'no valid output function specified');
             }
         } else {
-            return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+            return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'no output method specified');
         }
         if (isset($arguments['end_of_line'])) {
@@ -245,12 +245,12 @@ class MDB2_Schema_Writer
         if (isset($database_definition['tables']) && is_array($database_definition['tables'])) {
             foreach ($database_definition['tables'] as $table_name => $table) {
                 $buffer = ("$eol <table>$eol$eol  <name>$table_name</name>$eol");
-                if ($dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_STRUCTURE) {
+                if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_STRUCTURE) {
                     $buffer .= ("$eol  <declaration>$eol");
                     if (isset($table['fields']) && is_array($table['fields'])) {
                         foreach ($table['fields'] as $field_name => $field) {
                             if (!isset($field['type'])) {
-                                return $this->raiseError(MDB2_ERROR_MANAGER, null, null,
+                                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                                     'it was not specified the type of the field "'.
                                     $field_name.'" of the table "'.$table_name);
                             }
@@ -325,7 +325,7 @@ class MDB2_Schema_Writer
                     fwrite($fp, $buffer);
                 }
                 $buffer = '';
-                if ($dump == MDB2_MANAGER_DUMP_ALL || $dump == MDB2_MANAGER_DUMP_CONTENT) {
+                if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT) {
                     if (isset($table['initialization']) && !empty($table['initialization']) && is_array($table['initialization'])) {
                         $buffer = ("$eol  <initialization>$eol");
                         foreach ($table['initialization'] as $instruction) {
@@ -396,7 +396,7 @@ class MDB2_Schema_Writer
             fclose($fp);
         }
 
-        return MDB2_OK;
+        return MDB2_SCHEMA_OK;
     }
 }
 ?>
