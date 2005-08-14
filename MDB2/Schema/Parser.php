@@ -197,29 +197,31 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!isset($this->table['fields'])) {
                 $this->raiseError('tables need one or more fields', null, $xp);
             } else {
-                foreach ($this->table['fields'] as $field) {
+                foreach ($this->table['fields'] as $field_name => $field) {
                     if (isset($field['autoincrement']) && $field['autoincrement']) {
                         if ($primary) {
                             $this->raiseError('there was already an autoincrement field in "'.$this->table_name.'" before "'.$field_name.'"', null, $xp);
                         } else {
                             $primary = true;
                         }
-                        if(!$this->table['fields'][$field_name]['notnull']) {
+
+                        if (!$this->table['fields'][$field_name]['notnull']) {
                             $this->raiseError('all autoincrement fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
                         }
+
                         if (!isset($this->table['fields'][$field_name]['default'])) {
                             $this->table['fields'][$field_name]['default'] = '0';
-                        } elseif($this->table['fields'][$field_name]['notnull'] !== '0') {
+                        } elseif ($this->table['fields'][$field_name]['default'] !== '0') {
                             $this->raiseError('all autoincrement fields must be defined default "0" in "'.$this->table_name.'"', null, $xp);
                         }
                     }
                 }
             }
             if (isset($this->table['indexes'])) {
-                foreach ($this->table['indexes'] as $index) {
+                foreach ($this->table['indexes'] as $name => $index) {
                     if (isset($index['primary']) && $index['primary']) {
                         if ($primary) {
-                            $this->raiseError('there was already an primary index or autoincrement field in "'.$this->table_name.'" before "'.$index['name'].'"', null, $xp);
+                            $this->raiseError('there was already an primary index or autoincrement field in "'.$this->table_name.'" before "'.$name.'"', null, $xp);
                         } else {
                             $primary = true;
                         }
@@ -505,7 +507,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $error .= " - Byte: $byte; Line: $line; Col: $column";
             }
             $error .= "\n";
-            $this->error =& MDB2::raiseError(MDB2_ERROR_MANAGER_PARSE, null, null, $error);
+            $this->error =& MDB2::raiseError(MDB2_SCHEMA_ERROR_PARSE, null, null, $error);
         }
         return $this->error;
     }
