@@ -81,7 +81,8 @@ class MDB2_Schema_Writer
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        return MDB2::raiseError($code, $mode, $options, $userinfo);
+        $error =& MDB2::raiseError($code, $mode, $options, $userinfo);
+        return $error;
     }
 
     // }}}
@@ -288,7 +289,7 @@ class MDB2_Schema_Writer
                             }
 
                             if (isset($field['autoincrement'])) {
-                                $buffer .= "  <autoincrement>" . $field['autoincrement'] .
+                                $buffer .= "    <autoincrement>" . $field['autoincrement'] .
                                     "</autoincrement>$eol";
                             }
 
