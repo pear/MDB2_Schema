@@ -374,36 +374,18 @@ class MDB2_Schema extends PEAR
                 if (PEAR::isError($definition)) {
                     return $definition;
                 }
-                $table_definition['fields'][$field_name] = $definition[0][0];
-                $field_choices = count($definition[0]);
+                $table_definition['fields'][$field_name] = $definition[0];
+                $field_choices = count($definition);
                 if ($field_choices > 1) {
                     $warning = "There are $field_choices type choices in the table $table_name field $field_name (#1 is the default): ";
                     $field_choice_cnt = 1;
                     $table_definition['fields'][$field_name]['choices'] = array();
-                    foreach ($definition[0] as $field_choice) {
+                    foreach ($definition as $field_choice) {
                         $table_definition['fields'][$field_name]['choices'][] = $field_choice;
                         $warning .= 'choice #'.($field_choice_cnt).': '.serialize($field_choice);
                         $field_choice_cnt++;
                     }
                     $this->warnings[] = $warning;
-                }
-                if (isset($definition[1])) {
-                    $sequence = $definition[1]['definition'];
-                    $sequence_name = $definition[1]['name'];
-                    $this->db->debug('Implicitly defining sequence: '.$sequence_name);
-                    if (!isset($this->database_definition['sequences'])) {
-                        $this->database_definition['sequences'] = array();
-                    }
-                    $this->database_definition['sequences'][$sequence_name] = $sequence;
-                }
-                if (isset($definition[2])) {
-                    $index = $definition[2]['definition'];
-                    $index_name = $definition[2]['name'];
-                    $this->db->debug('Implicitly defining index: '.$index_name);
-                    if (!isset($table_definition['indexes'])) {
-                        $table_definition['indexes'] = array();
-                    }
-                    $table_definition['indexes'][$index_name] = $index;
                 }
             }
             $indexes = $this->db->manager->listTableIndexes($table_name);
@@ -1299,6 +1281,10 @@ class MDB2_Schema extends PEAR
     function alterDatabaseIndexes($table_name, $changes)
     {
         $alterations = 0;
+        if (empty($changes)) {
+            return $alterations;
+        }
+
         if (is_array($changes)) {
             if (isset($changes['changed_indexes'])) {
                 foreach ($changes['changed_indexes'] as $index_name => $index) {
@@ -1358,6 +1344,10 @@ class MDB2_Schema extends PEAR
     function alterDatabaseTables($changes, $current_definition)
     {
         $alterations = 0;
+        if (empty($changes)) {
+            return $alterations;
+        }
+
         if (is_array($changes)) {
             foreach ($changes as $table_name => $table) {
                 $indexes = null;
@@ -1412,6 +1402,10 @@ class MDB2_Schema extends PEAR
     function alterDatabaseSequences($changes, $current_definition)
     {
         $alterations = 0;
+        if (empty($changes)) {
+            return $alterations;
+        }
+
         if (is_array($changes)) {
             foreach ($changes as $sequence_name => $sequence) {
                 if (isset($sequence['add'])) {
@@ -1457,6 +1451,11 @@ class MDB2_Schema extends PEAR
      */
     function alterDatabase($changes, $current_definition = null)
     {
+        $alterations = 0;
+        if (empty($changes)) {
+            return $alterations;
+        }
+
         $current_definition = $current_definition
             ? $current_definition : $this->database_definition;
 
@@ -1470,8 +1469,6 @@ class MDB2_Schema extends PEAR
         ) {
             return $result;
         }
-
-        $alterations = 0;
 
         if (isset($changes['tables']) && isset($current_definition['tables'])) {
             $result = $this->alterDatabaseTables($changes['tables'], $current_definition['tables']);
