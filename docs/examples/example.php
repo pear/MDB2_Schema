@@ -57,6 +57,13 @@
 <html>
 <body>
 <?php
+$databases = array(
+    'mysql'  => 'MySQL',
+    'mysqli' => 'MySQLi',
+    'pgsql'  => 'PostGreSQL',
+    'sqlite' => 'SQLite',
+);
+
 if (isset($_GET['submit']) && $_GET['file'] != '') {
     require_once 'MDB2/Schema.php';
     @include_once 'Var_Dump.php';
@@ -130,9 +137,15 @@ if (!isset($_GET['submit']) || isset($error)) {
     <form action="" method="get">
     Database Type:
     <select name="type">
-        <option value="mysql"<?php if (isset($_GET['type']) && $_GET['type'] == 'mysql') {echo (' selected="selected"');} ?>>MySQL</option>
-        <option value="pgsql"<?php if (isset($_GET['type']) && $_GET['type'] == 'pgsql') {echo (' selected="selected"');} ?>>PostGreSQL</option>
-        <option value="sqlite"<?php if (isset($_GET['type']) && $_GET['type'] == 'sqlite') {echo (' selected="selected"');} ?>>SQLite</option>
+    <?php
+        foreach ($databases as $key => $name) {
+            echo '     <option value="' . $key . '"';
+            if (isset($_GET['type']) && $_GET['type'] == $key) {
+                echo ' selected="selected"';
+            }
+            echo '>' . $name . '</option>' . "\n";
+        }
+        ?>
     </select>
     <br />
     Username:
