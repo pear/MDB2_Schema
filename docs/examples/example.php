@@ -57,44 +57,44 @@
 <html>
 <body>
 <?php
-if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
+if (isset($_GET['submit']) && $_GET['file'] != '') {
     require_once 'MDB2/Schema.php';
     @include_once 'Var_Dump.php';
-    $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
+    $dsn = $_GET['type'].'://'.$_GET['user'].':'.$_GET['pass'].'@'.$_GET['host'].'/'.$_GET['name'];
 
     $manager =& MDB2_Schema::factory($dsn, array('debug' => true, 'log_line_break' => '<br>'));
     if (PEAR::isError($manager)) {
         $error = $manager->getMessage();
     } else {
-        if ($_REQUEST['action']) {
+        if ($_GET['action']) {
             set_time_limit(0);
         }
-        if ($_REQUEST['action'] == 'dump') {
-            switch ($_REQUEST['dump']) {
+        if ($_GET['action'] == 'dump') {
+            switch ($_GET['dump']) {
             case 'structure':
-                $dump_what = MDB2_MANAGER_DUMP_STRUCTURE;
+                $dump_what = MDB2_SCHEMA_DUMP_STRUCTURE;
                 break;
             case 'content':
-                $dump_what = MDB2_MANAGER_DUMP_CONTENT;
+                $dump_what = MDB2_SCHEMA_DUMP_CONTENT;
                 break;
             default:
-                $dump_what = MDB2_MANAGER_DUMP_ALL;
+                $dump_what = MDB2_SCHEMA_DUMP_ALL;
                 break;
             }
             $dump_config = array(
                 'output_mode' => 'file',
-                'output' => $_REQUEST['file']
+                'output' => $_GET['file']
             );
             if (class_exists('Var_Dump')) {
                 Var_Dump::display($manager->dumpDatabase($dump_config, $dump_what));
             } else {
                 var_dump($manager->dumpDatabase($dump_config, $dump_what));
             }
-        } elseif ($_REQUEST['action'] == 'create') {
+        } elseif ($_GET['action'] == 'create') {
             if (class_exists('Var_Dump')) {
-                Var_Dump::display($manager->updateDatabase($_REQUEST['file'], 'old_'.$_REQUEST['file']));
+                Var_Dump::display($manager->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
             } else {
-                var_dump($manager->updateDatabase($_REQUEST['file'], 'old_'.$_REQUEST['file']));
+                var_dump($manager->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
             }
         } else {
             $error = 'no action selected';
@@ -122,40 +122,40 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
     }
 }
 
-if (!isset($_REQUEST['submit']) || isset($error)) {
+if (!isset($_GET['submit']) || isset($error)) {
     if (isset($error) && $error) {
         echo($error.'<br>');
     }
 ?>
-    <form action="<?php echo $_SERVER['SCRIPT_NAME']; ?>" method="GET">
+    <form action="" method="get">
     Database Type:
     <select name="type">
-        <option value="mysql"<?php if (isset($_REQUEST['type']) && $_REQUEST['type'] == 'mysql') {echo (' selected="selected"');} ?>>MySQL</option>
-        <option value="pgsql"<?php if (isset($_REQUEST['type']) && $_REQUEST['type'] == 'pgsql') {echo (' selected="selected"');} ?>>PostGreSQL</option>
-        <option value="sqlite"<?php if (isset($_REQUEST['type']) && $_REQUEST['type'] == 'sqlite') {echo (' selected="selected"');} ?>>SQLite</option>
+        <option value="mysql"<?php if (isset($_GET['type']) && $_GET['type'] == 'mysql') {echo (' selected="selected"');} ?>>MySQL</option>
+        <option value="pgsql"<?php if (isset($_GET['type']) && $_GET['type'] == 'pgsql') {echo (' selected="selected"');} ?>>PostGreSQL</option>
+        <option value="sqlite"<?php if (isset($_GET['type']) && $_GET['type'] == 'sqlite') {echo (' selected="selected"');} ?>>SQLite</option>
     </select>
     <br />
     Username:
-    <input type="text" name="user" value="<?php (isset($_REQUEST['user']) ? $_REQUEST['user'] : '') ?>" />
+    <input type="text" name="user" value="<?php (isset($_GET['user']) ? $_GET['user'] : '') ?>" />
     <br />
     Password:
-    <input type="text" name="pass" value="<?php (isset($_REQUEST['pass']) ? $_REQUEST['pass'] : '') ?>" />
+    <input type="text" name="pass" value="<?php (isset($_GET['pass']) ? $_GET['pass'] : '') ?>" />
     <br />
     Host:
-    <input type="text" name="host" value="<?php (isset($_REQUEST['host']) ? $_REQUEST['host'] : '') ?>" />
+    <input type="text" name="host" value="<?php (isset($_GET['host']) ? $_GET['host'] : '') ?>" />
     <br />
     Databasename:
-    <input type="text" name="name" value="<?php (isset($_REQUEST['name']) ? $_REQUEST['name'] : '') ?>" />
+    <input type="text" name="name" value="<?php (isset($_GET['name']) ? $_GET['name'] : '') ?>" />
     <br />
     Filename:
-    <input type="text" name="file" value="<?php (isset($_REQUEST['file']) ? $_REQUEST['file'] : '') ?>" />
+    <input type="text" name="file" value="<?php (isset($_GET['file']) ? $_GET['file'] : '') ?>" />
     <br />
     Dump:
     <input type="radio" name="action" value="dump" />
     <select name="dump">
-        <option value="all"<?php if (isset($_REQUEST['dump']) && $_REQUEST['dump'] == 'all') {echo (' selected="selected"');} ?>>All</option>
-        <option value="structure"<?php if (isset($_REQUEST['dump']) && $_REQUEST['dump'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
-        <option value="content"<?php if (isset($_REQUEST['dump']) && $_REQUEST['dump'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
+        <option value="all"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'all') {echo (' selected="selected"');} ?>>All</option>
+        <option value="structure"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
+        <option value="content"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
     </select>
     <br />
     Create:
