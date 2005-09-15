@@ -889,7 +889,6 @@ class MDB2_Schema extends PEAR
                 }
                 if (isset($previous_definition[$was_field_name])) {
                     if ($was_field_name != $field_name) {
-
                         $changes['renamed_fields'][$was_field_name] = array(
                             'name' => $field_name,
                         );
@@ -905,7 +904,6 @@ class MDB2_Schema extends PEAR
                         return $change;
                     }
                     if (!empty($change)) {
-
                         $change['definition'] = $field;
                         $changes['changed_fields'][$field_name] = $change;
                     }
@@ -917,7 +915,7 @@ class MDB2_Schema extends PEAR
                             $table_name.'" that does not exist');
                     }
 
-                    $changes['added_fields'][$field_name] = $change;
+                    $changes['added_fields'][$field_name] = $field;
                 }
             }
         }
@@ -1329,11 +1327,6 @@ class MDB2_Schema extends PEAR
 
         if (is_array($changes)) {
             foreach ($changes as $table_name => $table) {
-                $indexes = null;
-                if (isset($table['indexes']) && isset($current_definition[$table_name]['indexes'])) {
-                    $indexes = $table['indexes'];
-                    unset($table['indexes']);
-                }
                 if (isset($table['remove'])) {
                     $result = $this->db->manager->dropTable($table_name);
                     if (PEAR::isError($result)) {
@@ -1347,18 +1340,31 @@ class MDB2_Schema extends PEAR
                     }
                     $alterations++;
                 } elseif(!empty($table)) {
+                    $indexes = null;
+                    if (isset($table['indexes'])) {
+                        $indexes = $table['indexes'];
+                        unset($table['indexes']);
+                    }
+                    if (isset($indexes['removed_indexes']) && isset($current_definition[$table_name]['indexes'])) {
+                        $result = $this->alterDatabaseIndexes($table_name, array('removed_indexes' => $indexes['removed_indexes']));
+                        if (PEAR::isError($result)) {
+                            return $result;
+                        }
+                        unset($indexes['removed_indexes']);
+                        $alterations += $result;
+                    }
                     $result = $this->db->manager->alterTable($table_name, $table, false);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
                     $alterations++;
-                }
-                if ($indexes) {
-                    $result = $this->alterDatabaseIndexes($table_name, $indexes);
-                    if (PEAR::isError($result)) {
-                        return $result;
+                    if (isset($indexes) && !empty($indexes) && isset($current_definition[$table_name]['indexes'])) {
+                        $result = $this->alterDatabaseIndexes($table_name, $indexes);
+                        if (PEAR::isError($result)) {
+                            return $result;
+                        }
+                        $alterations += $result;
                     }
-                    $alterations += $result;
                 }
             }
         }
@@ -1952,7 +1958,8 @@ class MDB2_Schema extends PEAR
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        return PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Schema_Error', true);
+        $err =& PEAR::raiseError(null, $code, $mode, $options, $userinfo, 'MDB2_Schema_Error', true);
+        return $err;
     }
 
     // }}}
