@@ -430,7 +430,7 @@ class MDB2_Schema extends PEAR
 
         $supports_primary_key = $this->db->supports('primary_key');
         foreach ($indexes as $index_name => $index) {
-            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $indexes = $this->db->manager->listTableIndexes($table_name);
             $this->db->popExpect();
@@ -499,7 +499,7 @@ class MDB2_Schema extends PEAR
     function createTable($table_name, $table, $overwrite = false)
     {
         $create = true;
-        $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
+        $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
         $this->db->expectError($errorcodes);
         $tables = $this->db->manager->listTables();
         $this->db->popExpect();
@@ -609,7 +609,7 @@ class MDB2_Schema extends PEAR
             return MDB2_OK;
         }
 
-        $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
+        $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
         $this->db->expectError($errorcodes);
         $sequences = $this->db->manager->listSequences();
         $this->db->popExpect();
@@ -637,7 +637,7 @@ class MDB2_Schema extends PEAR
             $table = $sequence['on']['table'];
             $field = $sequence['on']['field'];
 
-            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $tables = $this->db->manager->listTables();
             $this->db->popExpect();
@@ -696,7 +696,7 @@ class MDB2_Schema extends PEAR
         $create = (isset($this->database_definition['create']) && $this->database_definition['create']);
         $overwrite = (isset($this->database_definition['overwrite']) && $this->database_definition['overwrite']);
         if ($create) {
-            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
             $this->db->popExpect();
@@ -1849,7 +1849,7 @@ class MDB2_Schema extends PEAR
 
         $this->database_definition = $database_definition;
         if ($previous_schema_file && file_exists($previous_schema_file)) {
-            $errorcodes = array(MDB2_SCHEMA_ERROR_UNSUPPORTED, MDB2_SCHEMA_ERROR_NOT_CAPABLE);
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
             $this->db->popExpect();
