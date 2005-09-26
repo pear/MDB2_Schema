@@ -435,7 +435,7 @@ class MDB2_Schema extends PEAR
             $indexes = $this->db->manager->listTableIndexes($table_name);
             $this->db->popExpect();
             if (PEAR::isError($indexes)) {
-                if (!MDB2_Schema::isError($indexes, $errorcodes)) {
+                if (!MDB2::isError($indexes, $errorcodes)) {
                     return $indexes;
                 }
             } elseif (is_array($indexes) && in_array($index_name, $indexes)) {
@@ -504,7 +504,7 @@ class MDB2_Schema extends PEAR
         $tables = $this->db->manager->listTables();
         $this->db->popExpect();
         if (PEAR::isError($tables)) {
-            if (!MDB2_Schema::isError($tables, $errorcodes)) {
+            if (!MDB2::isError($tables, $errorcodes)) {
                 return $tables;
             }
         } elseif (is_array($tables) && in_array($table_name, $tables)) {
@@ -614,7 +614,7 @@ class MDB2_Schema extends PEAR
         $sequences = $this->db->manager->listSequences();
         $this->db->popExpect();
         if (PEAR::isError($sequences)) {
-            if (!MDB2_Schema::isError($sequences, $errorcodes)) {
+            if (!MDB2::isError($sequences, $errorcodes)) {
                 return $sequences;
             }
         } elseif (is_array($sequence) && in_array($sequence_name, $sequences)) {
@@ -641,7 +641,7 @@ class MDB2_Schema extends PEAR
             $this->db->expectError($errorcodes);
             $tables = $this->db->manager->listTables();
             $this->db->popExpect();
-            if (PEAR::isError($tables) && !MDB2_Schema::isError($tables, $errorcodes)) {
+            if (PEAR::isError($tables) && !MDB2::isError($tables, $errorcodes)) {
                  return $tables;
             }
 
@@ -701,7 +701,7 @@ class MDB2_Schema extends PEAR
             $databases = $this->db->manager->listDatabases();
             $this->db->popExpect();
             if (PEAR::isError($databases)) {
-                if (!MDB2_Schema::isError($databases, $errorcodes)) {
+                if (!MDB2::isError($databases, $errorcodes)) {
                     return $databases;
                 }
             } elseif (is_array($databases) && in_array($this->database_definition['name'], $databases)) {
@@ -1854,7 +1854,7 @@ class MDB2_Schema extends PEAR
             $databases = $this->db->manager->listDatabases();
             $this->db->popExpect();
             if (PEAR::isError($databases)) {
-                if (!MDB2_Schema::isError($databases, $errorcodes)) {
+                if (!MDB2::isError($databases, $errorcodes)) {
                     return $databases;
                 }
             } elseif (!is_array($databases) ||
@@ -1917,7 +1917,7 @@ class MDB2_Schema extends PEAR
                 MDB2_SCHEMA_ERROR_PARSE        => 'schema parse error',
                 MDB2_SCHEMA_ERROR_INVALID      => 'invalid',
                 MDB2_SCHEMA_ERROR_UNSUPPORTED  => 'not supported',
-                MDB2_SCHEMA_ERROR_NOT_CAPABLE  => 'MDB2_Schema backend not capable',
+                MDB2_SCHEMA_ERROR_NOT_CAPABLE  => 'not capable',
                 MDB2_SCHEMA_ERROR_NODBSELECTED => 'no database selected',
             );
         }
