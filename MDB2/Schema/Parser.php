@@ -198,7 +198,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('tables need one or more fields', null, $xp);
             } else {
                 foreach ($this->table['fields'] as $field_name => $field) {
-                    if (isset($field['autoincrement']) && $field['autoincrement']) {
+                    if (array_key_exists('autoincrement', $field) && $field['autoincrement']) {
                         if ($primary) {
                             $this->raiseError('there was already an autoincrement field in "'.$this->table_name.'" before "'.$field_name.'"', null, $xp);
                         } else {
@@ -219,7 +219,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             if (isset($this->table['indexes'])) {
                 foreach ($this->table['indexes'] as $name => $index) {
-                    if (isset($index['primary']) && $index['primary']) {
+                    if (array_key_exists('primary', $index) && $index['primary']) {
                         if ($primary) {
                             $this->raiseError('there was already an primary index or autoincrement field in "'.$this->table_name.'" before "'.$name.'"', null, $xp);
                         } else {
@@ -229,7 +229,7 @@ class MDB2_Schema_Parser extends XML_Parser
                     foreach ($index['fields'] as $field_name => $field) {
                         if (!isset($this->table['fields'][$field_name])) {
                             $this->raiseError('index field "'.$field_name.'" does not exist', null, $xp);
-                        } elseif (isset($index['primary']) && $index['primary']) {
+                        } elseif (array_key_exists('primary', $index) && $index['primary']) {
                             if(!$this->table['fields'][$field_name]['notnull']) {
                                 $this->raiseError('all primary key fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
                             }
@@ -391,7 +391,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             if (isset($this->database_definition['sequences'])) {
                 foreach ($this->database_definition['sequences'] as $seq_name => $seq) {
-                    if (isset($seq['on'])
+                    if (array_key_exists('on', $seq)
                         && !isset($this->database_definition['tables'][$seq['on']['table']]['fields'][$seq['on']['field']])
                     ) {
                         $this->raiseError('sequence "'.$seq_name.
@@ -419,7 +419,7 @@ class MDB2_Schema_Parser extends XML_Parser
         switch ($field_def['type']) {
         case 'text':
         case 'clob':
-            if (isset($field_def['length']) && strlen($field_value) > $field_def['length']) {
+            if (array_key_exists('length', $field_def) && strlen($field_value) > $field_def['length']) {
                 return $this->raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }
@@ -432,7 +432,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             */
             $field_value = pack('H*', $field_value);
-            if (isset($field_def['length']) && strlen($field_value) > $field_def['length']) {
+            if (array_key_exists('length', $field_def) && strlen($field_value) > $field_def['length']) {
                 return $this->raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }
@@ -443,7 +443,7 @@ class MDB2_Schema_Parser extends XML_Parser
                     $field_def['type'].'"', null, $xp);
             }
             $field_value = (int) $field_value;
-            if (isset($field_def['unsigned']) && $field_def['unsigned'] && $field_value < 0) {
+            if (array_key_exists('unsigned', $field_def) && $field_def['unsigned'] && $field_value < 0) {
                 return $this->raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }

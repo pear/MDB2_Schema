@@ -146,13 +146,13 @@ class MDB2_Schema_Writer
     {
         $buffer = "$eol <sequence>$eol  <name>$sequence_name</name>$eol";
         if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT) {
-            if (isset($sequence_definition['start'])) {
+            if (array_key_exists('start', $sequence_definition)) {
                 $start = $sequence_definition['start'];
                 $buffer .= "  <start>$start</start>$eol";
             }
         }
 
-        if (isset($sequence_definition['on'])) {
+        if (array_key_exists('on', $sequence_definition)) {
             $buffer .= "  <on>$eol";
             $buffer .= "   <table>".$sequence_definition['on']['table'].
                 "</table>$eol   <field>".$sequence_definition['on']['field'].
@@ -195,11 +195,11 @@ class MDB2_Schema_Writer
      */
     function dumpDatabase($database_definition, $arguments, $dump = MDB2_SCHEMA_DUMP_ALL)
     {
-        if (isset($arguments['definition']) && $arguments['definition']) {
+        if (array_key_exists('definition', $arguments) && $arguments['definition']) {
             $database_definition = $arguments['definition'];
         }
-        if (isset($arguments['output'])) {
-            if (isset($arguments['output_mode']) && $arguments['output_mode'] == 'file') {
+        if (array_key_exists('output', $arguments)) {
+            if (array_key_exists('output_mode', $arguments) && $arguments['output_mode'] == 'file') {
                 $fp = fopen($arguments['output'], 'w');
                 $output = false;
             } elseif (function_exists($arguments['output'])) {
@@ -212,18 +212,18 @@ class MDB2_Schema_Writer
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'no output method specified');
         }
-        if (isset($arguments['end_of_line'])) {
+        if (array_key_exists('end_of_line', $arguments)) {
             $eol = $arguments['end_of_line'];
         } else {
             $eol = "\n";
         }
 
         $sequences = array();
-        if (isset($database_definition['sequences'])
+        if (array_key_exists('sequences', $database_definition)
             && is_array($database_definition['sequences'])
         ) {
             foreach ($database_definition['sequences'] as $sequence_name => $sequence) {
-                if (isset($sequence['on'])) {
+                if (array_key_exists('on', $sequence)) {
                     $table = $sequence['on']['table'];
                 } else {
                     $table = '';
@@ -242,14 +242,14 @@ class MDB2_Schema_Writer
             fwrite($fp, $buffer);
         }
         $buffer = '';
-        if (isset($database_definition['tables']) && is_array($database_definition['tables'])) {
+        if (array_key_exists('tables', $database_definition) && is_array($database_definition['tables'])) {
             foreach ($database_definition['tables'] as $table_name => $table) {
                 $buffer = ("$eol <table>$eol$eol  <name>$table_name</name>$eol");
                 if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_STRUCTURE) {
                     $buffer .= ("$eol  <declaration>$eol");
-                    if (isset($table['fields']) && is_array($table['fields'])) {
+                    if (array_key_exists('fields', $table) && is_array($table['fields'])) {
                         foreach ($table['fields'] as $field_name => $field) {
-                            if (!isset($field['type'])) {
+                            if (!array_key_exists('type', $field)) {
                                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                                     'it was not specified the type of the field "'.
                                     $field_name.'" of the table "'.$table_name);
@@ -258,14 +258,14 @@ class MDB2_Schema_Writer
                                 .$field['type']."</type>$eol");
                             switch ($field['type']) {
                             case 'integer':
-                                if (isset($field['unsigned'])) {
+                                if (array_key_exists('unsigned', $field)) {
                                     $buffer .=("    <unsigned>1</unsigned>$eol");
                                 }
                                 break;
                             case 'text':
                             case 'clob':
                             case 'blob':
-                                if (isset($field['length'])) {
+                                if (array_key_exists('length', $field)) {
                                     $buffer .=('    <length>'.$field['length']."</length>$eol");
                                 }
                                 break;
@@ -280,15 +280,15 @@ class MDB2_Schema_Writer
                                 return $this->raiseError('type "'.$field['type'].
                                     '" is not yet supported');
                             }
-                            if (isset($field['notnull']) && $field['notnull']) {
+                            if (array_key_exists('notnull', $field) && $field['notnull']) {
                                 $buffer .=("    <notnull>true</notnull>$eol");
                             }
-                            if (isset($field['default'])) {
+                            if (array_key_exists('default', $field)) {
                                 $buffer .=('    <default>'.$this->_escapeSpecialChars($field['default'])
                                     ."</default>$eol");
                             }
 
-                            if (isset($field['autoincrement'])) {
+                            if (array_key_exists('autoincrement', $field)) {
                                 $buffer .= "    <autoincrement>" . $field['autoincrement'] .
                                     "</autoincrement>$eol";
                             }
@@ -296,20 +296,20 @@ class MDB2_Schema_Writer
                             $buffer .=("   </field>$eol");
                         }
                     }
-                    if (isset($table['indexes']) && is_array($table['indexes'])) {
+                    if (array_key_exists('indexes', $table) && is_array($table['indexes'])) {
                         foreach ($table['indexes'] as $index_name => $index) {
                             $buffer .=("$eol   <index>$eol    <name>$index_name</name>$eol");
-                            if (isset($index['unique'])) {
+                            if (array_key_exists('unique', $index)) {
                                 $buffer .=("    <unique>true</unique>$eol");
                             }
 
-                            if (isset($index['primary'])) {
+                            if (array_key_exists('primary', $index)) {
                                 $buffer .=("    <primary>true</primary>$eol");
                             }
 
                             foreach ($index['fields'] as $field_name => $field) {
                                 $buffer .=("    <field>$eol     <name>$field_name</name>$eol");
-                                if (is_array($field) && isset($field['sorting'])) {
+                                if (is_array($field) && array_key_exists('sorting', $field)) {
                                     $buffer .=('     <sorting>'.$field['sorting']."</sorting>$eol");
                                 }
                                 $buffer .=("    </field>$eol");
@@ -326,7 +326,7 @@ class MDB2_Schema_Writer
                 }
                 $buffer = '';
                 if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT) {
-                    if (isset($table['initialization']) && !empty($table['initialization']) && is_array($table['initialization'])) {
+                    if (array_key_exists('initialization', $table) && !empty($table['initialization']) && is_array($table['initialization'])) {
                         $buffer = ("$eol  <initialization>$eol");
                         foreach ($table['initialization'] as $instruction) {
                             switch ($instruction['type']) {
