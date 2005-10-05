@@ -81,7 +81,7 @@ class MDB2_Schema_Writer
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        $error =& MDB2::raiseError($code, $mode, $options, $userinfo);
+        $error =& MDB2_Schema::raiseError($code, $mode, $options, $userinfo);
         return $error;
     }
 
@@ -100,6 +100,7 @@ class MDB2_Schema_Writer
         if (!is_string($string)) {
             $string = strval($string);
         }
+
         $escaped = '';
         for ($char = 0, $count = strlen($string); $char < $count; $char++) {
             switch ($string[$char]) {
@@ -198,6 +199,7 @@ class MDB2_Schema_Writer
         if (array_key_exists('definition', $arguments) && $arguments['definition']) {
             $database_definition = $arguments['definition'];
         }
+
         if (array_key_exists('output', $arguments)) {
             if (array_key_exists('output_mode', $arguments) && $arguments['output_mode'] == 'file') {
                 $fp = fopen($arguments['output'], 'w');
@@ -212,6 +214,7 @@ class MDB2_Schema_Writer
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'no output method specified');
         }
+
         if (array_key_exists('end_of_line', $arguments)) {
             $eol = $arguments['end_of_line'];
         } else {
@@ -241,6 +244,7 @@ class MDB2_Schema_Writer
         } else {
             fwrite($fp, $buffer);
         }
+
         $buffer = '';
         if (array_key_exists('tables', $database_definition) && is_array($database_definition['tables'])) {
             foreach ($database_definition['tables'] as $table_name => $table) {
@@ -296,6 +300,7 @@ class MDB2_Schema_Writer
                             $buffer .=("   </field>$eol");
                         }
                     }
+
                     if (array_key_exists('indexes', $table) && is_array($table['indexes'])) {
                         foreach ($table['indexes'] as $index_name => $index) {
                             $buffer .=("$eol   <index>$eol    <name>$index_name</name>$eol");
@@ -319,11 +324,13 @@ class MDB2_Schema_Writer
                     }
                     $buffer .= ("$eol  </declaration>$eol");
                 }
+
                 if ($output) {
                     $output($buffer);
                 } else {
                     fwrite($fp, $buffer);
                 }
+
                 $buffer = '';
                 if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT) {
                     if (array_key_exists('initialization', $table) && !empty($table['initialization']) && is_array($table['initialization'])) {
@@ -349,6 +356,7 @@ class MDB2_Schema_Writer
                 } else {
                     fwrite($fp, $buffer);
                 }
+
                 if (isset($sequences[$table_name])) {
                     foreach ($sequences[$table_name] as $sequence) {
                         $result = $this->dumpSequence(
@@ -360,6 +368,7 @@ class MDB2_Schema_Writer
                         if (PEAR::isError($result)) {
                             return $result;
                         }
+
                         if ($output) {
                             $output($result);
                         } else {
@@ -369,6 +378,7 @@ class MDB2_Schema_Writer
                 }
             }
         }
+
         if (isset($sequences[''])) {
             foreach ($sequences[''] as $sequence) {
                 $result = $this->dumpSequence(
@@ -380,6 +390,7 @@ class MDB2_Schema_Writer
                 if (PEAR::isError($result)) {
                     return $result;
                 }
+
                 if ($output) {
                     $output($result);
                 } else {
