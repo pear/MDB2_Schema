@@ -892,9 +892,7 @@ class MDB2_Schema extends PEAR
                 }
                 if (isset($previous_definition[$was_field_name])) {
                     if ($was_field_name != $field_name) {
-                        $changes['rename'][$was_field_name] = array(
-                            'name' => $field_name,
-                        );
+                        $changes['rename'][$was_field_name] = array('name' => $field_name);
                     }
                     if (isset($defined_fields[$was_field_name])) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
@@ -1867,10 +1865,13 @@ class MDB2_Schema extends PEAR
      * @param array $variables an associative array that is passed to the argument
      * of the same name to the parseDatabaseDefinitionFile function. (there third
      * param)
+     * @param bool $disable_query determines if the disable_query option should
+     * be set to true for the alterDatabase() or createDatabase() call
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function updateDatabase($current_schema_file, $previous_schema_file = false, $variables = array())
+    function updateDatabase($current_schema_file, $previous_schema_file = false
+        , $variables = array(), $disable_query = false)
     {
         $database_definition = $this->parseDatabaseDefinitionFile(
             $current_schema_file,
@@ -1907,7 +1908,9 @@ class MDB2_Schema extends PEAR
                 return $changes;
             }
             if (is_array($changes)) {
+                $this->db->setOption('disable_query', $disable_query);
                 $result = $this->alterDatabase($changes, $previous_definition);
+                $this->db->setOption('disable_query', false);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1920,15 +1923,19 @@ class MDB2_Schema extends PEAR
                 }
             }
         } else {
+            $this->db->setOption('disable_query', $disable_query);
             $result = $this->createDatabase();
+            $this->db->setOption('disable_query', false);
             if (PEAR::isError($result)) {
                 return $result;
             }
         }
+
         if ($previous_schema_file && !copy($current_schema_file, $previous_schema_file)) {
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'Could not copy the new database definition file to the current file');
         }
+
         return MDB2_OK;
     }
 
