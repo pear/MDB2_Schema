@@ -69,9 +69,9 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
     @include_once 'Var_Dump.php';
     $dsn = $_GET['type'].'://'.$_GET['user'].':'.$_GET['pass'].'@'.$_GET['host'].'/'.$_GET['name'];
 
-    $manager =& MDB2_Schema::factory($dsn, array('debug' => true, 'log_line_break' => '<br>'));
-    if (PEAR::isError($manager)) {
-        $error = $manager->getMessage();
+    $schema =& MDB2_Schema::factory($dsn, array('debug' => true, 'log_line_break' => '<br>'));
+    if (PEAR::isError($schema)) {
+        $error = $schema->getMessage();
     } else {
         if ($_GET['action']) {
             set_time_limit(0);
@@ -93,20 +93,20 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
                 'output' => $_GET['file']
             );
             if (class_exists('Var_Dump')) {
-                Var_Dump::display($manager->dumpDatabase($dump_config, $dump_what));
+                Var_Dump::display($schema->dumpDatabase($dump_config, $dump_what));
             } else {
-                var_dump($manager->dumpDatabase($dump_config, $dump_what));
+                var_dump($schema->dumpDatabase($dump_config, $dump_what));
             }
         } elseif ($_GET['action'] == 'create') {
             if (class_exists('Var_Dump')) {
-                Var_Dump::display($manager->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
+                Var_Dump::display($schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
             } else {
-                var_dump($manager->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
+                var_dump($schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
             }
         } else {
             $error = 'no action selected';
         }
-        $warnings = $manager->getWarnings();
+        $warnings = $schema->getWarnings();
         if (count($warnings) > 0) {
             echo('Warnings<br>');
             if (class_exists('Var_Dump')) {
@@ -115,17 +115,17 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
                 var_dump($warnings);
             }
         }
-        if ($manager->db->getOption('debug')) {
+        if ($schema->db->getOption('debug')) {
             echo('Debug messages<br>');
-            echo($manager->db->debugOutput().'<br>');
+            echo($schema->db->debugOutput().'<br>');
         }
         echo('Database structure<br>');
         if (class_exists('Var_Dump')) {
-            Var_Dump::display($manager->database_definition);
+            Var_Dump::display($schema->database_definition);
         } else {
-            var_dump($manager->database_definition);
+            var_dump($schema->database_definition);
         }
-        $manager->disconnect();
+        $schema->disconnect();
     }
 }
 
