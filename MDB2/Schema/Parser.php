@@ -184,7 +184,7 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* Table definition */
         case 'database-table':
-            if (!isset($this->table['was'])) {
+            if (!array_key_exists('was', $this->table)) {
                 $this->table['was'] = $this->table_name;
             }
             if (!$this->table_name) {
@@ -194,7 +194,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('table "'.$this->table_name.'" already exists', null, $xp);
             }
             $primary = false;
-            if (!isset($this->table['fields'])) {
+            if (!array_key_exists('fields', $this->table)) {
                 $this->raiseError('tables need one or more fields', null, $xp);
             } else {
                 foreach ($this->table['fields'] as $field_name => $field) {
@@ -209,15 +209,15 @@ class MDB2_Schema_Parser extends XML_Parser
                             $this->raiseError('all autoincrement fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
                         }
 
-                        if (!isset($this->table['fields'][$field_name]['default'])) {
+                        if (!array_key_exists('default', $field)) {
                             $this->table['fields'][$field_name]['default'] = '0';
-                        } elseif ($this->table['fields'][$field_name]['default'] !== '0') {
+                        } elseif ($field['default'] !== '0') {
                             $this->raiseError('all autoincrement fields must be defined default "0" in "'.$this->table_name.'"', null, $xp);
                         }
                     }
                 }
             }
-            if (isset($this->table['indexes'])) {
+            if (array_key_exists('indexes', $this->table)) {
                 foreach ($this->table['indexes'] as $name => $index) {
                     if (array_key_exists('primary', $index) && $index['primary']) {
                         if ($primary) {
@@ -242,7 +242,7 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* Field declaration */
         case 'database-table-declaration-field':
-            if (!$this->field_name || !isset($this->field['type'])) {
+            if (!$this->field_name || !array_key_exists('type', $this->field)) {
                 $this->raiseError('field "'.$this->field_name.'" was not properly specified', null, $xp);
             }
             if (isset($this->table['fields'][$this->field_name])) {
@@ -255,13 +255,13 @@ class MDB2_Schema_Parser extends XML_Parser
             /* Type check */
             switch ($this->field['type']) {
             case 'integer':
-                if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
+                if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
                     $this->raiseError('unsigned has to be a boolean value', null, $xp);
                 }
             case 'text':
             case 'clob':
             case 'blob':
-                if (isset($this->field['length']) && ((int)$this->field['length']) <= 0) {
+                if (array_key_exists('length', $this->field) && ((int)$this->field['length']) <= 0) {
                     $this->raiseError('length has to be an integer greater 0', null, $xp);
                 }
                 break;
@@ -275,41 +275,45 @@ class MDB2_Schema_Parser extends XML_Parser
             default:
                 $this->raiseError('no valid field type ("'.$this->field['type'].'") specified', null, $xp);
             }
-            if (!isset($this->field['was'])) {
+            if (!array_key_exists('was', $this->field)) {
                 $this->field['was'] = $this->field_name;
             }
-/*
-            if (!isset($this->field['notnull'])) {
-                $this->field['notnull'] = 1;
-                if (!isset($this->field['default'])) {
-                    $this->field['default'] = '';
-                }
+
+            if (!array_key_exists('notnull', $this->field)) {
+                $this->field['notnull'] = true;
             }
-*/
-            if (isset($this->field['notnull']) && !$this->isBoolean($this->field['notnull'])) {
+
+            if (!$this->isBoolean($this->field['notnull'])) {
                 $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
-            if (isset($this->field['notnull']) && $this->field['notnull'] && !isset($this->field['default'])) {
-                $this->raiseError('if field is "notnull", it needs a default value', null, $xp);
+            if (!array_key_exists('default', $this->field)
+                && $this->field['type'] != 'clob' && $this->field['type'] != 'blob'
+            ) {
+                $this->field['default'] = '';
             }
-            if (isset($this->field['unsigned']) && !$this->isBoolean($this->field['unsigned'])) {
+            if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
                 $this->raiseError('field "unsigned" has to be a boolean value', null, $xp);
             }
 
-            $this->table['fields'][$this->field_name] = $this->field;
-
-            if (isset($this->field['default'])) {
+            if (array_key_exists('default', $this->field)) {
                 if ($this->field['type'] == 'clob' || $this->field['type'] == 'blob') {
                     $this->raiseError('"'.$this->field['type'].
                         '"-fields are not allowed to have a default value', null, $xp);
                 }
-                if ($this->field['default'] !== ''
-                    && !$this->validateFieldValue($this->field_name, $this->field['default'], $xp)
-                ) {
-                    $this->raiseError('default value of "'.$this->field_name.'" is of wrong type', null, $xp);
+                if ($this->field['default'] === '') {
+                    if (!$this->field['notnull']) {
+                        $this->field['default'] = null;
+                    }
                 }
             }
 
+            $this->table['fields'][$this->field_name] = $this->field;
+
+            if (array_key_exists('default', $this->field) && !empty($this->field['default'])
+                && !$this->validateFieldValue($this->field_name, $this->field['default'], $xp)
+            ) {
+                $this->raiseError('default value of "'.$this->field_name.'" is of wrong type', null, $xp);
+            }
             break;
 
         /* Index declaration */
@@ -320,14 +324,14 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->table['indexes'][$this->index_name])) {
                 $this->raiseError('index "'.$this->index_name.'" already exists', null, $xp);
             }
-            if (isset($this->index['unique']) && !$this->isBoolean($this->index['unique'])) {
+            if (array_key_exists('unique', $this->index) && !$this->isBoolean($this->index['unique'])) {
                 $this->raiseError('field "unique" has to be a boolean value', null, $xp);
             }
-            if (isset($this->index['primary']) && !$this->isBoolean($this->index['primary'])) {
+            if (array_key_exists('primary', $this->index) && !$this->isBoolean($this->index['primary'])) {
                 $this->raiseError('field "primary" has to be a boolean value', null, $xp);
             }
 
-            if (!isset($this->index['was'])) {
+            if (!array_key_exists('was', $this->index)) {
                 $this->index['was'] = $this->index_name;
             }
             $this->table['indexes'][$this->index_name] = $this->index;
@@ -336,9 +340,11 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!$this->field_name) {
                 $this->raiseError('the index-field-name is required', null, $xp);
             }
-            if (isset($this->field['sorting'])
+            if (array_key_exists('sorting', $this->field)
                 && $this->field['sorting'] !== 'ascending' && $this->field['sorting'] !== 'descending') {
                 $this->raiseError('sorting type unknown', null, $xp);
+            } else {
+                $this->field['sorting'] = 'ascending';
             }
             $this->index['fields'][$this->field_name] = $this->field;
             break;
@@ -357,11 +363,11 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError('sequence "'.$this->seq_name.'" already exists', null, $xp);
             }
 
-            if (!isset($this->seq['was'])) {
+            if (!array_key_exists('was', $this->seq)) {
                 $this->seq['was'] = $this->seq_name;
             }
 
-            if (isset($this->seq['on'])) {
+            if (array_key_exists('on', $this->seq)) {
                 if ((!isset($this->seq['on']['table']) || !$this->seq['on']['table'])
                     || (!isset($this->seq['on']['field']) || !$this->seq['on']['field'])
                 ) {
@@ -413,7 +419,6 @@ class MDB2_Schema_Parser extends XML_Parser
     {
         if (!isset($this->table['fields'][$field_name])) {
             return $this->raiseError('"'.$field_name.'" is not defined', null, $xp);
-
         }
         $field_def = $this->table['fields'][$field_name];
         switch ($field_def['type']) {
@@ -526,13 +531,13 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'n':
         case 'no':
         case 'false':
-            $value = 0;
+            $value = false;
             break;
         case 'Y':
         case 'y':
         case 'yes':
         case 'true':
-            $value = 1;
+            $value = true;
             break;
         default:
             return false;
@@ -597,7 +602,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-table-was':
-            if (isset($this->table['was'])) {
+            if (array_key_exists('was', $this->table)) {
                 $this->table['was'] .= $data;
             } else {
                 $this->table['was'] = $data;
@@ -613,49 +618,49 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-table-declaration-field-type':
-            if (isset($this->field['type'])) {
+            if (array_key_exists('type', $this->field)) {
                 $this->field['type'] .= $data;
             } else {
                 $this->field['type'] = $data;
             }
             break;
         case 'database-table-declaration-field-was':
-            if (isset($this->field['was'])) {
+            if (array_key_exists('was', $this->field)) {
                 $this->field['was'] .= $data;
             } else {
                 $this->field['was'] = $data;
             }
             break;
         case 'database-table-declaration-field-notnull':
-            if (isset($this->field['notnull'])) {
+            if (array_key_exists('notnull', $this->field)) {
                 $this->field['notnull'] .= $data;
             } else {
                 $this->field['notnull'] = $data;
             }
             break;
         case 'database-table-declaration-field-unsigned':
-            if (isset($this->field['unsigned'])) {
+            if (array_key_exists('unsigned', $this->field)) {
                 $this->field['unsigned'] .= $data;
             } else {
                 $this->field['unsigned'] = $data;
             }
             break;
         case 'database-table-declaration-field-autoincrement':
-            if (isset($this->field['autoincrement'])) {
+            if (array_key_exists('autoincrement', $this->field)) {
                 $this->field['autoincrement'] .= $data;
             } else {
                 $this->field['autoincrement'] = $data;
             }
             break;
         case 'database-table-declaration-field-default':
-            if (isset($this->field['default'])) {
+            if (array_key_exists('default', $this->field)) {
                 $this->field['default'] .= $data;
             } else {
                 $this->field['default'] = $data;
             }
             break;
         case 'database-table-declaration-field-length':
-            if (isset($this->field['length'])) {
+            if (array_key_exists('length', $this->field)) {
                 $this->field['length'] .= $data;
             } else {
                 $this->field['length'] = $data;
@@ -671,21 +676,21 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-table-declaration-index-primary':
-            if (isset($this->index['primary'])) {
+            if (array_key_exists('primary', $this->index)) {
                 $this->index['primary'] .= $data;
             } else {
                 $this->index['primary'] = $data;
             }
             break;
         case 'database-table-declaration-index-unique':
-            if (isset($this->index['unique'])) {
+            if (array_key_exists('unique', $this->index)) {
                 $this->index['unique'] .= $data;
             } else {
                 $this->index['unique'] = $data;
             }
             break;
         case 'database-table-declaration-index-was':
-            if (isset($this->index['was'])) {
+            if (array_key_exists('was', $this->index)) {
                 $this->index['was'] .= $data;
             } else {
                 $this->index['was'] = $data;
@@ -699,7 +704,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-table-declaration-index-field-sorting':
-            if (isset($this->field['sorting'])) {
+            if (array_key_exists('sorting', $this->field)) {
                 $this->field['sorting'] .= $data;
             } else {
                 $this->field['sorting'] = $data;
@@ -715,14 +720,14 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-sequence-was':
-            if (isset($this->seq['was'])) {
+            if (array_key_exists('was', $this->seq)) {
                 $this->seq['was'] .= $data;
             } else {
                 $this->seq['was'] = $data;
             }
             break;
         case 'database-sequence-start':
-            if (isset($this->seq['start'])) {
+            if (array_key_exists('start', $this->seq)) {
                 $this->seq['start'] .= $data;
             } else {
                 $this->seq['start'] = $data;
