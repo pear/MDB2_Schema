@@ -263,7 +263,7 @@ class MDB2_Schema_Writer
                             switch ($field['type']) {
                             case 'integer':
                                 if (array_key_exists('unsigned', $field)) {
-                                    $buffer .=("    <unsigned>1</unsigned>$eol");
+                                    $buffer .=("    <unsigned>true</unsigned>$eol");
                                 }
                                 break;
                             case 'text':
@@ -286,8 +286,12 @@ class MDB2_Schema_Writer
                             }
                             if (array_key_exists('notnull', $field) && $field['notnull']) {
                                 $buffer .=("    <notnull>true</notnull>$eol");
+                            } else {
+                                $buffer .=("    <notnull>false</notnull>$eol");
                             }
-                            if (array_key_exists('default', $field)) {
+                            if (array_key_exists('default', $field)
+                                && $field['type'] != 'clob' && $field['type'] != 'blob'
+                            ) {
                                 $buffer .=('    <default>'.$this->_escapeSpecialChars($field['default'])
                                     ."</default>$eol");
                             }
