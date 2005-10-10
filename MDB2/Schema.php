@@ -253,6 +253,7 @@ class MDB2_Schema extends PEAR
         }
         $this->db =& $db;
         $this->db->loadModule('Manager');
+        $this->db->loadModule('Reverse');
         return MDB2_OK;
     }
 
@@ -330,7 +331,6 @@ class MDB2_Schema extends PEAR
      */
     function getDefinitionFromDatabase()
     {
-        $this->db->loadModule('Reverse');
         $database = $this->db->database_name;
         if (empty($database)) {
             return $this->raiseError('it was not specified a valid database name');
@@ -460,7 +460,6 @@ class MDB2_Schema extends PEAR
                 $index['unique'] = true;
                 $fields = $index['fields'];
 
-                $this->db->loadModule('Reverse');
                 $changes = array();
 
                 foreach ($fields as $field => $empty) {
@@ -827,7 +826,7 @@ class MDB2_Schema extends PEAR
             }
             if (array_key_exists('tables', $previous_definition) && is_array($previous_definition['tables'])) {
                 foreach ($previous_definition['tables'] as $table_name => $table) {
-                    if (!isset($defined_tables[$table_name])) {
+                    if (!array_key_exists($table_name, $defined_tables)) {
                         $changes['remove'][$table_name] = true;
                     }
                 }
@@ -855,7 +854,7 @@ class MDB2_Schema extends PEAR
             }
             if (array_key_exists('sequences', $previous_definition) && is_array($previous_definition['sequences'])) {
                 foreach ($previous_definition['sequences'] as $sequence_name => $sequence) {
-                    if (!isset($defined_sequences[$sequence_name])) {
+                    if (!array_key_exists($sequence_name, $defined_sequences)) {
                         $changes['remove'][$sequence_name] = true;
                     }
                 }
@@ -884,17 +883,17 @@ class MDB2_Schema extends PEAR
         if (is_array($current_definition)) {
             foreach ($current_definition as $field_name => $field) {
                 $was_field_name = $field['was'];
-                if (isset($previous_definition[$field_name])
+                if (array_key_exists($field_name, $previous_definition)
                     && isset($previous_definition[$field_name]['was'])
                     && $previous_definition[$field_name]['was'] == $was_field_name
                 ) {
                     $was_field_name = $field_name;
                 }
-                if (isset($previous_definition[$was_field_name])) {
+                if (array_key_exists($was_field_name, $previous_definition)) {
                     if ($was_field_name != $field_name) {
                         $changes['rename'][$was_field_name] = array('name' => $field_name);
                     }
-                    if (isset($defined_fields[$was_field_name])) {
+                    if (array_key_exists($was_field_name, $defined_fields)) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'the field "'.$was_field_name.
                             '" was specified as base of more than one field of table');
@@ -915,14 +914,13 @@ class MDB2_Schema extends PEAR
                             $was_field_name.'") for field "'.$field_name.'" of table "'.
                             $table_name.'" that does not exist');
                     }
-
                     $changes['add'][$field_name] = $field;
                 }
             }
         }
         if (isset($previous_definition) && is_array($previous_definition)) {
             foreach ($previous_definition as $field_previous_name => $field_previous) {
-                if (!isset($defined_fields[$field_previous_name])) {
+                if (!array_key_exists($field_previous_name, $defined_fields)) {
                     $changes['remove'][$field_previous_name] = true;
                 }
             }
@@ -950,18 +948,18 @@ class MDB2_Schema extends PEAR
         if (is_array($current_definition)) {
             foreach ($current_definition as $index_name => $index) {
                 $was_index_name = $index['was'];
-                if (isset($previous_definition[$index_name])
+                if (array_key_exists($index_name, $previous_definition)
                     && isset($previous_definition[$index_name]['was'])
                     && $previous_definition[$index_name]['was'] == $was_index_name
                 ) {
                     $was_index_name = $index_name;
                 }
-                if (isset($previous_definition[$was_index_name])) {
+                if (array_key_exists($was_index_name, $previous_definition)) {
                     $change = array();
                     if ($was_index_name != $index_name) {
                         $change['name'] = $was_index_name;
                     }
-                    if (isset($defined_indexes[$was_index_name])) {
+                    if (array_key_exists($was_index_name, $defined_indexes)) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'the index "'.$was_index_name.'" was specified as base of'.
                             ' more than one index of table "'.$table_name.'"');
@@ -977,7 +975,7 @@ class MDB2_Schema extends PEAR
                     $previous_fields = $previous_definition[$was_index_name]['fields'];
                     if (array_key_exists('fields', $index) && is_array($index['fields'])) {
                         foreach ($index['fields'] as $field_name => $field) {
-                            if (isset($previous_fields[$field_name])) {
+                            if (array_key_exists($field_name, $previous_fields)) {
                                 $defined_fields[$field_name] = true;
                                 $sorting = (array_key_exists('sorting', $field) ? $field['sorting'] : '');
                                 $previous_sorting = (isset($previous_fields[$field_name]['sorting'])
@@ -992,7 +990,7 @@ class MDB2_Schema extends PEAR
                     }
                     if (isset($previous_fields) && is_array($previous_fields)) {
                         foreach ($previous_fields as $field_name => $field) {
-                            if (!isset($defined_fields[$field_name])) {
+                            if (!array_key_exists($field_name, $defined_fields)) {
                                 $change['change'] = true;
                             }
                         }
@@ -1011,7 +1009,7 @@ class MDB2_Schema extends PEAR
             }
         }
         foreach ($previous_definition as $index_previous_name => $index_previous) {
-            if (!isset($defined_indexes[$index_previous_name])) {
+            if (!array_key_exists($index_previous_name, $defined_indexes)) {
                 $changes['remove'][$index_previous_name] = true;
             }
         }
@@ -1040,12 +1038,12 @@ class MDB2_Schema extends PEAR
             if (array_key_exists('was', $current_definition)) {
                 $was_table_name = $current_definition['was'];
             }
-            if (isset($previous_definition[$was_table_name])) {
+            if (array_key_exists($was_table_name, $previous_definition)) {
                 $changes['change'][$was_table_name] = array();
                 if ($was_table_name != $table_name) {
                     $changes['change'][$was_table_name]+= array('name' => $table_name);
                 }
-                if (isset($defined_tables[$was_table_name])) {
+                if (array_key_exists($was_table_name, $defined_tables)) {
                     return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'the table "'.$was_table_name.
                         '" was specified as base of more than of table of the database');
@@ -1100,17 +1098,16 @@ class MDB2_Schema extends PEAR
                 if (empty($changes['change'][$was_table_name])) {
                     unset($changes['change'][$was_table_name]);
                 }
+                if (empty($changes['change'])) {
+                    unset($changes['change']);
+                }
             } else {
                 if ($table_name != $was_table_name) {
                     return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
-                        'it was specified a previous table name ("'.
-                        $was_table_name.'") for table "'.$table_name.
-                        '" that does not exist');
+                        'it was specified a previous table name ("'.$was_table_name.
+                        '") for table "'.$table_name.'" that does not exist');
                 }
                 $changes['add'][$table_name] = true;
-            }
-            if (empty($changes['change'])) {
-                unset($changes['change']);
             }
         }
 
@@ -1135,7 +1132,7 @@ class MDB2_Schema extends PEAR
 
         if (is_array($current_definition)) {
             $was_sequence_name = $sequence_name;
-            if (isset($previous_definition[$sequence_name])
+            if (array_key_exists($sequence_name, $previous_definition)
                 && isset($previous_definition[$sequence_name]['was'])
                 && $previous_definition[$sequence_name]['was'] == $was_sequence_name
             ) {
@@ -1143,11 +1140,11 @@ class MDB2_Schema extends PEAR
             } elseif (array_key_exists('was', $current_definition)) {
                 $was_sequence_name = $current_definition['was'];
             }
-            if (isset($previous_definition[$was_sequence_name])) {
+            if (array_key_exists($was_sequence_name, $previous_definition)) {
                 if ($was_sequence_name != $sequence_name) {
                     $changes['change'][$was_sequence_name]['name'] = $sequence_name;
                 }
-                if (isset($defined_sequences[$was_sequence_name])) {
+                if (array_key_exists($was_sequence_name, $defined_sequences)) {
                     return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'the sequence "'.$was_sequence_name.'" was specified as base'.
                         ' of more than of sequence of the database');
@@ -1571,27 +1568,28 @@ class MDB2_Schema extends PEAR
                             if (array_key_exists('type', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' type to '".
-                                        $field['type']."'");
+                                        $field['definition']['type']."'");
                             }
                             if (array_key_exists('unsigned', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' type to '".
-                                    ($field['unsigned'] ? '' : 'not ')."unsigned'");
+                                    (array_key_exists('unsigned', $field['definition']) && $field['definition']['unsigned'] ? '' : 'not ')."unsigned'");
                             }
                             if (array_key_exists('length', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' length to '".
-                                    ($field['length'] == 0 ? 'no length' : $field['length'])."'");
+                                    ((!array_key_exists('length', $field['definition']) || $field['definition']['length'] == 0)
+                                        ? 'no length' : $field['definition']['length'])."'");
                             }
                             if (array_key_exists('default', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' default to ".
-                                    (array_key_exists('default', $field) ? "'".$field['default']."'" : 'NULL'));
+                                    (array_key_exists('default', $field['definition']) ? "'".$field['definition']['default']."'" : 'NULL'));
                             }
                             if (array_key_exists('notnull', $field)) {
                                 $this->db->debug(
                                    "\tChanged field '$field_name' notnull to ".
-                                    (array_key_exists('notnull', $field) && $field['notnull'] ? 'true' : 'false')
+                                    (array_key_exists('notnull', $field['definition']) && $field['definition']['notnull'] ? 'true' : 'false')
                                 );
                             }
                         }
@@ -1730,7 +1728,7 @@ class MDB2_Schema extends PEAR
                         $initialization = array();
                         foreach ($data as $row) {
                             foreach($row as $key => $lob) {
-                                if (is_numeric($lob) && isset($fields[$key])
+                                if (is_numeric($lob) && array_key_exists($key, $fields)
                                     && ($fields[$key] == 'clob' || $fields[$key] == 'blob')
                                 ) {
                                     $value = '';
