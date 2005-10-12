@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="ISO-8859-1" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.0a11">
+<package version="1.0" packagerversion="1.4.1">
  <name>MDB2_Schema</name>
  <summary>XML based database schema manager</summary>
  <description>PEAR::MDB2_Schema enables users to maintain RDBMS independant schema
@@ -18,33 +18,38 @@ PEAR::MDB and Metabase.
   </maintainer>
   </maintainers>
  <release>
-  <version>0.2.0</version>
-  <date>2005-04-29</date>
+  <version>0.3.0</version>
+  <date>2005-10-10</date>
   <license>BSD License</license>
   <state>beta</state>
-  <notes>- fixed error handling in updateDatabase()
-- use MDB2::raiseError
-- always copy schema file in updateDatabase()
-- cosmetic fixes and tweaks
-- improved overwrite to check via list*() before creating (bug #3857, #4101)
-- updated MDB2 dependency
-- fixed sequence dumping
-- moved schema documentation, xml_reverse_engineering.php, MDB.dtd
-  and MDB.xls from MDB package
-- added optional support for PEAR::XML_DTD based validation of schema files
-- index can be defined on fields that dont explicity prohibit null values
-- dont disable sequence dumping when implicit sequences have been found
-- added code to support dumping of lobs (MDB2 really should move to streams)
-- added writeInitialization() method (untested)
-- is_boolean() =&gt; isBoolean() in parser (CS fix)
-- added MDB2_Schema::factory()
-- Parser: if set grab definition of a table from the strucure property if set
+  <notes>Warning: this is an intermediary release to address php 4.4/5.0.5. Some of the
+new features still need a bit more tweaking.
+
+- use MDB2::factory() by default instead of MDB2::connect()
+- added support for auto increment and primary key in schema.
+- alterTable now needs the full definition to work (use getTableFieldDefinition
+ from Reverse module if you do not have a definition at hand) this eliminates the need
+ of the declaration part in the alterTable array.
+- typo fix (bug #4620)
+- php 4.4.x/5.0.5 fixes
+- updated getTableFieldDefinition() call to accomodate API changes in MDB2
+- MDB2_Schema has its own error class and error codes
+- made it easier to add new database backend to the example
+- better handle removing of indexes on renamed columns in alterDatabaseTables()
+- use array_key_exists() instead of isset() where possible
+- restructured changes array to fix bugs due to inconsistency in the handling of array keys
+- added ability to disable query for the alterDatabase()/createDatabase() call
+  in updateDatabase(). this is useful to generate an RDBMS specific SQL file
+  using a custom debug callback
+- prefer &quot;true&quot; and &quot;false&quot; over &quot;1&quot; and &quot;0&quot;
+- an emty default tag now implies NULL for nullable columns and an empty string
+  for NOT NULL columns
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.2.0" optional="no"/>
    <dep type="pkg" rel="ge" version="1.0b1" optional="no">PEAR</dep>
    <dep type="pkg" rel="has" optional="no">XML_Parser</dep>
-   <dep type="pkg" rel="ge" version="2.0.0beta4" optional="no">MDB2</dep>
+   <dep type="pkg" rel="ge" version="2.0.0beta6" optional="no">MDB2</dep>
    <dep type="pkg" rel="has" optional="yes">XML_DTD</dep>
   </deps>
   <filelist>
@@ -82,6 +87,35 @@ PEAR::MDB and Metabase.
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>0.3.0</version>
+    <date>2005-10-10</date>
+    <license>BSD License</license>
+    <state>beta</state>
+    <notes>Warning: this is an intermediary release to address php 4.4/5.0.5. Some of the
+new features still need a bit more tweaking.
+
+- use MDB2::factory() by default instead of MDB2::connect()
+- added support for auto increment and primary key in schema.
+- alterTable now needs the full definition to work (use getTableFieldDefinition
+ from Reverse module if you do not have a definition at hand) this eliminates the need
+ of the declaration part in the alterTable array.
+- typo fix (bug #4620)
+- php 4.4.x/5.0.5 fixes
+- updated getTableFieldDefinition() call to accomodate API changes in MDB2
+- MDB2_Schema has its own error class and error codes
+- made it easier to add new database backend to the example
+- better handle removing of indexes on renamed columns in alterDatabaseTables()
+- use array_key_exists() instead of isset() where possible
+- restructured changes array to fix bugs due to inconsistency in the handling of array keys
+- added ability to disable query for the alterDatabase()/createDatabase() call
+  in updateDatabase(). this is useful to generate an RDBMS specific SQL file
+  using a custom debug callback
+- prefer &quot;true&quot; and &quot;false&quot; over &quot;1&quot; and &quot;0&quot;
+- an emty default tag now implies NULL for nullable columns and an empty string
+  for NOT NULL columns
+    </notes>
+   </release>
    <release>
     <version>0.2.0</version>
     <date>2005-04-29</date>
