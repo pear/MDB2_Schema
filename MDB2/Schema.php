@@ -374,6 +374,7 @@ class MDB2_Schema extends PEAR
                     $this->warnings[] = $warning;
                 }
             }
+            $index_definitions = array();
             $indexes = $this->db->manager->listTableIndexes($table_name);
             if (PEAR::isError($indexes)) {
                 return $indexes;
@@ -387,8 +388,27 @@ class MDB2_Schema extends PEAR
                     if (PEAR::isError($definition)) {
                         return $definition;
                     }
-                   $table_definition['indexes'][$index_name] = $definition;
+                   $index_definitions[$index_name] = $definition;
                 }
+            }
+            $constraints = $this->db->manager->listTableConstraints($table_name);
+            if (PEAR::isError($constraints)) {
+                return $constraints;
+            }
+            if (is_array($constraints) && !empty($constraints)
+                && !array_key_exists('indexes', $table_definition)
+            ) {
+                $table_definition['indexes'] = array();
+                foreach ($constraints as $index_name) {
+                    $definition = $this->db->reverse->getTableConstraintsDefinition($table_name, $index_name);
+                    if (PEAR::isError($definition)) {
+                        return $definition;
+                    }
+                   $index_definitions[$index_name] = $definition;
+                }
+            }
+            if (!empty($index_definitions)) {
+                $table_definition['indexes'] = $index_definitions;
             }
         }
 
@@ -432,7 +452,11 @@ class MDB2_Schema extends PEAR
         foreach ($indexes as $index_name => $index) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
-            $indexes = $this->db->manager->listTableIndexes($table_name);
+            if (array_key_exists('primary', $index)) {
+                $indexes = $this->db->manager->listTableConstraints($table_name);
+            } else {
+                $indexes = $this->db->manager->listTableIndexes($table_name);
+            }
             $this->db->popExpect();
             if (PEAR::isError($indexes)) {
                 if (!MDB2::isError($indexes, $errorcodes)) {
@@ -443,7 +467,11 @@ class MDB2_Schema extends PEAR
                     $this->db->debug('Index already exists: '.$index_name);
                     return MDB2_OK;
                 }
-                $result = $this->db->manager->dropIndex($table_name, $index_name);
+                if (array_key_exists('primary', $index)) {
+                    $result = $this->db->manager->dropConstraint($table_name, $index_name);
+                } else {
+                    $result = $this->db->manager->dropIndex($table_name, $index_name);
+                }
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -474,7 +502,11 @@ class MDB2_Schema extends PEAR
                 $this->db->manager->alterTable($table_name, $changes, false);
             }
 
-            $result = $this->db->manager->createIndex($table_name, $index_name, $index);
+            if (array_key_exists('primary', $index)) {
+                $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
+            } else {
+                $result = $this->db->manager->createIndex($table_name, $index_name, $index);
+            }
             if (PEAR::isError($result)) {
                 return $result;
             }
@@ -891,7 +923,7 @@ class MDB2_Schema extends PEAR
                 }
                 if (array_key_exists($was_field_name, $previous_definition)) {
                     if ($was_field_name != $field_name) {
-                        $changes['rename'][$was_field_name] = array('name' => $field_name);
+                        $changes['rename'][$was_field_name] = array('name' => $field_name, 'definition' => $field);
                     }
                     if (array_key_exists($was_field_name, $defined_fields)) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
@@ -1270,11 +1302,11 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('change', $changes)) {
             foreach ($changes['change'] as $index_name => $index) {
-                $result = $this->db->manager->createIndex(
-                    $table_name,
-                    $index_name,
-                    $index
-                );
+                if (array_key_exists('primary', $index)) {
+                    $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
+                } else {
+                    $result = $this->db->manager->createIndex($table_name, $index_name, $index);
+                }
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1283,11 +1315,11 @@ class MDB2_Schema extends PEAR
         }
         if (array_key_exists('add', $changes)) {
             foreach ($changes['add'] as $index_name => $index) {
-                $result = $this->db->manager->createIndex(
-                    $table_name,
-                    $index_name,
-                    $index
-                );
+                if (array_key_exists('primary', $index)) {
+                    $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
+                } else {
+                    $result = $this->db->manager->createIndex($table_name, $index_name, $index);
+                }
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1296,10 +1328,11 @@ class MDB2_Schema extends PEAR
         }
         if (array_key_exists('remove', $changes)) {
             foreach ($changes['remove'] as $index_name => $index) {
-                $result = $this->db->manager->dropIndex(
-                    $table_name,
-                    $index_name
-                );
+                if (array_key_exists('primary', $index)) {
+                    $result = $this->db->manager->dropConstraint($table_name, $index_name);
+                } else {
+                    $result = $this->db->manager->dropIndex($table_name, $index_name);
+                }
                 if (PEAR::isError($result)) {
                     return $result;
                 }
