@@ -187,13 +187,16 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!array_key_exists('was', $this->table)) {
                 $this->table['was'] = $this->table_name;
             }
+
             if (!$this->table_name) {
                 $this->raiseError('tables need names', null, $xp);
             }
+
             if (isset($this->database_definition['tables'][$this->table_name])) {
                 $this->raiseError('table "'.$this->table_name.'" already exists', null, $xp);
             }
-            $primary = false;
+
+            $autoinc = $primary = false;
             if (!array_key_exists('fields', $this->table)) {
                 $this->raiseError('tables need one or more fields', null, $xp);
             } else {
@@ -202,7 +205,7 @@ class MDB2_Schema_Parser extends XML_Parser
                         if ($primary) {
                             $this->raiseError('there was already an autoincrement field in "'.$this->table_name.'" before "'.$field_name.'"', null, $xp);
                         } else {
-                            $primary = true;
+                            $autoinc = $primary = true;
                         }
 
                         if (!$this->table['fields'][$field_name]['notnull']) {
@@ -219,19 +222,32 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             if (array_key_exists('indexes', $this->table)) {
                 foreach ($this->table['indexes'] as $name => $index) {
+                    $skip_index = false;
                     if (array_key_exists('primary', $index) && $index['primary']) {
-                        if ($primary) {
-                            $this->raiseError('there was already an primary index or autoincrement field in "'.$this->table_name.'" before "'.$name.'"', null, $xp);
+                        /*
+                         * Lets see if we should skip this index since there is
+                         * already a auto increment on this field this implying
+                         * a primary key index.
+                         */
+                        if ($autoinc && count($index['fields']) == '1') {
+                            $skip_index = true;
                         } else {
-                            $primary = true;
+                            if ($primary) {
+                                $this->raiseError('there was already an primary index or autoincrement field in "'.$this->table_name.'" before "'.$name.'"', null, $xp);
+                            } else {
+                                $primary = true;
+                            }
                         }
                     }
-                    foreach ($index['fields'] as $field_name => $field) {
-                        if (!isset($this->table['fields'][$field_name])) {
-                            $this->raiseError('index field "'.$field_name.'" does not exist', null, $xp);
-                        } elseif (array_key_exists('primary', $index) && $index['primary']) {
-                            if(!$this->table['fields'][$field_name]['notnull']) {
-                                $this->raiseError('all primary key fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
+
+                    if (!$skip_index) {
+                        foreach ($index['fields'] as $field_name => $field) {
+                            if (!isset($this->table['fields'][$field_name])) {
+                                $this->raiseError('index field "'.$field_name.'" does not exist', null, $xp);
+                            } elseif (array_key_exists('primary', $index) && $index['primary']) {
+                                if (!$this->table['fields'][$field_name]['notnull']) {
+                                    $this->raiseError('all primary key fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
+                                }
                             }
                         }
                     }
