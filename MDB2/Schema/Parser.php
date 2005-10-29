@@ -728,6 +728,14 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->field['sorting'] = $data;
             }
             break;
+        /* Add by Leoncx */
+        case 'database-table-declaration-index-field-length':
+            if (array_key_exists('length', $this->field)) {
+                $this->field['length'] .= $data;
+            } else {
+                $this->field['length'] = $data;
+            }
+            break;
 
         /* Sequence declaration */
         case 'database-sequence-name':
