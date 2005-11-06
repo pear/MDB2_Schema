@@ -603,7 +603,7 @@ class MDB2_Schema extends PEAR
         $fields = implode(',', array_keys($table['fields']));
         $placeholders = implode(',', $placeholders);
         $query = "INSERT INTO $table_name ($fields) VALUES ($placeholders)";
-        $stmt = $this->db->prepare($query, $types);
+        $stmt = $this->db->prepare($query, $types, null, true);
         if (PEAR::isError($stmt)) {
             return $stmt;
         }
