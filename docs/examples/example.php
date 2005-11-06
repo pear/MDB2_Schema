@@ -57,6 +57,13 @@
 <html>
 <body>
 <?php
+@include_once 'Var_Dump.php';
+if (class_exists('Var_Dump')) {
+    $var_dump = array('Var_Dump', 'display');
+} else {
+    $var_dump = 'var_dump';
+}
+
 $databases = array(
     'mysql'  => 'MySQL',
     'mysqli' => 'MySQLi',
@@ -66,12 +73,11 @@ $databases = array(
 
 if (isset($_GET['submit']) && $_GET['file'] != '') {
     require_once 'MDB2/Schema.php';
-    @include_once 'Var_Dump.php';
     $dsn = $_GET['type'].'://'.$_GET['user'].':'.$_GET['pass'].'@'.$_GET['host'].'/'.$_GET['name'];
 
     $schema =& MDB2_Schema::factory($dsn, array('debug' => true, 'log_line_break' => '<br>'));
     if (PEAR::isError($schema)) {
-        $error = $schema->getMessage();
+        $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
     } else {
         if ($_GET['action']) {
             set_time_limit(0);
@@ -92,16 +98,15 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
                 'output_mode' => 'file',
                 'output' => $_GET['file']
             );
-            if (class_exists('Var_Dump')) {
-                Var_Dump::display($schema->dumpDatabase($dump_config, $dump_what));
-            } else {
-                var_dump($schema->dumpDatabase($dump_config, $dump_what));
-            }
+            $operation = $schema->dumpDatabase($dump_config, $dump_what);
+            call_user_func($var_dump, $operation);
         } elseif ($_GET['action'] == 'create') {
-            if (class_exists('Var_Dump')) {
-                Var_Dump::display($schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
+            $operation = $schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']);
+            if (PEAR::isError($operation)) {
+                echo $operation->getMessage() . ' ' . $operation->getUserInfo();
+                call_user_func($var_dump, $operation);
             } else {
-                var_dump($schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']));
+                call_user_func($var_dump, $operation);
             }
         } else {
             $error = 'no action selected';
@@ -109,22 +114,14 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
         $warnings = $schema->getWarnings();
         if (count($warnings) > 0) {
             echo('Warnings<br>');
-            if (class_exists('Var_Dump')) {
-                Var_Dump::display($warnings);
-            } else {
-                var_dump($warnings);
-            }
+            call_user_func($var_dump, $operation);
         }
         if ($schema->db->getOption('debug')) {
             echo('Debug messages<br>');
             echo($schema->db->debugOutput().'<br>');
         }
         echo('Database structure<br>');
-        if (class_exists('Var_Dump')) {
-            Var_Dump::display($schema->database_definition);
-        } else {
-            var_dump($schema->database_definition);
-        }
+        call_user_func($var_dump, $operation);
         $schema->disconnect();
     }
 }
