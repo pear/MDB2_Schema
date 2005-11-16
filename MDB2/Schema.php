@@ -1233,11 +1233,10 @@ class MDB2_Schema extends PEAR
      */
     function verifyAlterDatabase($changes)
     {
-        if (array_key_exists('tables', $changes) && is_array($changes['tables'])) {
-            foreach ($changes['tables'] as $table_name => $table) {
-                if (array_key_exists('add', $table) || array_key_exists('remove', $table)) {
-                    continue;
-                }
+        if (array_key_exists('tables', $changes) && is_array($changes['tables'])
+            && array_key_exists('tables', $changes['tables']['change'])
+        ) {
+            foreach ($changes['tables']['change'] as $table_name => $table) {
                 if (array_key_exists('indexes', $table) && is_array($table['indexes'])) {
                     if (!$this->db->supports('indexes')) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
@@ -1282,7 +1281,7 @@ class MDB2_Schema extends PEAR
             }
             if ($sequence_changes) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
-                    'index alteration not yet supported: '.implode(', ', array_keys($changes['sequences'])));
+                    'sequence alteration not yet supported: '.implode(', ', array_keys($changes['sequences'])));
             }
         }
         return MDB2_OK;
@@ -1393,7 +1392,7 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('change', $changes)) {
             foreach ($changes['change'] as $table_name => $table) {
-                $indexes = null;
+                $indexes = array();
                 if (array_key_exists('indexes', $table)) {
                     $indexes = $table['indexes'];
                     unset($table['indexes']);
@@ -1947,6 +1946,7 @@ class MDB2_Schema extends PEAR
             if (PEAR::isError($changes)) {
                 return $changes;
             }
+
             if (is_array($changes)) {
                 $this->db->setOption('disable_query', $disable_query);
                 $result = $this->alterDatabase($changes, $previous_definition);
