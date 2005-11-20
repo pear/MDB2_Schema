@@ -54,7 +54,10 @@
  */
 
 ?>
-<html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+      <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+      <head><title>MDB2_Schema example</title></head>
 <body>
 <?php
 @include_once 'Var_Dump.php';
@@ -79,11 +82,12 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
     if (PEAR::isError($schema)) {
         $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
     } else {
-        if ($_GET['action']) {
+        if (array_key_exists('dump', $_GET) 
+            || array_key_exists('create', $_GET)) {
             set_time_limit(0);
         }
-        if ($_GET['action'] == 'dump') {
-            switch ($_GET['dump']) {
+        if (array_key_exists('dumptype', $_GET)) {
+            switch ($_GET['dumptype']) {
             case 'structure':
                 $dump_what = MDB2_SCHEMA_DUMP_STRUCTURE;
                 break;
@@ -100,7 +104,7 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
             );
             $operation = $schema->dumpDatabase($dump_config, $dump_what);
             call_user_func($var_dump, $operation);
-        } elseif ($_GET['action'] == 'create') {
+        } elseif (array_key_exists('create', $_GET)) {
             $operation = $schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']);
             if (PEAR::isError($operation)) {
                 echo $operation->getMessage() . ' ' . $operation->getUserInfo();
@@ -132,46 +136,63 @@ if (!isset($_GET['submit']) || isset($error)) {
     }
 ?>
     <form action="" method="get">
-    Database Type:
-    <select name="type">
-    <?php
-        foreach ($databases as $key => $name) {
-            echo '     <option value="' . $key . '"';
-            if (isset($_GET['type']) && $_GET['type'] == $key) {
-                echo ' selected="selected"';
+    <fieldset>
+    <legend>Database information</legend>
+
+    <table>
+    <tr>
+    <td><label for="type">Database Type:</label></td>
+        <td>
+        <select name="type" id="type">
+        <?php
+            foreach ($databases as $key => $name) {
+                echo '<option value="' . $key . '"';
+                if (isset($_GET['type']) && $_GET['type'] == $key) {
+                    echo ' selected="selected"';
+                }
+                echo '>' . $name . '</option>' . "\n";
             }
-            echo '>' . $name . '</option>' . "\n";
-        }
-        ?>
-    </select>
-    <br />
-    Username:
-    <input type="text" name="user" value="<?php (isset($_GET['user']) ? $_GET['user'] : '') ?>" />
-    <br />
-    Password:
-    <input type="text" name="pass" value="<?php (isset($_GET['pass']) ? $_GET['pass'] : '') ?>" />
-    <br />
-    Host:
-    <input type="text" name="host" value="<?php (isset($_GET['host']) ? $_GET['host'] : '') ?>" />
-    <br />
-    Databasename:
-    <input type="text" name="name" value="<?php (isset($_GET['name']) ? $_GET['name'] : '') ?>" />
-    <br />
-    Filename:
-    <input type="text" name="file" value="<?php (isset($_GET['file']) ? $_GET['file'] : '') ?>" />
-    <br />
-    Dump:
-    <input type="radio" name="action" value="dump" />
-    <select name="dump">
-        <option value="all"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'all') {echo (' selected="selected"');} ?>>All</option>
-        <option value="structure"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
-        <option value="content"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
-    </select>
-    <br />
-    Create:
-    <input type="radio" name="action" value="create" />
-    <br />
-    <input type="submit" name="submit" value="ok" />
+            ?>
+        </select>
+        </td>
+    </tr>
+    <tr>
+        <td><label for="user">Username:</label></td>
+        <td><input type="text" name="user" id="user" value="<?php (isset($_GET['user']) ? $_GET['user'] : '') ?>" /></td>
+    </tr>
+    <tr>
+        <td><label for="pass">Password:</label></td>
+        <td><input type="text" name="pass" id="pass" value="<?php (isset($_GET['pass']) ? $_GET['pass'] : '') ?>" /></td>
+    </tr>
+    <tr>
+        <td><label for="host">Host:</label></td>
+        <td><input type="text" name="host" id="host" value="<?php (isset($_GET['host']) ? $_GET['host'] : '') ?>" /></td>
+    </tr>
+    <tr>
+        <td><label for="name">Databasename:</label></td>
+        <td><input type="text" name="name" id="name" value="<?php (isset($_GET['name']) ? $_GET['name'] : '') ?>" /></td>
+    </tr>
+    <tr>
+        <td><label for="file">Filename:</label></td>
+        <td><input type="text" name="file" id="file" value="<?php (isset($_GET['file']) ? $_GET['file'] : '') ?>" /></td>
+    </tr>
+    <tr>
+        <td><label for="dump">Dump:</label></td>
+        <td><input type="radio" name="dump" id="dump" value="dump" />
+        <select id="dumptype" name="dumptype">
+            <option value="all"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'all') {echo (' selected="selected"');} ?>>All</option>
+            <option value="structure"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
+            <option value="content"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
+        </select>
+        </td>
+    </tr>
+    <tr>
+        <td><label for="create">Create:</label></td>
+        <td><input type="radio" name="create" id="create" value="create" /></td>
+    </tr>
+    </table>
+    <p><input type="submit" name="submit" value="ok" /></p>
+    </fieldset>
 <?php } ?>
 </form>
 </body>
