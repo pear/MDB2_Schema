@@ -82,8 +82,7 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
     if (PEAR::isError($schema)) {
         $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
     } else {
-        if (array_key_exists('dump', $_GET) 
-            || array_key_exists('create', $_GET)) {
+        if (array_key_exists('action', $_GET)) {
             set_time_limit(0);
         }
         if (array_key_exists('dumptype', $_GET)) {
@@ -104,7 +103,7 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
             );
             $operation = $schema->dumpDatabase($dump_config, $dump_what);
             call_user_func($var_dump, $operation);
-        } elseif (array_key_exists('create', $_GET)) {
+        } elseif (array_key_exists('action', $_GET) && $_GET['action'] == 'create') {
             $operation = $schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']);
             if (PEAR::isError($operation)) {
                 echo $operation->getMessage() . ' ' . $operation->getUserInfo();
@@ -132,10 +131,12 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
 
 if (!isset($_GET['submit']) || isset($error)) {
     if (isset($error) && $error) {
-        echo($error.'<br>');
+        echo '<div id="errors"><ul>';
+        echo '<li>' . $error . '</li>';
+        echo '</ul></div>';
     }
 ?>
-    <form action="" method="get">
+    <form action="<?php echo strip_tags($_SERVER['PHP_SELF']); ?>" method="get">
     <fieldset>
     <legend>Database information</legend>
 
@@ -158,37 +159,37 @@ if (!isset($_GET['submit']) || isset($error)) {
     </tr>
     <tr>
         <td><label for="user">Username:</label></td>
-        <td><input type="text" name="user" id="user" value="<?php (isset($_GET['user']) ? $_GET['user'] : '') ?>" /></td>
+        <td><input type="text" name="user" id="user" value="<?php echo (isset($_GET['user']) ? $_GET['user'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="pass">Password:</label></td>
-        <td><input type="text" name="pass" id="pass" value="<?php (isset($_GET['pass']) ? $_GET['pass'] : '') ?>" /></td>
+        <td><input type="text" name="pass" id="pass" value="<?php echo (isset($_GET['pass']) ? $_GET['pass'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="host">Host:</label></td>
-        <td><input type="text" name="host" id="host" value="<?php (isset($_GET['host']) ? $_GET['host'] : '') ?>" /></td>
+        <td><input type="text" name="host" id="host" value="<?php echo (isset($_GET['host']) ? $_GET['host'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="name">Databasename:</label></td>
-        <td><input type="text" name="name" id="name" value="<?php (isset($_GET['name']) ? $_GET['name'] : '') ?>" /></td>
+        <td><input type="text" name="name" id="name" value="<?php echo (isset($_GET['name']) ? $_GET['name'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="file">Filename:</label></td>
-        <td><input type="text" name="file" id="file" value="<?php (isset($_GET['file']) ? $_GET['file'] : '') ?>" /></td>
+        <td><input type="text" name="file" id="file" value="<?php echo (isset($_GET['file']) ? $_GET['file'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="dump">Dump:</label></td>
-        <td><input type="radio" name="dump" id="dump" value="dump" />
+        <td><input type="radio" name="action" id="dump" value="dump" <?php if (isset($_GET['action']) && $_GET['action'] == 'dump') {echo (' checked="checked"');} ?> />
         <select id="dumptype" name="dumptype">
-            <option value="all"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'all') {echo (' selected="selected"');} ?>>All</option>
-            <option value="structure"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
-            <option value="content"<?php if (isset($_GET['dump']) && $_GET['dump'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
+            <option value="all"<?php if (isset($_GET['dumptype']) && $_GET['dumptype'] == 'all') {echo (' selected="selected"');} ?>>All</option>
+            <option value="structure"<?php if (isset($_GET['dumptype']) && $_GET['dumptype'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
+            <option value="content"<?php if (isset($_GET['dumptype']) && $_GET['dumptype'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
         </select>
         </td>
     </tr>
     <tr>
         <td><label for="create">Create:</label></td>
-        <td><input type="radio" name="create" id="create" value="create" /></td>
+        <td><input type="radio" name="action" id="create" value="create" <?php if (isset($_GET['action']) && $_GET['action'] == 'create') { echo 'checked="checked"';} ?> /></td>
     </tr>
     </table>
     <p><input type="submit" name="submit" value="ok" /></p>
