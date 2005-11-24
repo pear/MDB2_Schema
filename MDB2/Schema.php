@@ -389,7 +389,12 @@ class MDB2_Schema extends PEAR
             ) {
                 $table_definition['indexes'] = array();
                 foreach ($indexes as $index_name) {
+                    $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     $definition = $this->db->reverse->getTableIndexDefinition($table_name, $index_name);
+                    $this->db->popExpect();
+                    if (PEAR::isError($definition, MDB2_ERROR_NOT_FOUND)) {
+                        continue;
+                    }
                     if (PEAR::isError($definition)) {
                         return $definition;
                     }
@@ -405,7 +410,12 @@ class MDB2_Schema extends PEAR
             ) {
                 $table_definition['indexes'] = array();
                 foreach ($constraints as $index_name) {
-                    $definition = $this->db->reverse->getTableConstraintsDefinition($table_name, $index_name);
+                    $this->db->expectError(MDB2_ERROR_NOT_FOUND);
+                    $definition = $this->db->reverse->getTableConstraintDefinition($table_name, $index_name);
+                    $this->db->popExpect();
+                    if (PEAR::isError($definition, MDB2_ERROR_NOT_FOUND)) {
+                        continue;
+                    }
                     if (PEAR::isError($definition)) {
                         return $definition;
                     }
@@ -1234,7 +1244,7 @@ class MDB2_Schema extends PEAR
     function verifyAlterDatabase($changes)
     {
         if (array_key_exists('tables', $changes) && is_array($changes['tables'])
-            && array_key_exists('tables', $changes['tables']['change'])
+            && array_key_exists('change', $changes['tables'])
         ) {
             foreach ($changes['tables']['change'] as $table_name => $table) {
                 if (array_key_exists('indexes', $table) && is_array($table['indexes'])) {
@@ -1445,7 +1455,7 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('add', $changes)) {
             foreach ($changes['add'] as $sequence_name => $sequence) {
-                $result = $this->createSequence($sequence_name, $sequence);
+                $result = $this->createSequence($sequence_name, $current_definition[$sequence_name]);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
