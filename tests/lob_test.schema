@@ -15,13 +15,13 @@
  <table>
   <name>files</name>
   <declaration>
-   <field> <name>ID</name>       <type>integer</type> <default>0</default> <notnull>1</notnull> </field>
+   <field> <name>id</name>       <type>integer</type> <default>0</default> <notnull>1</notnull> </field>
    <field> <name>document</name> <type>clob</type>                                              </field>
    <field> <name>picture</name>  <type>blob</type>                                              </field>
    <index>
     <name>lob_id_index</name>
     <unique>1</unique>
-    <field> <name>ID</name> </field>
+    <field> <name>id</name> </field>
    </index>
   </declaration>
  </table>
