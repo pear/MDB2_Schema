@@ -2,30 +2,21 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.3.0';
+$version = '0.4.0';
 $notes = <<<EOT
-Warning: this is an intermediary release to address php 4.4/5.0.5. Some of the
-new features still need a bit more tweaking.
-
-- use MDB2::factory() by default instead of MDB2::connect()
-- added support for auto increment and primary key in schema.
-- alterTable now needs the full definition to work (use getTableFieldDefinition
- from Reverse module if you do not have a definition at hand) this eliminates the need
- of the declaration part in the alterTable array.
-- typo fix (bug #4620)
-- php 4.4.x/5.0.5 fixes
-- updated getTableFieldDefinition() call to accomodate API changes in MDB2
-- MDB2_Schema has its own error class and error codes
-- made it easier to add new database backend to the example
-- better handle removing of indexes on renamed columns in alterDatabaseTables()
-- use array_key_exists() instead of isset() where possible
-- restructured changes array to fix bugs due to inconsistency in the handling of array keys
-- added ability to disable query for the alterDatabase()/createDatabase() call
-  in updateDatabase(). this is useful to generate an RDBMS specific SQL file
-  using a custom debug callback
-- prefer "true" and "false" over "1" and "0"
-- an emty default tag now implies NULL for nullable columns and an empty string
-  for NOT NULL columns
+- Silence a "error" when there is auto increment and a primary key index defined
+  on the same field, since auto increment implies a primary key
+- support column length in create index (mysql only feature, but a nice touch,
+  emulating it with substring is not feasible though)
+- use exec() for INSERT statement
+- add extra debug info better use of the var_dump package if present in example
+- fixed bug in verifyAlterDatabase() when checking table alterations (bug #5977)
+- fixed typo in getTableConstraintDefinition() method name (removed additional "s") (bug #6054)
+- expect and ignore MDB2_ERROR_NOT_FOUND when calling getTableConstraintDefinition()
+  and getTableIndexDefinition() (bug #6055)
+- fixed typo in verifyAlterDatabase() (bug #6053)
+- fixed typo in alterDatabaseSequences() (bug #6053)
+- added test suite
 EOT;
 
 $description =<<<EOT
