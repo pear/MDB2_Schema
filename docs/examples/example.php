@@ -121,7 +121,7 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
         }
         if ($schema->db->getOption('debug')) {
             echo('Debug messages<br>');
-            echo($schema->db->debugOutput().'<br>');
+            echo($schema->db->getDebugOutput().'<br>');
         }
         echo('Database structure<br>');
         call_user_func($var_dump, $operation);
