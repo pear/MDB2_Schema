@@ -749,12 +749,19 @@ class MDB2_Schema extends PEAR
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
+
+            // Lower / Upper case the db name if the portability deems so.
+            if ($this->db->options['portability'] & MDB2_PORTABILITY_FIX_CASE) {
+                $func = $db->options['field_case'] == CASE_LOWER ? 'strtolower' : 'strtoupper';
+                $db_name = $func($this->database_definition['name']);
+            }
+
             $this->db->popExpect();
             if (PEAR::isError($databases)) {
                 if (!MDB2::isError($databases, $errorcodes)) {
                     return $databases;
                 }
-            } elseif (is_array($databases) && in_array($this->database_definition['name'], $databases)) {
+            } elseif (is_array($databases) && in_array($db_name, $databases)) {
                 if (!$overwrite) {
                     $this->db->debug('Database already exists: ' . $this->database_definition['name']);
                     $create = false;
