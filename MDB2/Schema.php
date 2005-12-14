@@ -681,7 +681,6 @@ class MDB2_Schema extends PEAR
         }
 
         $start = 1;
-        $autoinc = false;
         $field = '';
         if (array_key_exists('on', $sequence)) {
             $table = $sequence['on']['table'];
@@ -716,7 +715,7 @@ class MDB2_Schema extends PEAR
             $table = '';
         }
 
-        $result = $this->db->manager->createSequence($sequence_name, $start, $autoinc);
+        $result = $this->db->manager->createSequence($sequence_name, $start);
         if (PEAR::isError($result)) {
             return $result;
         }
