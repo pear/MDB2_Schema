@@ -468,7 +468,7 @@ class MDB2_Schema extends PEAR
         foreach ($indexes as $index_name => $index) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
-            if (array_key_exists('primary', $index)) {
+            if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
                 $indexes = $this->db->manager->listTableConstraints($table_name);
             } else {
                 $indexes = $this->db->manager->listTableIndexes($table_name);
@@ -483,7 +483,7 @@ class MDB2_Schema extends PEAR
                     $this->db->debug('Index already exists: '.$index_name);
                     return MDB2_OK;
                 }
-                if (array_key_exists('primary', $index)) {
+                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
                     $result = $this->db->manager->dropConstraint($table_name, $index_name);
                 } else {
                     $result = $this->db->manager->dropIndex($table_name, $index_name);
@@ -518,7 +518,7 @@ class MDB2_Schema extends PEAR
                 $this->db->manager->alterTable($table_name, $changes, false);
             }
 
-            if (array_key_exists('primary', $index)) {
+            if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
                 $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
             } else {
                 $result = $this->db->manager->createIndex($table_name, $index_name, $index);
@@ -1325,7 +1325,7 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('change', $changes)) {
             foreach ($changes['change'] as $index_name => $index) {
-                if (array_key_exists('primary', $index)) {
+                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);
@@ -1338,7 +1338,7 @@ class MDB2_Schema extends PEAR
         }
         if (array_key_exists('add', $changes)) {
             foreach ($changes['add'] as $index_name => $index) {
-                if (array_key_exists('primary', $index)) {
+                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);
@@ -1351,7 +1351,7 @@ class MDB2_Schema extends PEAR
         }
         if (array_key_exists('remove', $changes)) {
             foreach ($changes['remove'] as $index_name => $index) {
-                if (array_key_exists('primary', $index)) {
+                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
                     $result = $this->db->manager->dropConstraint($table_name, $index_name);
                 } else {
                     $result = $this->db->manager->dropIndex($table_name, $index_name);
