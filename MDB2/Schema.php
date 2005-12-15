@@ -751,7 +751,7 @@ class MDB2_Schema extends PEAR
 
             // Lower / Upper case the db name if the portability deems so.
             if ($this->db->options['portability'] & MDB2_PORTABILITY_FIX_CASE) {
-                $func = $db->options['field_case'] == CASE_LOWER ? 'strtolower' : 'strtoupper';
+                $func = $this->db->options['field_case'] == CASE_LOWER ? 'strtolower' : 'strtoupper';
                 $db_name = $func($this->database_definition['name']);
             }
 
