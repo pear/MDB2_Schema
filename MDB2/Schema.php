@@ -1913,10 +1913,10 @@ class MDB2_Schema extends PEAR
      * to let this function make a consistent evaluation of the exact changes that
      * need to be applied.
      *
-     * @param string $current_schema_file name of the updated database schema
-     * definition file.
-     * @param string $previous_schema_file name the previously installed database
-     * schema definition file.
+     * @param mixed $current_schema filename or array of the updated database
+     * schema definition.
+     * @param mixed $previous_schema filename or array of the previously installed
+     * database schema definition.
      * @param array $variables an associative array that is passed to the argument
      * of the same name to the parseDatabaseDefinitionFile function. (there third
      * param)
@@ -1925,21 +1925,27 @@ class MDB2_Schema extends PEAR
      * @return mixed MDB2_OK on success, or a MDB2 error object
      * @access public
      */
-    function updateDatabase($current_schema_file, $previous_schema_file = false
+    function updateDatabase($current_schema, $previous_schema = false
         , $variables = array(), $disable_query = false)
     {
-        $database_definition = $this->parseDatabaseDefinitionFile(
-            $current_schema_file,
-            $variables,
-            $this->options['fail_on_invalid_names']
-        );
-
-        if (PEAR::isError($database_definition)) {
-            return $database_definition;
+        if (is_string($current_schema)) {
+            $database_definition = $this->parseDatabaseDefinitionFile(
+                $current_schema,
+                $variables,
+                $this->options['fail_on_invalid_names']
+            );
+            if (PEAR::isError($database_definition)) {
+                return $database_definition;
+            }
+        } elseif (is_array($current_schema)) {
+            $database_definition = $current_schema;
+        } else {
+            return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                    'invalid data type of current_schema');
         }
 
         $this->database_definition = $database_definition;
-        if ($previous_schema_file && file_exists($previous_schema_file)) {
+        if ($previous_schema) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
@@ -1954,10 +1960,20 @@ class MDB2_Schema extends PEAR
                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'database to update does not exist: '.$this->database_definition['name']);
             }
-            $previous_definition = $this->parseDatabaseDefinitionFile($previous_schema_file, $variables, 0);
-            if (PEAR::isError($previous_definition)) {
-                return $previous_definition;
+
+            if (is_string($previous_schema)) {
+                $previous_definition = $this->parseDatabaseDefinitionFile(
+                    $previous_schema, $variables, false);
+                if (PEAR::isError($previous_definition)) {
+                    return $previous_definition;
+                }
+            } elseif (is_array($previous_schema)) {
+                $previous_definition = $previous_schema;
+            } else {
+                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                    'invalid data type of previous_schema');
             }
+
             $changes = $this->compareDefinitions($previous_definition);
             if (PEAR::isError($changes)) {
                 return $changes;
@@ -1987,7 +2003,9 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if ($previous_schema_file && !copy($current_schema_file, $previous_schema_file)) {
+        if (is_string($previous_schema) && is_string($current_schema)
+            && !copy($current_schema, $previous_schema)
+        ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'Could not copy the new database definition file to the current file');
         }
