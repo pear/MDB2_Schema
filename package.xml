@@ -19,7 +19,7 @@ PEAR::MDB and Metabase.
   </maintainers>
  <release>
   <version>0.4.0</version>
-  <date>2005-12-03</date>
+  <date>2005-12-18</date>
   <license>BSD License</license>
   <state>beta</state>
   <notes>- Silence a &quot;error&quot; when there is auto increment and a primary key index defined
@@ -34,12 +34,16 @@ PEAR::MDB and Metabase.
   and getTableIndexDefinition() (bug #6055)
 - fixed typo in verifyAlterDatabase() (bug #6053)
 - fixed typo in alterDatabaseSequences() (bug #6053)
+- added test suite
+- fixed issue in createDatabase() with portability fix case turned
+- ensure that all primary/unique/foreign key handling is only in the contraint methods
+- optionally allow schemas to be passed as an array to updateDatabase() (thx Matthias)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.2.0" optional="no"/>
    <dep type="pkg" rel="ge" version="1.0b1" optional="no">PEAR</dep>
    <dep type="pkg" rel="has" optional="no">XML_Parser</dep>
-   <dep type="pkg" rel="ge" version="2.0.0beta6" optional="no">MDB2</dep>
+   <dep type="pkg" rel="ge" version="2.0.0RC1" optional="no">MDB2</dep>
    <dep type="pkg" rel="has" optional="yes">XML_DTD</dep>
   </deps>
   <filelist>
@@ -117,7 +121,7 @@ PEAR::MDB and Metabase.
  <changelog>
    <release>
     <version>0.4.0</version>
-    <date>2005-12-03</date>
+    <date>2005-12-18</date>
     <license>BSD License</license>
     <state>beta</state>
     <notes>- Silence a &quot;error&quot; when there is auto increment and a primary key index defined
@@ -132,6 +136,10 @@ PEAR::MDB and Metabase.
   and getTableIndexDefinition() (bug #6055)
 - fixed typo in verifyAlterDatabase() (bug #6053)
 - fixed typo in alterDatabaseSequences() (bug #6053)
+- added test suite
+- fixed issue in createDatabase() with portability fix case turned
+- ensure that all primary/unique/foreign key handling is only in the contraint methods
+- optionally allow schemas to be passed as an array to updateDatabase() (thx Matthias)
     </notes>
    </release>
    <release>

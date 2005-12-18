@@ -17,6 +17,9 @@ $notes = <<<EOT
 - fixed typo in verifyAlterDatabase() (bug #6053)
 - fixed typo in alterDatabaseSequences() (bug #6053)
 - added test suite
+- fixed issue in createDatabase() with portability fix case turned
+- ensure that all primary/unique/foreign key handling is only in the contraint methods
+- optionally allow schemas to be passed as an array to updateDatabase() (thx Matthias)
 EOT;
 
 $description =<<<EOT
