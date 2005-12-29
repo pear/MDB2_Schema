@@ -2,24 +2,10 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.4.0';
+$version = '0.4.1';
 $notes = <<<EOT
-- Silence a "error" when there is auto increment and a primary key index defined
-  on the same field, since auto increment implies a primary key
-- support column length in create index (mysql only feature, but a nice touch,
-  emulating it with substring is not feasible though)
-- use exec() for INSERT statement
-- add extra debug info better use of the var_dump package if present in example
-- fixed bug in verifyAlterDatabase() when checking table alterations (bug #5977)
-- fixed typo in getTableConstraintDefinition() method name (removed additional "s") (bug #6054)
-- expect and ignore MDB2_ERROR_NOT_FOUND when calling getTableConstraintDefinition()
-  and getTableIndexDefinition() (bug #6055)
-- fixed typo in verifyAlterDatabase() (bug #6053)
-- fixed typo in alterDatabaseSequences() (bug #6053)
-- added test suite
-- fixed issue in createDatabase() with portability fix case turned
-- ensure that all primary/unique/foreign key handling is only in the contraint methods
-- optionally allow schemas to be passed as an array to updateDatabase() (thx Matthias)
+- fixed bug in updateDatabase() when using a file as the previous schema
+  (bug was introduced in last release)
 EOT;
 
 $description =<<<EOT
