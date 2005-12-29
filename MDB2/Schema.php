@@ -105,7 +105,7 @@ class MDB2_Schema extends PEAR
      */
     function apiVersion()
     {
-        return '@package_version@';
+        return '0.4.0';
     }
 
     // }}}
@@ -1945,7 +1945,26 @@ class MDB2_Schema extends PEAR
         }
 
         $this->database_definition = $database_definition;
+
+        $previous_definition = false;
         if ($previous_schema) {
+            if (is_string($previous_schema)) {
+                if (file_exists($previous_schema)) {
+                    $previous_definition = $this->parseDatabaseDefinitionFile(
+                        $previous_schema, $variables, false);
+                    if (PEAR::isError($previous_definition)) {
+                        return $previous_definition;
+                    }
+                }
+            } elseif (is_array($previous_schema)) {
+                $previous_definition = $previous_schema;
+            } else {
+                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                    'invalid data type of previous_schema');
+            }
+        }
+
+        if ($previous_definition) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
@@ -1959,19 +1978,6 @@ class MDB2_Schema extends PEAR
             ) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'database to update does not exist: '.$this->database_definition['name']);
-            }
-
-            if (is_string($previous_schema)) {
-                $previous_definition = $this->parseDatabaseDefinitionFile(
-                    $previous_schema, $variables, false);
-                if (PEAR::isError($previous_definition)) {
-                    return $previous_definition;
-                }
-            } elseif (is_array($previous_schema)) {
-                $previous_definition = $previous_schema;
-            } else {
-                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'invalid data type of previous_schema');
             }
 
             $changes = $this->compareDefinitions($previous_definition);
