@@ -6,6 +6,7 @@ $version = '0.4.1';
 $notes = <<<EOT
 - fixed bug in updateDatabase() when using a file as the previous schema
   (bug was introduced in last release)
+- fixed install roles for test files
 EOT;
 
 $description =<<<EOT
