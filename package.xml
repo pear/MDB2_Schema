@@ -64,40 +64,40 @@ PEAR::MDB and Metabase.
      </file>
     </dir> <!-- /MDB2 -->
     <dir name="tests">
-     <file role="php" name="clitest.php">
+     <file role="test" name="clitest.php">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="php" name="Console_TestListener.php">
+     <file role="test" name="Console_TestListener.php">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="data" name="driver_test.schema">
+     <file role="test" name="driver_test.schema">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="php" name="HTML_TestListener.php">
+     <file role="test" name="HTML_TestListener.php">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="data" name="lob_test.schema">
+     <file role="test" name="lob_test.schema">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="php" name="MDB2_Schema_testcase.php">
+     <file role="test" name="MDB2_Schema_testcase.php">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="data" name="README">
+     <file role="test" name="README">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="php" name="test.php">
+     <file role="test" name="test.php">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="php" name="testchoose.php">
+     <file role="test" name="testchoose.php">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="data" name="tests.css">
+     <file role="test" name="tests.css">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="php" name="testUtils.php">
+     <file role="test" name="testUtils.php">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
-     <file role="data" name="test_setup.php.dist">
+     <file role="test" name="test_setup.php.dist">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
     </dir> <!-- /tests -->
