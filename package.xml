@@ -18,26 +18,12 @@ PEAR::MDB and Metabase.
   </maintainer>
   </maintainers>
  <release>
-  <version>0.4.0</version>
-  <date>2005-12-21</date>
+  <version>0.4.1</version>
+  <date>2005-12-30</date>
   <license>BSD License</license>
   <state>beta</state>
-  <notes>- Silence a &quot;error&quot; when there is auto increment and a primary key index defined
-  on the same field, since auto increment implies a primary key
-- support column length in create index (mysql only feature, but a nice touch,
-  emulating it with substring is not feasible though)
-- use exec() for INSERT statement
-- add extra debug info better use of the var_dump package if present in example
-- fixed bug in verifyAlterDatabase() when checking table alterations (bug #5977)
-- fixed typo in getTableConstraintDefinition() method name (removed additional &quot;s&quot;) (bug #6054)
-- expect and ignore MDB2_ERROR_NOT_FOUND when calling getTableConstraintDefinition()
-  and getTableIndexDefinition() (bug #6055)
-- fixed typo in verifyAlterDatabase() (bug #6053)
-- fixed typo in alterDatabaseSequences() (bug #6053)
-- added test suite
-- fixed issue in createDatabase() with portability fix case turned
-- ensure that all primary/unique/foreign key handling is only in the contraint methods
-- optionally allow schemas to be passed as an array to updateDatabase() (thx Matthias)
+  <notes>- fixed bug in updateDatabase() when using a file as the previous schema
+  (bug was introduced in last release)
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.2.0" optional="no"/>
@@ -119,6 +105,15 @@ PEAR::MDB and Metabase.
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>0.4.1</version>
+    <date>2005-12-30</date>
+    <license>BSD License</license>
+    <state>beta</state>
+    <notes>- fixed bug in updateDatabase() when using a file as the previous schema
+  (bug was introduced in last release)
+    </notes>
+   </release>
    <release>
     <version>0.4.0</version>
     <date>2005-12-21</date>
