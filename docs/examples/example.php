@@ -60,11 +60,20 @@
       <head><title>MDB2_Schema example</title></head>
 <body>
 <?php
+
 @include_once 'Var_Dump.php';
 if (class_exists('Var_Dump')) {
     $var_dump = array('Var_Dump', 'display');
 } else {
     $var_dump = 'var_dump';
+}
+
+function printQueries(&$db, $scope, $message)
+{
+    if ($scope == 'query') {
+        echo $message.$db->getOption('log_line_break');
+    }
+    MDB2_defaultDebugOutput($db, $scope, $message);
 }
 
 $databases = array(
@@ -74,19 +83,17 @@ $databases = array(
     'sqlite' => 'SQLite',
 );
 
-if (isset($_GET['submit']) && $_GET['file'] != '') {
+if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
     require_once 'MDB2/Schema.php';
-    $dsn = $_GET['type'].'://'.$_GET['user'].':'.$_GET['pass'].'@'.$_GET['host'].'/'.$_GET['name'];
+    $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
 
     $schema =& MDB2_Schema::factory($dsn, array('debug' => true, 'log_line_break' => '<br>'));
     if (PEAR::isError($schema)) {
         $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
-    } else {
-        if (array_key_exists('action', $_GET)) {
-            set_time_limit(0);
-        }
-        if (array_key_exists('dumptype', $_GET)) {
-            switch ($_GET['dumptype']) {
+    } elseif (array_key_exists('action', $_REQUEST)) {
+        set_time_limit(0);
+        if ($_REQUEST['action'] == 'dump' && array_key_exists('dumptype', $_REQUEST)) {
+            switch ($_REQUEST['dumptype']) {
             case 'structure':
                 $dump_what = MDB2_SCHEMA_DUMP_STRUCTURE;
                 break;
@@ -99,12 +106,26 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
             }
             $dump_config = array(
                 'output_mode' => 'file',
-                'output' => $_GET['file']
+                'output' => $_REQUEST['file']
             );
             $operation = $schema->dumpDatabase($dump_config, $dump_what);
             call_user_func($var_dump, $operation);
-        } elseif (array_key_exists('action', $_GET) && $_GET['action'] == 'create') {
-            $operation = $schema->updateDatabase($_GET['file'], 'old_'.$_GET['file']);
+        } elseif ($_REQUEST['action'] == 'create') {
+            $disable_query = false;
+            if (isset($_REQUEST['dumpsql']) && $_REQUEST['dumpsql']) {
+                $debug_tmp = $schema->db->getOption('debug');
+                $schema->db->setOption('debug', true);
+                $debug_handler_tmp = $schema->db->getOption('debug_handler');
+                $schema->db->setOption('debug_handler', 'printQueries');
+                $disable_query = true;
+            }
+            $operation = $schema->updateDatabase($_REQUEST['file']
+                , $_REQUEST['file'].'.old', array(), $disable_query
+            );
+            if (isset($_REQUEST['dumpsql']) && $_REQUEST['dumpsql']) {
+                $schema->db->setOption('debug', $debug_tmp);
+                $schema->db->setOption('debug_handler', $debug_handler_tmp);
+            }
             if (PEAR::isError($operation)) {
                 echo $operation->getMessage() . ' ' . $operation->getUserInfo();
                 call_user_func($var_dump, $operation);
@@ -129,7 +150,7 @@ if (isset($_GET['submit']) && $_GET['file'] != '') {
     }
 }
 
-if (!isset($_GET['submit']) || isset($error)) {
+if (!isset($_REQUEST['submit']) || isset($error)) {
     if (isset($error) && $error) {
         echo '<div id="errors"><ul>';
         echo '<li>' . $error . '</li>';
@@ -148,7 +169,7 @@ if (!isset($_GET['submit']) || isset($error)) {
         <?php
             foreach ($databases as $key => $name) {
                 echo '<option value="' . $key . '"';
-                if (isset($_GET['type']) && $_GET['type'] == $key) {
+                if (isset($_REQUEST['type']) && $_REQUEST['type'] == $key) {
                     echo ' selected="selected"';
                 }
                 echo '>' . $name . '</option>' . "\n";
@@ -159,37 +180,41 @@ if (!isset($_GET['submit']) || isset($error)) {
     </tr>
     <tr>
         <td><label for="user">Username:</label></td>
-        <td><input type="text" name="user" id="user" value="<?php echo (isset($_GET['user']) ? $_GET['user'] : '') ?>" /></td>
+        <td><input type="text" name="user" id="user" value="<?php echo (isset($_REQUEST['user']) ? $_REQUEST['user'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="pass">Password:</label></td>
-        <td><input type="text" name="pass" id="pass" value="<?php echo (isset($_GET['pass']) ? $_GET['pass'] : '') ?>" /></td>
+        <td><input type="text" name="pass" id="pass" value="<?php echo (isset($_REQUEST['pass']) ? $_REQUEST['pass'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="host">Host:</label></td>
-        <td><input type="text" name="host" id="host" value="<?php echo (isset($_GET['host']) ? $_GET['host'] : '') ?>" /></td>
+        <td><input type="text" name="host" id="host" value="<?php echo (isset($_REQUEST['host']) ? $_REQUEST['host'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="name">Databasename:</label></td>
-        <td><input type="text" name="name" id="name" value="<?php echo (isset($_GET['name']) ? $_GET['name'] : '') ?>" /></td>
+        <td><input type="text" name="name" id="name" value="<?php echo (isset($_REQUEST['name']) ? $_REQUEST['name'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="file">Filename:</label></td>
-        <td><input type="text" name="file" id="file" value="<?php echo (isset($_GET['file']) ? $_GET['file'] : '') ?>" /></td>
+        <td><input type="text" name="file" id="file" value="<?php echo (isset($_REQUEST['file']) ? $_REQUEST['file'] : '') ?>" /></td>
     </tr>
     <tr>
         <td><label for="dump">Dump:</label></td>
-        <td><input type="radio" name="action" id="dump" value="dump" <?php if (isset($_GET['action']) && $_GET['action'] == 'dump') {echo (' checked="checked"');} ?> />
+        <td><input type="radio" name="action" id="dump" value="dump" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'dump') {echo (' checked="checked"');} ?> />
         <select id="dumptype" name="dumptype">
-            <option value="all"<?php if (isset($_GET['dumptype']) && $_GET['dumptype'] == 'all') {echo (' selected="selected"');} ?>>All</option>
-            <option value="structure"<?php if (isset($_GET['dumptype']) && $_GET['dumptype'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
-            <option value="content"<?php if (isset($_GET['dumptype']) && $_GET['dumptype'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
+            <option value="all"<?php if (isset($_REQUEST['dumptype']) && $_REQUEST['dumptype'] == 'all') {echo (' selected="selected"');} ?>>All</option>
+            <option value="structure"<?php if (isset($_REQUEST['dumptype']) && $_REQUEST['dumptype'] == 'structure') {echo (' selected="selected"');} ?>>Structure</option>
+            <option value="content"<?php if (isset($_REQUEST['dumptype']) && $_REQUEST['dumptype'] == 'content') {echo (' selected="selected"');} ?>>Content</option>
         </select>
         </td>
     </tr>
     <tr>
         <td><label for="create">Create:</label></td>
-        <td><input type="radio" name="action" id="create" value="create" <?php if (isset($_GET['action']) && $_GET['action'] == 'create') { echo 'checked="checked"';} ?> /></td>
+        <td><input type="radio" name="action" id="create" value="create" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'create') { echo 'checked="checked"';} ?> /></td>
+    </tr>
+    <tr>
+        <td><label for="file">Dump SQL:</label></td>
+        <td><input type="checkbox" name="dumpsql" id="dumpsql" value="1" /></td>
     </tr>
     </table>
     <p><input type="submit" name="submit" value="ok" /></p>
