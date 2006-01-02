@@ -48,6 +48,10 @@
 /**
  * MDB2 reverse engineering of xml schemas script.
  *
+ * This is all rather ugly code, thats probably very much XSS exploitable etc.
+ * However the idea was to keep the magic and dependencies low, to just
+ * illustrate the MDB2_Schema API a bit.
+ *
  * @package MDB2
  * @category Database
  * @author  Lukas Smith <smith@pooteeweet.org>
