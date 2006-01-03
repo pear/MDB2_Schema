@@ -327,7 +327,7 @@ class MDB2_Schema_Parser extends XML_Parser
 
             $this->table['fields'][$this->field_name] = $this->field;
 
-            if (array_key_exists('default', $this->field) && !empty($this->field['default'])
+            if (array_key_exists('default', $this->field) && isset($this->field['default'])
                 && !$this->validateFieldValue($this->field_name, $this->field['default'], $xp)
             ) {
                 $this->raiseError('default value of "'.$this->field_name.'" is of wrong type', null, $xp);
@@ -537,20 +537,25 @@ class MDB2_Schema_Parser extends XML_Parser
 
     function isBoolean(&$value)
     {
-        if (is_int($value) && ($value == 0 || $value == 1)) {
+        if (is_bool($value)) {
             return true;
         }
-        if ($value === '1' || $value === '0') {
-            $value = (int) $value;
+        if ($value === 0 || $value === 1) {
+            $value = (bool)$value;
             return true;
+        }
+        if (!is_string($value)) {
+            return false;
         }
         switch ($value) {
+        case '0':
         case 'N':
         case 'n':
         case 'no':
         case 'false':
             $value = false;
             break;
+        case '1':
         case 'Y':
         case 'y':
         case 'yes':
