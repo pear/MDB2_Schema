@@ -364,6 +364,11 @@ class MDB2_Schema extends PEAR
                     return $definition;
                 }
 
+                if (array_key_exists('autoincrement', $definition[0])
+                    && $definition[0]['autoincrement']
+                ) {
+                    $definition[0]['default'] = 0;
+                }
                 $table_definition['fields'][$field_name] = $definition[0];
                 $field_choices = count($definition);
                 if ($field_choices > 1) {
@@ -419,7 +424,9 @@ class MDB2_Schema extends PEAR
                     if (PEAR::isError($definition)) {
                         return $definition;
                     }
-                   $index_definitions[$index_name] = $definition;
+                    if (!array_key_exists('primary', $definition) || !$definition['primary']) {
+                        $index_definitions[$index_name] = $definition;
+                    }
                 }
             }
             if (!empty($index_definitions)) {
