@@ -1398,7 +1398,8 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('add', $changes)) {
             foreach ($changes['add'] as $table_name => $table) {
-                $result = $this->createTable($table_name, $current_definition[$table_name]);
+                $result = $this->createTable($table_name,
+                    $this->database_definition['tables'][$table_name]);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1461,7 +1462,8 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('add', $changes)) {
             foreach ($changes['add'] as $sequence_name => $sequence) {
-                $result = $this->createSequence($sequence_name, $current_definition[$sequence_name]);
+                $result = $this->createSequence($sequence_name,
+                    $this->database_definition['sequences'][$sequence_name]);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1520,6 +1522,9 @@ class MDB2_Schema extends PEAR
             ? $current_definition : $this->database_definition;
 
         $result = $this->verifyAlterDatabase($changes);
+        if (PEAR::isError($result)) {
+            return $result;
+        }
 
         if (array_key_exists('name', $current_definition)) {
             $previous_database_name = $this->db->setDatabase($current_definition['name']);
@@ -1531,13 +1536,13 @@ class MDB2_Schema extends PEAR
         }
 
         if (array_key_exists('tables', $changes) && array_key_exists('tables', $current_definition)) {
-            $result = $this->alterDatabaseTables($changes['tables'], $current_definition['tables']);
+            $result = $this->alterDatabaseTables($changes, $current_definition['tables']);
             if (is_numeric($result)) {
                 $alterations += $result;
             }
         }
         if (!PEAR::isError($result) && array_key_exists('sequences', $changes) && array_key_exists('sequences', $current_definition)) {
-            $result = $this->alterDatabaseSequences($changes['sequences'], $current_definition['sequences']);
+            $result = $this->alterDatabaseSequences($changes, $current_definition['sequences']);
             if (is_numeric($result)) {
                 $alterations += $result;
             }
@@ -1941,30 +1946,11 @@ class MDB2_Schema extends PEAR
             $database_definition = $current_schema;
         } else {
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'invalid data type of current_schema');
+                'invalid data type of current_schema');
         }
 
         $this->database_definition = $database_definition;
-
-        $previous_definition = false;
         if ($previous_schema) {
-            if (is_string($previous_schema)) {
-                if (file_exists($previous_schema)) {
-                    $previous_definition = $this->parseDatabaseDefinitionFile(
-                        $previous_schema, $variables, false);
-                    if (PEAR::isError($previous_definition)) {
-                        return $previous_definition;
-                    }
-                }
-            } elseif (is_array($previous_schema)) {
-                $previous_definition = $previous_schema;
-            } else {
-                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'invalid data type of previous_schema');
-            }
-        }
-
-        if ($previous_definition) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
             $databases = $this->db->manager->listDatabases();
@@ -1978,6 +1964,19 @@ class MDB2_Schema extends PEAR
             ) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                     'database to update does not exist: '.$this->database_definition['name']);
+            }
+
+            if (is_string($previous_schema)) {
+                $previous_definition = $this->parseDatabaseDefinitionFile(
+                    $previous_schema, $variables, false);
+                if (PEAR::isError($previous_definition)) {
+                    return $previous_definition;
+                }
+            } elseif (is_array($previous_schema)) {
+                $previous_definition = $previous_schema;
+            } else {
+                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                    'invalid data type of previous_schema');
             }
 
             $changes = $this->compareDefinitions($previous_definition);
