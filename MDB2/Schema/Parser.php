@@ -214,7 +214,7 @@ class MDB2_Schema_Parser extends XML_Parser
 
                         if (!array_key_exists('default', $field)) {
                             $this->table['fields'][$field_name]['default'] = '0';
-                        } elseif ($field['default'] !== '0') {
+                        } elseif ($field['default'] !== '0' && $field['default'] !== 0) {
                             $this->raiseError('all autoincrement fields must be defined default "0" in "'.$this->table_name.'"', null, $xp);
                         }
                     }
