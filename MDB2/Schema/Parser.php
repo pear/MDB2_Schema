@@ -325,13 +325,14 @@ class MDB2_Schema_Parser extends XML_Parser
                 }
             }
 
+            $this->table['fields'][$this->field_name] = $this->field;
+
             if (array_key_exists('default', $this->field) && isset($this->field['default'])
-                && !$this->validateFieldValue($this->field_name, $this->field['default'], $xp)
+                && !$this->validateFieldValue($this->field_name,
+                $this->table['fields'][$this->field_name]['default'], $xp)
             ) {
                 $this->raiseError('default value of "'.$this->field_name.'" is of wrong type', null, $xp);
             }
-
-            $this->table['fields'][$this->field_name] = $this->field;
             break;
 
         /* Index declaration */
