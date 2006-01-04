@@ -298,7 +298,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
 
             if (!array_key_exists('notnull', $this->field)) {
-                $this->field['notnull'] = true;
+                $this->field['notnull'] = false;
             }
 
             if (!$this->isBoolean($this->field['notnull'])) {
@@ -329,7 +329,8 @@ class MDB2_Schema_Parser extends XML_Parser
 
             if (array_key_exists('default', $this->field) && isset($this->field['default'])
                 && !$this->validateFieldValue($this->field_name,
-                $this->table['fields'][$this->field_name]['default'], $xp)
+                    $this->table['fields'][$this->field_name]['default'], $xp
+                )
             ) {
                 $this->raiseError('default value of "'.$this->field_name.'" is of wrong type', null, $xp);
             }
