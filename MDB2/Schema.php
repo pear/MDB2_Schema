@@ -407,6 +407,7 @@ class MDB2_Schema extends PEAR
                 }
             }
             $constraints = $this->db->manager->listTableConstraints($table_name);
+
             if (PEAR::isError($constraints)) {
                 return $constraints;
             }
@@ -424,9 +425,7 @@ class MDB2_Schema extends PEAR
                     if (PEAR::isError($definition)) {
                         return $definition;
                     }
-                    if (!array_key_exists('primary', $definition) || !$definition['primary']) {
-                        $index_definitions[$index_name] = $definition;
-                    }
+                    $index_definitions[$index_name] = $definition;
                 }
             }
             if (!empty($index_definitions)) {
