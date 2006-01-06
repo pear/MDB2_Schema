@@ -2,11 +2,14 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.4.1';
+$version = '0.4.2';
 $notes = <<<EOT
-- fixed bug in updateDatabase() when using a file as the previous schema
-  (bug was introduced in last release)
-- fixed install roles for test files
+- added ability to dump sql instead of commiting it to the database in the example
+- fix for bug in handling of boolean default values (bug #6397)
+- default to notnull = false in the schema parser
+- several fixes for database alterations (thx Matthias)
+- default for autoincrement can be '0' or 0 in the parser
+- set default 0 for autoincrement columns when reverse engineering a schema
 EOT;
 
 $description =<<<EOT
@@ -52,8 +55,8 @@ $package->addMaintainer('lsmith', 'lead', 'Lukas Kahwe Smith', 'smith@pooteeweet
 $package->addDependency('php',     '4.2.0', 'ge',  'php', false);
 $package->addDependency('PEAR',    '1.0b1', 'ge',  'pkg', false);
 $package->addDependency('MDB2', '2.0.0RC1', 'ge',  'pkg', false);
-$package->addDependency('XML_Parser',   true, 'has', 'pkg', false);
-$package->addDependency('XML_DTD',      true, 'has', 'pkg', true);
+$package->addDependency('XML_Parser', true, 'has', 'pkg', false);
+$package->addDependency('XML_DTD',    true, 'has', 'pkg', true);
 
 $package->addglobalreplacement('package-info', '@package_version@', 'version');
 
