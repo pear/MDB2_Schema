@@ -10,6 +10,10 @@ $notes = <<<EOT
 - several fixes for database alterations (thx Matthias)
 - default for autoincrement can be '0' or 0 in the parser
 - set default 0 for autoincrement columns when reverse engineering a schema
+- expect MDB2_ERROR_ALREADY_EXISTS when creating a database (bug #6481)
+
+open todo items:
+- better handling for NULL values in the xml schema format
 EOT;
 
 $description =<<<EOT
