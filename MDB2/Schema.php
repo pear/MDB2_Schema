@@ -779,8 +779,10 @@ class MDB2_Schema extends PEAR
                 }
             }
             if ($create) {
+                $this->db->expectError(MDB2_ERROR_ALREADY_EXISTS);
                 $result = $this->db->manager->createDatabase($this->database_definition['name']);
-                if (PEAR::isError($result)) {
+                $this->db->popExpect();
+                if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_ALREADY_EXISTS)) {
                     return $result;
                 }
             }
