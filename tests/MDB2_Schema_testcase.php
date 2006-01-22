@@ -53,7 +53,7 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
     //contains the name of the database we are testing
     var $database;
     //contains the MDB2_Schema object of the db once we have connected
-    var $manager;
+    var $schema;
     //contains the name of the driver_test schema
     var $driver_input_file = 'driver_test.schema';
     //contains the name of the lob_test schema
@@ -77,8 +77,8 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
         if (file_exists($backup_file)) {
             unlink($backup_file);
         }
-        $this->manager =& MDB2_Schema::factory($this->dsn, $this->options);
-        if (PEAR::isError($this->manager)) {
+        $this->schema =& MDB2_Schema::factory($this->dsn, $this->options);
+        if (PEAR::isError($this->schema)) {
             $this->assertTrue(false, 'Could not connect to manager in setUp');
             exit;
         }
@@ -86,10 +86,10 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
 
     function tearDown() {
         unset($this->dsn);
-        if (!PEAR::isError($this->manager)) {
-            $this->manager->disconnect();
+        if (!PEAR::isError($this->schema)) {
+            $this->schema->disconnect();
         }
-        unset($this->manager);
+        unset($this->schema);
     }
 
     function methodExists(&$class, $name) {
@@ -103,25 +103,25 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
     }
 
     function testCreateDatabase() {
-        if (!$this->methodExists($this->manager->db->manager, 'dropDatabase')) {
+        if (!$this->methodExists($this->schema->db->manager, 'dropDatabase')) {
             return;
         }
-        $this->manager->db->expectError('*');
-        $result = $this->manager->db->manager->dropDatabase($this->database);
-        $this->manager->db->popExpect();
+        $this->schema->db->expectError('*');
+        $result = $this->schema->db->manager->dropDatabase($this->database);
+        $this->schema->db->popExpect();
         if (PEAR::isError($result)) {
             $this->assertTrue(false, 'Database dropping failed: please manually delete the database if needed');
         }
-        if (!$this->methodExists($this->manager, 'updateDatabase')) {
+        if (!$this->methodExists($this->schema, 'updateDatabase')) {
             return;
         }
-        $result = $this->manager->updateDatabase(
+        $result = $this->schema->updateDatabase(
             $this->driver_input_file,
             false,
             array('create' =>'1', 'name' => $this->database)
         );
         if (!PEAR::isError($result)) {
-            $result = $this->manager->updateDatabase(
+            $result = $this->schema->updateDatabase(
                 $this->lob_input_file,
                 false,
                 array('create' =>'0', 'name' => $this->database)
@@ -131,14 +131,14 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
     }
 
     function testUpdateDatabase() {
-        if (!$this->methodExists($this->manager, 'updateDatabase')) {
+        if (!$this->methodExists($this->schema, 'updateDatabase')) {
             return;
         }
         $backup_file = $this->driver_input_file.$this->backup_extension;
         if (!file_exists($backup_file)) {
             copy($this->driver_input_file, $backup_file);
         }
-        $result = $this->manager->updateDatabase(
+        $result = $this->schema->updateDatabase(
             $this->driver_input_file,
             $backup_file,
             array('create' =>'0', 'name' =>$this->database)
@@ -148,7 +148,7 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
             if (!file_exists($backup_file)) {
                 copy($this->lob_input_file, $backup_file);
             }
-            $result = $this->manager->updateDatabase(
+            $result = $this->schema->updateDatabase(
                 $this->lob_input_file,
                 $backup_file,
                 array('create' =>'0', 'name' => $this->database)
