@@ -2,15 +2,10 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.4.2';
+$version = '0.4.3';
 $notes = <<<EOT
-- added ability to dump sql instead of commiting it to the database in the example
-- fix for bug in handling of boolean default values (bug #6397)
-- default to notnull = false in the schema parser
-- several fixes for database alterations (thx Matthias)
-- default for autoincrement can be '0' or 0 in the parser
-- set default 0 for autoincrement columns when reverse engineering a schema
-- expect MDB2_ERROR_ALREADY_EXISTS when creating a database (bug #6481)
+- renamed "manager" property to "schema" for clarity in the testsuite
+- fixed logic related to using a non existant previous schema name in updateDatabase()
 
 open todo items:
 - better handling for NULL values in the xml schema format
