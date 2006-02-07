@@ -47,6 +47,10 @@
 
 require_once 'XML/Parser.php';
 
+if (!array_key_exists('_MDB2_Schema_Reserved', $GLOBALS)) {
+    $GLOBALS['_MDB2_Schema_Reserved'] = array();
+}
+
 /**
  * Parses an XML schema file
  *
@@ -75,23 +79,6 @@ class MDB2_Schema_Parser extends XML_Parser
     var $seq = array();
     var $seq_name = '';
     var $error;
-    var $invalid_names = array(
-        'user' => array(),
-        'is' => array(),
-        'file' => array(
-            'oci' => array(),
-            'oracle' => array()
-        ),
-        'notify' => array(
-            'pgsql' => array()
-        ),
-        'restrict' => array(
-            'mysql' => array()
-        ),
-        'password' => array(
-            'ibase' => array()
-        )
-    );
     var $fail_on_invalid_names = true;
     var $structure = false;
 
@@ -99,7 +86,14 @@ class MDB2_Schema_Parser extends XML_Parser
     {
         parent::XML_Parser();
         $this->variables = $variables;
-        $this->fail_on_invalid_names = $fail_on_invalid_names;
+        if (is_array($fail_on_invalid_names)) {
+            $this->fail_on_invalid_names
+                = array_intersect($fail_on_invalid_names, array_keys($GLOBALS['_MDB2_Schema_Reserved']));
+        } elseif ($this->fail_on_invalid_names === true) {
+            $this->fail_on_invalid_names = array_keys($GLOBALS['_MDB2_Schema_Reserved']);
+        } else {
+            $this->fail_on_invalid_names = false;
+        }
         $this->structure = $structure;
     }
 
@@ -184,16 +178,24 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* Table definition */
         case 'database-table':
-            if (!array_key_exists('was', $this->table)) {
-                $this->table['was'] = $this->table_name;
-            }
-
             if (!$this->table_name) {
-                $this->raiseError('tables need names', null, $xp);
+                $this->raiseError('a table has to have a name', null, $xp);
+            } elseif ($this->fail_on_invalid_names) {
+                $name = strtoupper($this->table_name);
+                foreach ($this->fail_on_invalid_names as $rdbms) {
+                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
+                        $this->raiseError('table name "'.$this->table_name.'" is a reserved word in: '.$rdbms, null, $xp);
+                        break;
+                    }
+                }
             }
 
             if (isset($this->database_definition['tables'][$this->table_name])) {
                 $this->raiseError('table "'.$this->table_name.'" already exists', null, $xp);
+            }
+
+            if (!array_key_exists('was', $this->table)) {
+                $this->table['was'] = $this->table_name;
             }
 
             $autoinc = $primary = false;
@@ -266,9 +268,15 @@ class MDB2_Schema_Parser extends XML_Parser
             if (isset($this->table['fields'][$this->field_name])) {
                 $this->raiseError('field "'.$this->field_name.'" already exists', null, $xp);
             }
-            /* Invalidname check */
-            if ($this->fail_on_invalid_names && isset($this->invalid_names[$this->field_name])) {
-                $this->raiseError('fieldname "'.$this->field_name.'" not allowed', null, $xp);
+
+            if ($this->fail_on_invalid_names) {
+                $name = strtoupper($this->field_name);
+                foreach ($this->fail_on_invalid_names as $rdbms) {
+                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
+                        $this->raiseError('field name "'.$this->field_name.'" is a reserved word in: '.$rdbms, null, $xp);
+                        break;
+                    }
+                }
             }
             /* Type check */
             switch ($this->field['type']) {
@@ -339,7 +347,7 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Index declaration */
         case 'database-table-declaration-index':
             if (!$this->index_name) {
-                $this->raiseError('an index needs a name', null, $xp);
+                $this->raiseError('an index has to have a name', null, $xp);
             }
             if (isset($this->table['indexes'][$this->index_name])) {
                 $this->raiseError('index "'.$this->index_name.'" already exists', null, $xp);
@@ -378,7 +386,16 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-sequence':
             if (!$this->seq_name) {
                 $this->raiseError('a sequence has to have a name', null, $xp);
+            } elseif ($this->fail_on_invalid_names) {
+                $name = strtoupper($this->seq_name);
+                foreach ($this->fail_on_invalid_names as $rdbms) {
+                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
+                        $this->raiseError('sequence name "'.$this->seq_name.'" is a reserved word in: '.$rdbms, null, $xp);
+                        break;
+                    }
+                }
             }
+
             if (isset($this->database_definition['sequences'][$this->seq_name])) {
                 $this->raiseError('sequence "'.$this->seq_name.'" already exists', null, $xp);
             }
@@ -400,6 +417,18 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* End of File */
         case 'database':
+            if (!isset($this->database_definition['name']) || !$this->database_definition['name']) {
+                $this->raiseError('a database has to have a name', null, $xp);
+            } elseif ($this->fail_on_invalid_names) {
+                $name = strtoupper($this->database_definition['name']);
+                foreach ($this->fail_on_invalid_names as $rdbms) {
+                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
+                        $this->raiseError('database name "'.$this->database_definition['name'].'" is a reserved word in: '.$rdbms, null, $xp);
+                        break;
+                    }
+                }
+            }
+
             if (isset($this->database_definition['create'])
                 && !$this->isBoolean($this->database_definition['create'])
             ) {
@@ -410,11 +439,7 @@ class MDB2_Schema_Parser extends XML_Parser
             ) {
                 $this->raiseError('field "overwrite" has to be a boolean value', null, $xp);
             }
-            if (!isset($this->database_definition['name'])
-                || !$this->database_definition['name']
-            ) {
-                $this->raiseError('database needs a name', null, $xp);
-            }
+
             if (isset($this->database_definition['sequences'])) {
                 foreach ($this->database_definition['sequences'] as $seq_name => $seq) {
                     if (array_key_exists('on', $seq)
