@@ -44,7 +44,8 @@
 // +----------------------------------------------------------------------+
 //
 // $Id$
-
+// }}}
+// {{{ $GLOBALS['_MDB2_Schema_Reserved']['mysql']
 /**
  * Has a list of reserved words of mysql
  *
@@ -279,3 +280,5 @@ $GLOBALS['_MDB2_Schema_Reserved']['mysql'] = array(
     'YEAR_MONTH',
     'ZEROFILL',
     );
+    // }}}
+?>
