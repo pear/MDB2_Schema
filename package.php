@@ -2,10 +2,9 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.4.3';
+$version = '0.5.0';
 $notes = <<<EOT
-- renamed "manager" property to "schema" for clarity in the testsuite
-- fixed logic related to using a non existant previous schema name in updateDatabase()
+- expanded reserved word handling
 
 open todo items:
 - better handling for NULL values in the xml schema format
