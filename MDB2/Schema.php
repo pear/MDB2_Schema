@@ -1801,8 +1801,8 @@ class MDB2_Schema extends PEAR
                                     && ($fields[$key] == 'clob' || $fields[$key] == 'blob')
                                 ) {
                                     $value = '';
-                                    while (!$this->db->datatype->endOfLOB($lob)) {
-                                        $this->db->datatype->readLOB($lob, $data, 8192);
+                                    while (!$this->db->datatype->_endOfLOB($lob)) {
+                                        $this->db->datatype->_readLOB($lob, $data, 8192);
                                         $value .= $data;
                                     }
                                     $row[$key] = $value;
