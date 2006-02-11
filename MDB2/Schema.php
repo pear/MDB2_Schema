@@ -1795,15 +1795,13 @@ class MDB2_Schema extends PEAR
                     }
                     if (!empty($data)) {
                         $initialization = array();
+                        $lob_buffer_length = $this->db->getOption('lob_buffer_length');
                         foreach ($data as $row) {
                             foreach($row as $key => $lob) {
-                                if (is_numeric($lob) && array_key_exists($key, $fields)
-                                    && ($fields[$key] == 'clob' || $fields[$key] == 'blob')
-                                ) {
+                                if (is_resource($lob)) {
                                     $value = '';
-                                    while (!$this->db->datatype->_endOfLOB($lob)) {
-                                        $this->db->datatype->_readLOB($lob, $data, 8192);
-                                        $value .= $data;
+                                    while (!feof($lob)) {
+                                        $value.= fread($lob, $lob_buffer_length);
                                     }
                                     $row[$key] = $value;
                                 }
