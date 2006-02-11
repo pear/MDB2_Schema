@@ -5,6 +5,7 @@ require_once 'PEAR/PackageFileManager.php';
 $version = '0.5.0';
 $notes = <<<EOT
 - expanded reserved word handling
+- Schema was wrongly calling endOfLOB and readLOB from MDB2 Datatype, it lacked _ in the calls
 
 open todo items:
 - better handling for NULL values in the xml schema format
