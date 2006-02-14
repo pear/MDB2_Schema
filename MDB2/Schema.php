@@ -91,6 +91,7 @@ class MDB2_Schema extends PEAR
     var $database_definition = array(
         'name' => '',
         'create' => false,
+        'overwrite' => false,
         'tables' => array()
     );
 

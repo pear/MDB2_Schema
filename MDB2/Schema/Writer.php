@@ -236,8 +236,9 @@ class MDB2_Schema_Writer
         }
 
         $buffer = ('<?xml version="1.0" encoding="ISO-8859-1" ?>'.$eol);
-        $buffer .= ("<database>$eol$eol <name>".$database_definition['name']."</name>$eol <create>"
-            .$database_definition['create']."</create>$eol");
+        $buffer .= ("<database>$eol$eol <name>".$database_definition['name']."</name>");
+        $buffer .= ("$eol <create>".$database_definition['create']."</create>");
+        $buffer .= ("$eol <overwrite>".$database_definition['overwrite']."</overwrite>$eol");
 
         if ($output) {
             $output($buffer);
