@@ -90,8 +90,12 @@ $databases = array(
 if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
     require_once 'MDB2/Schema.php';
     $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
-
-    $schema =& MDB2_Schema::factory($dsn, array('debug' => true, 'log_line_break' => '<br>'));
+    $options = array(
+        'debug' => true,
+        'log_line_break' => '<br>',
+#        'idxname_format' => '%s',
+    );
+    $schema =& MDB2_Schema::factory($dsn, $options);
     if (PEAR::isError($schema)) {
         $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
     } elseif (array_key_exists('action', $_REQUEST)) {
