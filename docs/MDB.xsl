@@ -1,6 +1,6 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <!--
-     @(#) $Id: MDB.xsl,v 1.1 2005-04-17 12:46:12 lsmith Exp $
+     @(#) $Id: MDB.xsl,v 1.2 2006-02-21 22:20:34 lsmith Exp $
   -->
 <xsl:template match="/">
     <!--  -->
@@ -62,6 +62,12 @@
     <xsl:for-each select="descendant::default"><xsl:call-template name="showdefault"/>
     </xsl:for-each>
 
+    <xsl:for-each select="descendant::autoincrement"><xsl:call-template name="showautoincrement"/>
+    </xsl:for-each>
+
+    <xsl:for-each select="descendant::unsigned"><xsl:call-template name="showunsigned"/>
+    </xsl:for-each>
+
     <xsl:for-each select="descendant::notnull"><xsl:call-template name="shownotnull"/>
     </xsl:for-each>
 
@@ -71,6 +77,7 @@
          <xsl:if test="$curfield=field/name">
          <br/>index <xsl:value-of select="name"/>
             <xsl:if test="unique"> unique</xsl:if>
+            <xsl:if test="primary"> primary</xsl:if>
          </xsl:if>
 
     </xsl:for-each>
@@ -85,6 +92,14 @@
 
 <xsl:template name="showdefault">
     default=<xsl:value-of select="//default"/>
+</xsl:template>
+
+<xsl:template name="showautoincrement">
+    autoincrement=<xsl:value-of select="//autoincrement"/>
+</xsl:template>
+
+<xsl:template name="showunsigned">
+    unsigned=<xsl:value-of select="//unsigned"/>
 </xsl:template>
 
 <xsl:template name="shownotnull">

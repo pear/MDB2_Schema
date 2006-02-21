@@ -11,15 +11,17 @@
 <!ELEMENT start (#PCDATA)>
 <!ELEMENT type (#PCDATA)>
 <!ELEMENT unique (#PCDATA)>
+<!ELEMENT primary (#PCDATA)>
+<!ELEMENT autoincrement (#PCDATA)>
 <!ELEMENT unsigned (#PCDATA)>
 <!ELEMENT value (#PCDATA)>
 <!ELEMENT variable (#PCDATA)>
 <!ELEMENT was (#PCDATA)>
 <!ELEMENT database (name+ | create? | overwrite? | description? | comments? | table+ | sequence?)*>
-<!ELEMENT field (#PCDATA | name | was | type | default | notnull | unsigned | description | comments | length | sorting | value)*>
+<!ELEMENT field (#PCDATA | name | was | type | default | notnull | autoincrement | unsigned | description | comments | length | sorting | value)*>
 <!ELEMENT table (#PCDATA | name | was | description | comments | declaration | initialization)*>
 <!ELEMENT sequence (name+ | was? | start? | on+ | description? | comments?)*>
-<!ELEMENT index (name+ | was? | unique? | field+)>
+<!ELEMENT index (name+ | was? | unique? | primary? | field+)>
 <!ELEMENT declaration (field+, index?)>
 <!ELEMENT initialization (insert)>
 <!ELEMENT insert (field+)>
