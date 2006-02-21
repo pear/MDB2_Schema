@@ -153,8 +153,11 @@
 <p><li><tt>notnull</tt></li></p>
 <p>Boolean flag property that specifies whether the table field should be created with the constraint <tt>NOT NULL</tt>.  As it suggests, this implies that it is not allowed to set this field value with <tt>NULL</tt>.  The parser does not allow that an index is declared on a field that is not declared with the <tt>notnull</tt> flag property.</p>
 <p><b>Default:</b> <tt>0</tt></p>
+<p><li><tt>autoincrement</tt></li></p>
+<p>Boolean flag property that specifies whether the field should be an auto incrementing integer field with a primary key. Note that some <i>DBMS</i> do not support unsigned integer fields.  In such case the <i>DBMS</i> driver will ignore this property but it issues a warning.</p>
+<p><b>Default:</b> <tt>0</tt></p>
 <p><li><tt>unsigned</tt></li></p>
-<p>Boolean flag property that specifies whether an integer field should be declared as unsigned integer.  Note that some <i>DBMS</i> do not support unsigned integer fields.  In such case the <i>DBMS</i> driver will ignore this property but it issues a warning.</p>
+<p>Boolean flag property that specifies whether an integer field should be declared as unsigned integer.  Note that some <i>DBMS</i> do not support auto increment natively in which case this is emulated with a trigger that updates a sequence.</p>
 <p><b>Default:</b> <tt>0</tt></p>
 <p><li><tt>length</tt></li></p>
 <p>Unsigned integer property that specifies the length of a text.  If this property is specified the text field may not have a longer length.  Text values shorter than the length are not padded.  If this property is not specified the length limit is determined by the <i>DBMS</i>.</p>
@@ -191,6 +194,9 @@
 <p><b>Default:</b> none</p>
 <p><li><tt>unique</tt></li></p>
 <p>Boolean flag property that specifies whether the combination of the values of the index fields on each row of the table should unique.</p>
+<p><b>Default:</b> <tt>0</tt></p>
+<p><li><tt>primary</tt></li></p>
+<p>Boolean flag property that specifies whether the combination of the values of the index fields on each row of the table should be a primary key.</p>
 <p><b>Default:</b> <tt>0</tt></p>
 </ul>
 <h4><a name="234.3.5"><li>index <tt>field</tt></li></a></h4>
