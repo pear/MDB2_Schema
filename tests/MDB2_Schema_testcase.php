@@ -118,13 +118,20 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
         $result = $this->schema->updateDatabase(
             $this->driver_input_file,
             false,
-            array('create' =>'1', 'name' => $this->database)
+            array('create' => '1', 'name' => $this->database)
         );
+        if (PEAR::isError($result)) {
+            $result = $this->schema->updateDatabase(
+                $this->driver_input_file,
+                false,
+                array('create' => '0', 'name' => $this->database)
+            );
+        }
         if (!PEAR::isError($result)) {
             $result = $this->schema->updateDatabase(
                 $this->lob_input_file,
                 false,
-                array('create' =>'0', 'name' => $this->database)
+                array('create' => '0', 'name' => $this->database)
             );
         }
         $this->assertFalse(PEAR::isError($result), 'Error creating database');
