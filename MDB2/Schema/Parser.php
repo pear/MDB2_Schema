@@ -81,8 +81,9 @@ class MDB2_Schema_Parser extends XML_Parser
     var $error;
     var $fail_on_invalid_names = true;
     var $structure = false;
+    var $valid_types = array();
 
-    function __construct($variables, $fail_on_invalid_names = true, $structure = false)
+    function __construct($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array())
     {
         parent::XML_Parser();
         $this->variables = $variables;
@@ -95,11 +96,12 @@ class MDB2_Schema_Parser extends XML_Parser
             $this->fail_on_invalid_names = false;
         }
         $this->structure = $structure;
+        $this->valid_types = $valid_types;
     }
 
-    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false)
+    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array())
     {
-        $this->__construct($variables, $fail_on_invalid_names, $structure);
+        $this->__construct($variables, $fail_on_invalid_names, $structure, $valid_types);
     }
 
     function startHandler($xp, $element, $attribs)
@@ -279,6 +281,9 @@ class MDB2_Schema_Parser extends XML_Parser
                 }
             }
             /* Type check */
+            if (!array_key_exists('type', $this->field) || !array_key_exists($this->field['type'], $this->valid_types)) {
+                $this->raiseError('no valid field type ("'.$this->field['type'].'") specified', null, $xp);
+            }
             switch ($this->field['type']) {
             case 'integer':
                 if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
@@ -315,7 +320,7 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!array_key_exists('default', $this->field)
                 && $this->field['type'] != 'clob' && $this->field['type'] != 'blob'
             ) {
-                $this->field['default'] = '';
+                $this->field['default'] = $this->valid_types[$this->field['type']];
             }
             if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
                 $this->raiseError('field "unsigned" has to be a boolean value', null, $xp);
