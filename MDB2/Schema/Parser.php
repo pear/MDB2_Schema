@@ -510,19 +510,25 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'date':
-            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/', $field_value)) {
+            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/', $field_value)
+                && $field_value !== 'CURRENT_DATE'
+            ) {
                 return $this->raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }
             break;
         case 'timestamp':
-            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})/', $field_value)) {
+            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})/', $field_value)
+                && $field_value !== 'CURRENT_TIMESTAMP'
+            ) {
                 return $this->raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }
             break;
         case 'time':
-            if (!preg_match("/([0-9]{2}):([0-9]{2}):([0-9]{2})/", $field_value)) {
+            if (!preg_match("/([0-9]{2}):([0-9]{2}):([0-9]{2})/", $field_value)
+                && $field_value !== 'CURRENT_TIME'
+            ) {
                 return $this->raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }
