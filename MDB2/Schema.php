@@ -86,6 +86,9 @@ class MDB2_Schema extends PEAR
     var $options = array(
         'fail_on_invalid_names' => true,
         'dtd_file' => false,
+        'valid_types' => array(),
+        'parser' => 'MDB2_Schema_Parser',
+        'writer' => 'MDB2_Schema_Writer',
     );
 
     var $database_definition = array(
@@ -106,7 +109,7 @@ class MDB2_Schema extends PEAR
      */
     function apiVersion()
     {
-        return '0.4.0';
+        return '@package_version@';
     }
 
     // }}}
@@ -254,8 +257,13 @@ class MDB2_Schema extends PEAR
         }
 
         $this->db =& $db;
+        $this->db->loadModule('Datatype');
         $this->db->loadModule('Manager');
         $this->db->loadModule('Reverse');
+        if (empty($this->options['valid_types'])) {
+            $this->options['valid_types'] = $this->db->datatype->valid_types;
+        }
+
         return MDB2_OK;
     }
 
@@ -303,8 +311,13 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        require_once 'MDB2/Schema/Parser.php';
-        $parser =& new MDB2_Schema_Parser($variables, $fail_on_invalid_names, $structure);
+        $class_name = $this->getOption('parser');
+        $result = MDB2::loadClass($class_name, $this->db->getOption('debug'));
+        if (PEAR::isError($result)) {
+            return $result;
+        }
+
+        $parser =& new $class_name($variables, $fail_on_invalid_names, $structure, $this->getOption('valid_types'));
         $result = $parser->setInputFile($input_file);
         if (PEAR::isError($result)) {
             return $result;
@@ -1770,6 +1783,12 @@ class MDB2_Schema extends PEAR
      */
     function dumpDatabase($arguments, $dump = MDB2_SCHEMA_DUMP_ALL)
     {
+        $class_name = $this->getOption('writer');
+        $result = MDB2::loadClass($class_name, $this->db->getOption('debug'));
+        if (PEAR::isError($result)) {
+            return $result;
+        }
+
         if (!array_key_exists('definition', $arguments) || !$arguments['definition']) {
             if (!$this->db) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR_NODBSELECTED,
@@ -1816,8 +1835,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        require_once 'MDB2/Schema/Writer.php';
-        $writer =& new MDB2_Schema_Writer();
+        $writer =& new $class_name();
         return $writer->dumpDatabase($this->database_definition, $arguments, $dump);
     }
 
