@@ -1,21 +1,17 @@
-This is a test framework for MDB2_Schema built using PHPUnit. Currently all
-the tests from the metabase driver_test.php have been ported.
+This is a test framework for MDB2_Schema built using PHPUnit.
 These tests directly access the MDB2_Schema API - hopefully this framework
 should give better feedback as to where or what caused when error are encountered.
 
 Usage:
-In order for the tests to work they need to access a database called
-"driver_test". This database is created in the manager test. If you have
-problems running the manager test or the driver you are using does not yet
-provide the necessary methods you may create the database manually. In the
-future we will probably provide SQL files for every supported database.
+In order for the tests to work you need to ensure that the user you configure
+is allowed to create a new database.
 
 To setup the tests
 
 * requires PHPUnit to be installed
 
-* requires MDB2_Schema to be installed in a php include path or the tests need to be
-  moved into the MDB2_Schema root path.
+* requires MDB2 (with the given driver) as well as MDB2_Schema to be installed
+  in a php include path.
 
 * copy the file test_setup.php.dist to test_setup.php
 
