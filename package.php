@@ -6,9 +6,19 @@ $version = '0.5.0';
 $notes = <<<EOT
 - expanded reserved word handling
 - fix LOB data dumping
-
-open todo items:
-- better handling for NULL values in the xml schema format
+- added overwrite support to writer class
+- added comment for idxname_format setting to example
+- added autoincrement and primary to the documentation and .xsl/.dtd
+- if we cannot create the database, then assume it was created manually in the
+  test suite
+- added option valid_types
+- added option to set parser and writer class
+- automatically let the installer set the API Version
+- make sure that the Datatype module is loaded
+- added valid_types property to determine if a given type is valid in an xml
+  schema and to set missing default values
+- begun work on allow CURRENT_* in temporal types (bug #6416)
+- improve test suite documentation
 EOT;
 
 $description =<<<EOT
@@ -53,7 +63,7 @@ $package->addMaintainer('lsmith', 'lead', 'Lukas Kahwe Smith', 'smith@pooteeweet
 
 $package->addDependency('php',     '4.2.0', 'ge',  'php', false);
 $package->addDependency('PEAR',    '1.0b1', 'ge',  'pkg', false);
-$package->addDependency('MDB2', '2.0.0RC1', 'ge',  'pkg', false);
+$package->addDependency('MDB2',    '2.0.1', 'ge',  'pkg', false);
 $package->addDependency('XML_Parser', true, 'has', 'pkg', false);
 $package->addDependency('XML_DTD',    true, 'has', 'pkg', true);
 
