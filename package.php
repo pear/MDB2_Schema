@@ -17,7 +17,7 @@ $notes = <<<EOT
 - make sure that the Datatype module is loaded
 - added valid_types property to determine if a given type is valid in an xml
   schema and to set missing default values
-- begun work on allow CURRENT_* in temporal types (bug #6416)
+- allow CURRENT_* as default in temporal types (bug #6416)
 - improve test suite documentation
 EOT;
 
