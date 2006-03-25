@@ -91,25 +91,18 @@ class MDB2_Schema extends PEAR
         'writer' => 'MDB2_Schema_Writer',
     );
 
-    var $database_definition = array(
-        'name' => '',
-        'create' => false,
-        'overwrite' => false,
-        'tables' => array()
-    );
-
     // }}}
     // {{{ apiVersion()
 
     /**
      * Return the MDB2 API version
      *
-     * @return string     the MDB2 API version number
+     * @return string  the MDB2 API version number
      * @access public
      */
     function apiVersion()
     {
-        return '@package_version@';
+        return '0.4.3';
     }
 
     // }}}
@@ -147,9 +140,9 @@ class MDB2_Schema extends PEAR
     /**
      * set the option for the db class
      *
-     * @param string $option option name
-     * @param mixed $value value for the option
-     * @return mixed MDB2_OK or MDB2 Error Object
+     * @param string option name
+     * @param mixed value for the option
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function setOption($option, $value)
@@ -172,7 +165,7 @@ class MDB2_Schema extends PEAR
     /**
      * returns the value of an option
      *
-     * @param string $option option name
+     * @param string option name
      * @return mixed the option value or error object
      * @access public
      */
@@ -192,16 +185,14 @@ class MDB2_Schema extends PEAR
      * Create a new MDB2 object for the specified database type
      * type
      *
-     * @param   mixed   $db       'data source name', see the MDB2::parseDSN
-     *                            method for a description of the dsn format.
-     *                            Can also be specified as an array of the
-     *                            format returned by MDB2::parseDSN.
-     *                            Finally you can also pass an existing db
-     *                            object to be used.
-     * @param   mixed   $options  An associative array of option names and
-     *                            their values.
-     * @return  mixed MDB2_OK on success, or a MDB2 error object
-     * @access  public
+     * @param string|array|MDB2_Driver_Common   'data source name', see the
+                    MDB2::parseDSN method for a description of the dsn format.
+     *              Can also be specified as an array of the
+     *              format returned by MDB2::parseDSN.
+     *              Finally you can also pass an existing db object to be used.
+     * @param array An associative array of option names and their values.
+     * @return bool|MDB2_Error MDB2_OK or error object
+     * @access public
      * @see     MDB2::parseDSN
      */
     function &factory(&$db, $options = array())
@@ -221,17 +212,15 @@ class MDB2_Schema extends PEAR
      * Create a new MDB2 connection object and connect to the specified
      * database
      *
-     * @param   mixed   $db       'data source name', see the MDB2::parseDSN
-     *                            method for a description of the dsn format.
-     *                            Can also be specified as an array of the
-     *                            format returned by MDB2::parseDSN.
-     *                            Finally you can also pass an existing db
-     *                            object to be used.
-     * @param   mixed   $options  An associative array of option names and
-     *                            their values.
-     * @return  mixed MDB2_OK on success, or a MDB2 error object
-     * @access  public
-     * @see     MDB2::parseDSN
+     * @param string|array|MDB2_Driver_Common   'data source name', see the
+                    MDB2::parseDSN method for a description of the dsn format.
+     *              Can also be specified as an array of the
+     *              format returned by MDB2::parseDSN.
+     *              Finally you can also pass an existing db object to be used.
+     * @param array An associative array of option names and their values.
+     * @return bool|MDB2_Error MDB2_OK or error object
+     * @access public
+     * @see    MDB2::parseDSN
      */
     function connect(&$db, $options = array())
     {
@@ -291,13 +280,11 @@ class MDB2_Schema extends PEAR
      * Parse a database definition file by creating a Metabase schema format
      * parser object and passing the file contents as parser input data stream.
      *
-     * @param string $input_file the path of the database schema file.
-     * @param array $variables an associative array that the defines the text
-     * string values that are meant to be used to replace the variables that are
-     * used in the schema description.
-     * @param bool $fail_on_invalid_names (optional) make function fail on invalid
-     * names
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param string the database schema file.
+     * @param array associative array that the defines the text string values
+     *              that are meant to be used to replace the variables that are
+     *              used in the schema description.
+     * @param bool make function fail on invalid names
      * @access public
      */
     function parseDatabaseDefinitionFile($input_file, $variables = array(),
@@ -343,7 +330,7 @@ class MDB2_Schema extends PEAR
      * This method can be used if no xml schema file exists yet.
      * The resulting xml schema file may need some manual adjustments.
      *
-     * @return mixed MDB2_OK or array with all ambiguities on success, or a MDB2 error object
+     * @return array|MDB2_Error array with definition or error object
      * @access public
      */
     function getDefinitionFromDatabase()
@@ -353,7 +340,7 @@ class MDB2_Schema extends PEAR
             return $this->raiseError('it was not specified a valid database name');
         }
 
-        $this->database_definition = array(
+        $database_definition = array(
             'name' => $database,
             'create' => true,
             'overwrite' => false,
@@ -372,8 +359,8 @@ class MDB2_Schema extends PEAR
                 return $fields;
             }
 
-            $this->database_definition['tables'][$table_name] = array('fields' => array());
-            $table_definition =& $this->database_definition['tables'][$table_name];
+            $database_definition['tables'][$table_name] = array('fields' => array());
+            $table_definition =& $database_definition['tables'][$table_name];
             foreach ($fields as $field_name) {
                 $definition = $this->db->reverse->getTableFieldDefinition($table_name, $field_name);
                 if (PEAR::isError($definition)) {
@@ -460,7 +447,7 @@ class MDB2_Schema extends PEAR
                 if (PEAR::isError($definition)) {
                     return $definition;
                 }
-                $this->database_definition['sequences'][$sequence_name] = $definition;
+                $database_definition['sequences'][$sequence_name] = $definition;
             }
         }
         return MDB2_OK;
@@ -472,11 +459,10 @@ class MDB2_Schema extends PEAR
     /**
      * create a indexes om a table
      *
-     * @param string $table_name  name of the table
-     * @param array  $indexes     indexes to be created
-     * @return mixed MDB2_OK on success, or a MDB2 error object
-     * @param boolean $overwrite  determine if the table/index should be
-                                  overwritten if it already exists
+     * @param string  name of the table
+     * @param array   indexes to be created
+     * @param bool  if the table/index should be overwritten if it already exists
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function createTableIndexes($table_name, $indexes, $overwrite = false)
@@ -558,12 +544,11 @@ class MDB2_Schema extends PEAR
     /**
      * create a table and inititialize the table if data is available
      *
-     * @param string $table_name  name of the table to be created
-     * @param array  $table       multi dimensional array that containts the
-     *                            structure and optional data of the table
-     * @param boolean $overwrite  determine if the table/index should be
-                                  overwritten if it already exists
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param string name of the table to be created
+     * @param array  multi dimensional array that containts the
+     *               structure and optional data of the table
+     * @param bool   if the table/index should be overwritten if it already exists
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function createTable($table_name, $table, $overwrite = false)
@@ -620,10 +605,10 @@ class MDB2_Schema extends PEAR
     /**
      * inititialize the table with data
      *
-     * @param string $table_name        name of the table
-     * @param array  $table       multi dimensional array that containts the
-     *                            structure and optional data of the table
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param string name of the table
+     * @param array  multi dimensional array that containts the
+     *               structure and optional data of the table
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function initializeTable($table_name, $table)
@@ -666,12 +651,11 @@ class MDB2_Schema extends PEAR
     /**
      * create a sequence
      *
-     * @param string $sequence_name  name of the sequence to be created
-     * @param array  $sequence       multi dimensional array that containts the
-     *                               structure and optional data of the table
-     * @param boolean $overwrite    determine if the sequence should be overwritten
-                                    if it already exists
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param string name of the sequence to be created
+     * @param array  multi dimensional array that containts the
+     *               structure and optional data of the table
+     * @param bool  if the sequence should be overwritten if it already exists
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function createSequence($sequence_name, $sequence, $overwrite = false)
@@ -755,17 +739,18 @@ class MDB2_Schema extends PEAR
      * successfully. Consult the documentation or the DBMS drivers that you
      * use to be aware of eventual configuration requirements.
      *
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the current definition
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
-    function createDatabase()
+    function createDatabase($database_definition)
     {
-        if (!isset($this->database_definition['name']) || !$this->database_definition['name']) {
+        if (!isset($database_definition['name']) || !$database_definition['name']) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                 'no valid database name specified');
         }
-        $create = (isset($this->database_definition['create']) && $this->database_definition['create']);
-        $overwrite = (isset($this->database_definition['overwrite']) && $this->database_definition['overwrite']);
+        $create = (isset($database_definition['create']) && $database_definition['create']);
+        $overwrite = (isset($database_definition['overwrite']) && $database_definition['overwrite']);
         if ($create) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
@@ -774,7 +759,7 @@ class MDB2_Schema extends PEAR
             // Lower / Upper case the db name if the portability deems so.
             if ($this->db->options['portability'] & MDB2_PORTABILITY_FIX_CASE) {
                 $func = $this->db->options['field_case'] == CASE_LOWER ? 'strtolower' : 'strtoupper';
-                $db_name = $func($this->database_definition['name']);
+                $db_name = $func($database_definition['name']);
             }
 
             $this->db->popExpect();
@@ -784,26 +769,26 @@ class MDB2_Schema extends PEAR
                 }
             } elseif (is_array($databases) && in_array($db_name, $databases)) {
                 if (!$overwrite) {
-                    $this->db->debug('Database already exists: ' . $this->database_definition['name']);
+                    $this->db->debug('Database already exists: ' . $database_definition['name']);
                     $create = false;
                 } else {
-                    $result = $this->db->manager->dropDatabase($this->database_definition['name']);
+                    $result = $this->db->manager->dropDatabase($database_definition['name']);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
-                    $this->db->debug('Overwritting database: '.$this->database_definition['name']);
+                    $this->db->debug('Overwritting database: '.$database_definition['name']);
                 }
             }
             if ($create) {
                 $this->db->expectError(MDB2_ERROR_ALREADY_EXISTS);
-                $result = $this->db->manager->createDatabase($this->database_definition['name']);
+                $result = $this->db->manager->createDatabase($database_definition['name']);
                 $this->db->popExpect();
                 if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_ALREADY_EXISTS)) {
                     return $result;
                 }
             }
         }
-        $previous_database_name = $this->db->setDatabase($this->database_definition['name']);
+        $previous_database_name = $this->db->setDatabase($database_definition['name']);
         if (($support_transactions = $this->db->supports('transactions'))
             && PEAR::isError($result = $this->db->beginTransaction())
         ) {
@@ -811,10 +796,10 @@ class MDB2_Schema extends PEAR
         }
 
         $created_objects = 0;
-        if (isset($this->database_definition['tables'])
-            && is_array($this->database_definition['tables'])
+        if (isset($database_definition['tables'])
+            && is_array($database_definition['tables'])
         ) {
-            foreach ($this->database_definition['tables'] as $table_name => $table) {
+            foreach ($database_definition['tables'] as $table_name => $table) {
                 $result = $this->createTable($table_name, $table, $overwrite);
                 if (PEAR::isError($result)) {
                     break;
@@ -823,10 +808,10 @@ class MDB2_Schema extends PEAR
             }
         }
         if (!PEAR::isError($result)
-            && isset($this->database_definition['sequences'])
-            && is_array($this->database_definition['sequences'])
+            && isset($database_definition['sequences'])
+            && is_array($database_definition['sequences'])
         ) {
-            foreach ($this->database_definition['sequences'] as $sequence_name => $sequence) {
+            foreach ($database_definition['sequences'] as $sequence_name => $sequence) {
                 $result = $this->createSequence($sequence_name, $sequence, false, $overwrite);
 
                 if (PEAR::isError($result)) {
@@ -863,7 +848,7 @@ class MDB2_Schema extends PEAR
         $this->db->setDatabase($previous_database_name);
 
         if (PEAR::isError($result) && $create
-            && PEAR::isError($result2 = $this->db->manager->dropDatabase($this->database_definition['name']))
+            && PEAR::isError($result2 = $this->db->manager->dropDatabase($database_definition['name']))
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'Could not drop the created database after unsuccessful creation attempt ('.
@@ -879,14 +864,13 @@ class MDB2_Schema extends PEAR
     /**
      * compare a previous definition with the currenlty parsed definition
      *
-     * @param array multi dimensional array that contains the previous definition
      * @param array multi dimensional array that contains the current definition
-     * @return mixed array of changes on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
-    function compareDefinitions($previous_definition, $current_definition = null)
+    function compareDefinitions($current_definition, $previous_definition)
     {
-        $current_definition = $current_definition ? $current_definition : $this->database_definition;
         $changes = array();
 
         if (array_key_exists('tables', $current_definition) && is_array($current_definition['tables'])) {
@@ -896,7 +880,7 @@ class MDB2_Schema extends PEAR
                 if (array_key_exists('tables', $previous_definition) && is_array($previous_definition)) {
                     $previous_tables = $previous_definition['tables'];
                 }
-                $change = $this->compareTableDefinitions($table_name, $previous_tables, $table, $defined_tables);
+                $change = $this->compareTableDefinitions($table_name, $table, $previous_tables, $defined_tables);
                 if (PEAR::isError($change)) {
                     return $change;
                 }
@@ -921,8 +905,8 @@ class MDB2_Schema extends PEAR
                 }
                 $change = $this->compareSequenceDefinitions(
                     $sequence_name,
-                    $previous_sequences,
                     $sequence,
+                    $previous_sequences,
                     $defined_sequences
                 );
                 if (PEAR::isError($change)) {
@@ -949,14 +933,14 @@ class MDB2_Schema extends PEAR
     /**
      * compare a previous definition with the currenlty parsed definition
      *
-     * @param string $table_name    name of the table
-     * @param array multi dimensional array that contains the previous definition
+     * @param string name of the table
      * @param array multi dimensional array that contains the current definition
-     * @return mixed array of changes on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
-    function compareTableFieldsDefinitions($table_name, $previous_definition,
-        $current_definition, &$defined_fields)
+    function compareTableFieldsDefinitions($table_name, $current_definition,
+        $previous_definition, &$defined_fields)
     {
         $changes = array();
 
@@ -1014,14 +998,14 @@ class MDB2_Schema extends PEAR
     /**
      * compare a previous definition with the currenlty parsed definition
      *
-     * @param string $table_name    name of the table
-     * @param array multi dimensional array that contains the previous definition
+     * @param string name of the table
      * @param array multi dimensional array that contains the current definition
-     * @return mixed array of changes on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
-    function compareTableIndexesDefinitions($table_name, $previous_definition,
-        $current_definition, &$defined_indexes)
+    function compareTableIndexesDefinitions($table_name, $current_definition,
+        $previous_definition, &$defined_indexes)
     {
         $changes = array();
 
@@ -1102,14 +1086,14 @@ class MDB2_Schema extends PEAR
     /**
      * compare a previous definition with the currenlty parsed definition
      *
-     * @param string $table_name    name of the table
-     * @param array multi dimensional array that contains the previous definition
+     * @param string name of the table
      * @param array multi dimensional array that contains the current definition
-     * @return mixed array of changes on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
-    function compareTableDefinitions($table_name, $previous_definition,
-        $current_definition, &$defined_tables)
+    function compareTableDefinitions($table_name, $current_definition,
+        $previous_definition, &$defined_tables)
     {
         $changes = array();
 
@@ -1139,8 +1123,8 @@ class MDB2_Schema extends PEAR
                     $defined_fields = array();
                     $change = $this->compareTableFieldsDefinitions(
                         $table_name,
-                        $previous_fields,
                         $current_definition['fields'],
+                        $previous_fields,
                         $defined_fields
                     );
                     if (PEAR::isError($change)) {
@@ -1160,8 +1144,8 @@ class MDB2_Schema extends PEAR
                     $defined_indexes = array();
                     $change = $this->compareTableIndexesDefinitions(
                         $table_name,
-                        $previous_indexes,
                         $current_definition['indexes'],
+                        $previous_indexes,
                         $defined_indexes
                     );
                     if (PEAR::isError($change)) {
@@ -1200,13 +1184,14 @@ class MDB2_Schema extends PEAR
     /**
      * compare a previous definition with the currenlty parsed definition
      *
-     * @param array multi dimensional array that contains the previous definition
+     * @param string name of the sequence
      * @param array multi dimensional array that contains the current definition
-     * @return mixed array of changes on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
-    function compareSequenceDefinitions($sequence_name, $previous_definition,
-        $current_definition, &$defined_sequences)
+    function compareSequenceDefinitions($sequence_name, $current_definition,
+        $previous_definition, &$defined_sequences)
     {
         $changes = array();
 
@@ -1266,9 +1251,9 @@ class MDB2_Schema extends PEAR
     /**
      * verify that the changes requested are supported
      *
-     * @param array $changes an associative array that contains the definition of
-     * the changes that are meant to be applied to the database structure.
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param array associative array that contains the definition of the changes
+     *              that are meant to be applied to the database structure.
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function verifyAlterDatabase($changes)
@@ -1335,9 +1320,9 @@ class MDB2_Schema extends PEAR
      * in the indexes inside a database structure.
      *
      * @param string name of the table
-     * @param array $changes an associative array that contains the definition of
-     * the changes that are meant to be applied to the database structure.
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param array associative array that contains the definition of the changes
+     *              that are meant to be applied to the database structure.
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function alterDatabaseIndexes($table_name, $changes)
@@ -1397,13 +1382,14 @@ class MDB2_Schema extends PEAR
      * Execute the necessary actions to implement the requested changes
      * in the tables inside a database structure.
      *
-     * @param array $changes an associative array that contains the definition of
-     * the changes that are meant to be applied to the database structure.
      * @param array multi dimensional array that contains the current definition
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @param array associative array that contains the definition of the changes
+     *              that are meant to be applied to the database structure.
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
-    function alterDatabaseTables($changes, $current_definition)
+    function alterDatabaseTables($current_definition, $previous_definition, $changes)
     {
         $alterations = 0;
         if (empty($changes)) {
@@ -1422,8 +1408,7 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('add', $changes)) {
             foreach ($changes['add'] as $table_name => $table) {
-                $result = $this->createTable($table_name,
-                    $this->database_definition['tables'][$table_name]);
+                $result = $this->createTable($table_name, $current_definition[$table_name]);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1438,7 +1423,7 @@ class MDB2_Schema extends PEAR
                     $indexes = $table['indexes'];
                     unset($table['indexes']);
                 }
-                if (array_key_exists('remove', $indexes) && isset($current_definition[$table_name]['indexes'])) {
+                if (array_key_exists('remove', $indexes)) {
                     $result = $this->alterDatabaseIndexes($table_name, array('remove' => $indexes['remove']));
                     if (PEAR::isError($result)) {
                         return $result;
@@ -1451,7 +1436,7 @@ class MDB2_Schema extends PEAR
                     return $result;
                 }
                 $alterations++;
-                if (!empty($indexes) && isset($current_definition[$table_name]['indexes'])) {
+                if (!empty($indexes)) {
                     $result = $this->alterDatabaseIndexes($table_name, $indexes);
                     if (PEAR::isError($result)) {
                         return $result;
@@ -1471,13 +1456,14 @@ class MDB2_Schema extends PEAR
      * Execute the necessary actions to implement the requested changes
      * in the sequences inside a database structure.
      *
-     * @param array $changes an associative array that contains the definition of
-     * the changes that are meant to be applied to the database structure.
      * @param array multi dimensional array that contains the current definition
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @param array associative array that contains the definition of the changes
+     *              that are meant to be applied to the database structure.
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
-    function alterDatabaseSequences($changes, $current_definition)
+    function alterDatabaseSequences($current_definition, $previous_definition, $changes)
     {
         $alterations = 0;
         if (empty($changes)) {
@@ -1486,8 +1472,7 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('add', $changes)) {
             foreach ($changes['add'] as $sequence_name => $sequence) {
-                $result = $this->createSequence($sequence_name,
-                    $this->database_definition['sequences'][$sequence_name]);
+                $result = $this->createSequence($sequence_name, $current_definition[$sequence_name]);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1507,11 +1492,11 @@ class MDB2_Schema extends PEAR
 
         if (array_key_exists('change', $changes)) {
             foreach ($changes['change'] as $sequence_name => $sequence) {
-                $result = $this->db->manager->dropSequence($current_definition[$sequence_name]['was']);
+                $result = $this->db->manager->dropSequence($previous_definition[$sequence_name]['was']);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
-                $result = $this->createSequence($sequence_name, $current_definition[$sequence_name]);
+                $result = $this->createSequence($sequence_name, $sequence);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1529,21 +1514,19 @@ class MDB2_Schema extends PEAR
      * Execute the necessary actions to implement the requested changes
      * in a database structure.
      *
-     * @param array $changes an associative array that contains the definition of
-     * the changes that are meant to be applied to the database structure.
      * @param array multi dimensional array that contains the current definition
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param array multi dimensional array that contains the previous definition
+     * @param array associative array that contains the definition of the changes
+     *              that are meant to be applied to the database structure.
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
-    function alterDatabase($changes, $current_definition = null)
+    function alterDatabase($current_definition, $previous_definition, $changes)
     {
         $alterations = 0;
         if (empty($changes)) {
             return $alterations;
         }
-
-        $current_definition = $current_definition
-            ? $current_definition : $this->database_definition;
 
         $result = $this->verifyAlterDatabase($changes);
         if (PEAR::isError($result)) {
@@ -1560,13 +1543,17 @@ class MDB2_Schema extends PEAR
         }
 
         if (array_key_exists('tables', $changes) && array_key_exists('tables', $current_definition)) {
-            $result = $this->alterDatabaseTables($changes, $current_definition['tables']);
+            $current_tables = isset($current_definition['tables']) ? $current_definition['tables'] : array();
+            $previous_tables = isset($previous_definition['tables']) ? $previous_definition['tables'] : array();
+            $result = $this->alterDatabaseTables($current_tables, $previous_tables, $changes);
             if (is_numeric($result)) {
                 $alterations += $result;
             }
         }
-        if (!PEAR::isError($result) && array_key_exists('sequences', $changes) && array_key_exists('sequences', $current_definition)) {
-            $result = $this->alterDatabaseSequences($changes, $current_definition['sequences']);
+        if (!PEAR::isError($result) && array_key_exists('sequences', $changes)) {
+            $current_sequences = isset($current_definition['sequences']) ? $current_definition['sequences'] : array();
+            $previous_sequences = isset($previous_definition['sequences']) ? $previous_definition['sequences'] : array();
+            $result = $this->alterDatabaseSequences($current_sequences, $previous_sequences, $changes);
             if (is_numeric($result)) {
                 $alterations += $result;
             }
@@ -1605,10 +1592,10 @@ class MDB2_Schema extends PEAR
     /**
      * Dump the changes between two database definitions.
      *
-     * @param array $changes an associative array that specifies the list
-     * of database definitions changes as returned by the _compareDefinitions
-     * manager class function.
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param array associative array that specifies the list of database
+     *              definitions changes as returned by the _compareDefinitions
+     *              manager class function.
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function dumpDatabaseChanges($changes)
@@ -1758,12 +1745,10 @@ class MDB2_Schema extends PEAR
      * may optionally dump the database definition with initialization
      * commands that specify the data that is currently present in the tables.
      *
-     * @param array $arguments an associative array that takes pairs of tag
+     * @param array multi dimensional array that contains the current definition
+     * @param array associative array that takes pairs of tag
      * names and values that define dump options.
      *                 array (
-     *                     'definition'    =>    Boolean
-     *                         true   :  dump currently parsed definition
-     *                         default:  dump currently connected database
      *                     'output_mode'    =>    String
      *                         'file' :   dump into a file
      *                         default:   dump using a function
@@ -1775,14 +1760,14 @@ class MDB2_Schema extends PEAR
      *                         end of line delimiter that should be used
      *                         default: "\n"
      *                 );
-     * @param integer $dump constant that determines what data to dump
+     * @param int that determines what data to dump
      *                      MDB2_SCHEMA_DUMP_ALL       : the entire db
      *                      MDB2_SCHEMA_DUMP_STRUCTURE : only the structure of the db
      *                      MDB2_SCHEMA_DUMP_CONTENT   : only the content of the db
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
-    function dumpDatabase($arguments, $dump = MDB2_SCHEMA_DUMP_ALL)
+    function dumpDatabase($database_definition, $arguments, $dump = MDB2_SCHEMA_DUMP_ALL)
     {
         $class_name = $this->getOption('writer');
         $result = MDB2::loadClass($class_name, $this->db->getOption('debug'));
@@ -1790,54 +1775,43 @@ class MDB2_Schema extends PEAR
             return $result;
         }
 
-        if (!array_key_exists('definition', $arguments) || !$arguments['definition']) {
-            if (!$this->db) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_NODBSELECTED,
-                    null, null, 'please connect to a RDBMS first');
-            }
-            $error = $this->getDefinitionFromDatabase();
-            if (PEAR::isError($error)) {
-                return $error;
-            }
-
-            // get initialization data
-            if (isset($this->database_definition['tables']) && is_array($this->database_definition['tables'])
-                && $dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT
-            ) {
-                foreach ($this->database_definition['tables'] as $table_name => $table) {
-                    $fields = array();
-                    $types = array();
-                    foreach ($table['fields'] as $field_name => $field) {
-                        $fields[$field_name] = $field['type'];
-                    }
-                    $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM '.$table_name;
-                    $data = $this->db->queryAll($query, $types, MDB2_FETCHMODE_ASSOC);
-                    if (PEAR::isError($data)) {
-                        return $data;
-                    }
-                    if (!empty($data)) {
-                        $initialization = array();
-                        $lob_buffer_length = $this->db->getOption('lob_buffer_length');
-                        foreach ($data as $row) {
-                            foreach($row as $key => $lob) {
-                                if (is_resource($lob)) {
-                                    $value = '';
-                                    while (!feof($lob)) {
-                                        $value.= fread($lob, $lob_buffer_length);
-                                    }
-                                    $row[$key] = $value;
+        // get initialization data
+        if (isset($database_definition['tables']) && is_array($database_definition['tables'])
+            && $dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_CONTENT
+        ) {
+            foreach ($database_definition['tables'] as $table_name => $table) {
+                $fields = array();
+                $types = array();
+                foreach ($table['fields'] as $field_name => $field) {
+                    $fields[$field_name] = $field['type'];
+                }
+                $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM '.$table_name;
+                $data = $this->db->queryAll($query, $types, MDB2_FETCHMODE_ASSOC);
+                if (PEAR::isError($data)) {
+                    return $data;
+                }
+                if (!empty($data)) {
+                    $initialization = array();
+                    $lob_buffer_length = $this->db->getOption('lob_buffer_length');
+                    foreach ($data as $row) {
+                        foreach($row as $key => $lob) {
+                            if (is_resource($lob)) {
+                                $value = '';
+                                while (!feof($lob)) {
+                                    $value.= fread($lob, $lob_buffer_length);
                                 }
+                                $row[$key] = $value;
                             }
-                            $initialization[] = array('type' => 'insert', 'fields' => $row);
                         }
-                        $this->database_definition['tables'][$table_name]['initialization'] = $initialization;
+                        $initialization[] = array('type' => 'insert', 'fields' => $row);
                     }
+                    $database_definition['tables'][$table_name]['initialization'] = $initialization;
                 }
             }
         }
 
         $writer =& new $class_name();
-        return $writer->dumpDatabase($this->database_definition, $arguments, $dump);
+        return $writer->dumpDatabase($database_definition, $arguments, $dump);
     }
 
     // }}}
@@ -1846,12 +1820,12 @@ class MDB2_Schema extends PEAR
     /**
      * write initialization and sequences
      *
-     * @param string $data_file
-     * @param string $structure_file
-     * @param array $variables an associative array that is passed to the argument
+     * @param string  data file
+     * @param string  structure file
+     * @param array associative array that is passed to the argument
      * of the same name to the parseDatabaseDefinitionFile function. (there third
      * param)
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function writeInitialization($data_file, $structure_file = false, $variables = array())
@@ -1859,8 +1833,7 @@ class MDB2_Schema extends PEAR
         $structure = false;
         if ($structure_file) {
             $structure = $this->parseDatabaseDefinitionFile(
-                $structure_file,
-                $variables
+                $structure_file, $variables
             );
             if (PEAR::isError($structure)) {
                 return $structure;
@@ -1868,10 +1841,7 @@ class MDB2_Schema extends PEAR
         }
 
         $data = $this->parseDatabaseDefinitionFile(
-            $data_file,
-            $variables,
-            false,
-            $structure
+            $data_file, $variables, false, $structure
         );
         if (PEAR::isError($data)) {
             return $data;
@@ -1945,16 +1915,13 @@ class MDB2_Schema extends PEAR
      * to let this function make a consistent evaluation of the exact changes that
      * need to be applied.
      *
-     * @param mixed $current_schema filename or array of the updated database
-     * schema definition.
-     * @param mixed $previous_schema filename or array of the previously installed
-     * database schema definition.
-     * @param array $variables an associative array that is passed to the argument
-     * of the same name to the parseDatabaseDefinitionFile function. (there third
-     * param)
-     * @param bool $disable_query determines if the disable_query option should
-     * be set to true for the alterDatabase() or createDatabase() call
-     * @return mixed MDB2_OK on success, or a MDB2 error object
+     * @param string|array filename or array of the updated database schema definition.
+     * @param string|array filename or array of the previously installed database schema definition.
+     * @param array associative array that is passed to the argument of the same
+     *              name to the parseDatabaseDefinitionFile function. (there third param)
+     * @param bool determines if the disable_query option should be set to true
+     *              for the alterDatabase() or createDatabase() call
+     * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
     function updateDatabase($current_schema, $previous_schema = false
@@ -1975,8 +1942,6 @@ class MDB2_Schema extends PEAR
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'invalid data type of current_schema');
         }
-
-        $this->database_definition = $database_definition;
 
         $previous_definition = false;
         if ($previous_schema) {
@@ -2008,20 +1973,20 @@ class MDB2_Schema extends PEAR
                     return $databases;
                 }
             } elseif (!is_array($databases) ||
-                !in_array($this->database_definition['name'], $databases)
+                !in_array($database_definition['name'], $databases)
             ) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'database to update does not exist: '.$this->database_definition['name']);
+                    'database to update does not exist: '.$database_definition['name']);
             }
 
-            $changes = $this->compareDefinitions($previous_definition);
+            $changes = $this->compareDefinitions($current_definition, $previous_definition);
             if (PEAR::isError($changes)) {
                 return $changes;
             }
 
             if (is_array($changes)) {
                 $this->db->setOption('disable_query', $disable_query);
-                $result = $this->alterDatabase($changes, $previous_definition);
+                $result = $this->alterDatabase($current_definition, $previous_definition, $changes);
                 $this->db->setOption('disable_query', false);
                 if (PEAR::isError($result)) {
                     return $result;
@@ -2036,7 +2001,7 @@ class MDB2_Schema extends PEAR
             }
         } else {
             $this->db->setOption('disable_query', $disable_query);
-            $result = $this->createDatabase();
+            $result = $this->createDatabase($database_definition);
             $this->db->setOption('disable_query', false);
             if (PEAR::isError($result)) {
                 return $result;
@@ -2052,22 +2017,25 @@ class MDB2_Schema extends PEAR
 
         return MDB2_OK;
     }
-
     // }}}
     // {{{ errorMessage()
 
     /**
-     * Return a textual error message for a MDB2_Schema error code
+     * Return a textual error message for a MDB2 error code
      *
-     * @param   int     $value error code
-     * @return  string  error message, or false if the error code was
-     *                  not recognized
+     * @param   int|array integer error code,
+                          null to get the current error code-message map,
+                          or an array with a new error code-message map
+     * @return  string  error message, or false if the error code was not recognized
      * @access public
      */
-    function errorMessage($value)
+    function errorMessage($value = null)
     {
         static $errorMessages;
-        if (!isset($errorMessages)) {
+        if (is_array($value)) {
+            $errorMessages = $value;
+            return MDB2_OK;
+        } elseif (!isset($errorMessages)) {
             $errorMessages = array(
                 MDB2_SCHEMA_ERROR              => 'unknown error',
                 MDB2_SCHEMA_ERROR_PARSE        => 'schema parse error',
@@ -2076,6 +2044,10 @@ class MDB2_Schema extends PEAR
                 MDB2_SCHEMA_ERROR_NOT_CAPABLE  => 'not capable',
                 MDB2_SCHEMA_ERROR_NODBSELECTED => 'no database selected',
             );
+        }
+
+        if (is_null($value)) {
+            return $errorMessages;
         }
 
         if (PEAR::isError($value)) {
@@ -2094,22 +2066,18 @@ class MDB2_Schema extends PEAR
      * callbacks etc.  Basically a wrapper for PEAR::raiseError
      * without the message string.
      *
-     * @param mixed    integer error code
-     *
+     * @param int|PEAR_Error  integer error code or and PEAR_Error instance
      * @param int      error mode, see PEAR_Error docs
      *
-     * @param mixed    If error mode is PEAR_ERROR_TRIGGER, this is the
      *                 error level (E_USER_NOTICE etc).  If error mode is
      *                 PEAR_ERROR_CALLBACK, this is the callback function,
      *                 either as a function name, or as an array of an
      *                 object and method name.  For other error modes this
      *                 parameter is ignored.
-     *
      * @param string   Extra debug information.  Defaults to the last
      *                 query and native error code.
-     *
      * @return object  a PEAR error object
-     *
+     * @access  public
      * @see PEAR_Error
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
@@ -2124,13 +2092,12 @@ class MDB2_Schema extends PEAR
     /**
      * Tell whether a value is a MDB2_Schema error.
      *
-     * @param   mixed $data   the value to test
-     * @param   int   $code   if $data is an error object, return true
-     *                        only if $code is a string and
-     *                        $db->getMessage() == $code or
-     *                        $code is an integer and $db->getCode() == $code
+     * @param   mixed the value to test
+     * @param   int   if $data is an error object, return true only if $code is
+                      a string and $db->getMessage() == $code or
+     *                $code is an integer and $db->getCode() == $code
+     * @return  bool  true if parameter is an error
      * @access  public
-     * @return  bool    true if parameter is an error
      */
     function isError($data, $code = null)
     {
@@ -2163,11 +2130,11 @@ class MDB2_Schema_Error extends PEAR_Error
     /**
      * MDB2_Schema_Error constructor.
      *
-     * @param mixed   $code      MDB error code, or string with error message.
-     * @param integer $mode      what 'error mode' to operate in
-     * @param integer $level     what error level to use for
-     *                           $mode & PEAR_ERROR_TRIGGER
-     * @param smixed  $debuginfo additional debug info, such as the last query
+     * @param mixed     error code, or string with error message.
+     * @param int       what 'error mode' to operate in
+     * @param int       what error level to use for $mode & PEAR_ERROR_TRIGGER
+     * @param mixed     additional debug info, such as the last query
+     * @access  public
      */
     function MDB2_Schema_Error($code = MDB2_SCHEMA_ERROR, $mode = PEAR_ERROR_RETURN,
               $level = E_USER_NOTICE, $debuginfo = null)
