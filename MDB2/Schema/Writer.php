@@ -55,6 +55,7 @@
  */
 class MDB2_Schema_Writer
 {
+
     // }}}
     // {{{ raiseError()
 
@@ -63,20 +64,18 @@ class MDB2_Schema_Writer
      * callbacks etc.  Basically a wrapper for PEAR::raiseError
      * without the message string.
      *
-     * @param mixed $code integer error code, or a PEAR error object (all
-     *      other parameters are ignored if this parameter is an object
-     * @param int $mode error mode, see PEAR_Error docs
-     * @param mixed $options If error mode is PEAR_ERROR_TRIGGER, this is the
-     *      error level (E_USER_NOTICE etc).  If error mode is
-     *      PEAR_ERROR_CALLBACK, this is the callback function, either as a
-     *      function name, or as an array of an object and method name. For
-     *      other error modes this parameter is ignored.
-     * @param string $userinfo Extra debug information.  Defaults to the last
-     *      query and native error code.
-     * @param mixed $nativecode Native error code, integer or string depending
-     *      the backend.
-     * @return object a PEAR error object
-     * @access public
+     * @param int|PEAR_Error  integer error code or and PEAR_Error instance
+     * @param int      error mode, see PEAR_Error docs
+     *
+     *                 error level (E_USER_NOTICE etc).  If error mode is
+     *                 PEAR_ERROR_CALLBACK, this is the callback function,
+     *                 either as a function name, or as an array of an
+     *                 object and method name.  For other error modes this
+     *                 parameter is ignored.
+     * @param string   Extra debug information.  Defaults to the last
+     *                 query and native error code.
+     * @return object  a PEAR error object
+     * @access  public
      * @see PEAR_Error
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
@@ -91,7 +90,7 @@ class MDB2_Schema_Writer
     /**
      * add escapecharacters to all special characters in a string
      *
-     * @param string $string string that should be escaped
+     * @param string string that should be escaped
      * @return string escaped string
      * @access protected
      */
@@ -138,8 +137,8 @@ class MDB2_Schema_Writer
     /**
      * dump the structure of a sequence
      *
-     * @param string  $sequence_name
-     * @param string  $eol
+     * @param string sequence name
+     * @param string end of line characters
      * @return mixed string with xml seqeunce definition on success, or a MDB2 error object
      * @access public
      */
@@ -173,8 +172,8 @@ class MDB2_Schema_Writer
      * may optionally dump the database definition with initialization
      * commands that specify the data that is currently present in the tables.
      *
-     * @param array $arguments an associative array that takes pairs of tag
-     * names and values that define dump options.
+     * @param array associative array that takes pairs of tag
+     *              names and values that define dump options.
      *                 array (
      *                     'output_mode'    =>    String
      *                         'file' :   dump into a file
@@ -187,7 +186,7 @@ class MDB2_Schema_Writer
      *                         end of line delimiter that should be used
      *                         default: "\n"
      *                 );
-     * @param integer $dump constant that determines what data to dump
+     * @param integer determines what data to dump
      *                      MDB2_SCHEMA_DUMP_ALL       : the entire db
      *                      MDB2_SCHEMA_DUMP_STRUCTURE : only the structure of the db
      *                      MDB2_SCHEMA_DUMP_CONTENT   : only the content of the db
