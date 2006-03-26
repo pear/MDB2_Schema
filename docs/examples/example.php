@@ -116,7 +116,8 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
                 'output_mode' => 'file',
                 'output' => $_REQUEST['file']
             );
-            $operation = $schema->dumpDatabase($dump_config, $dump_what);
+            $definition = $schema->getDefinitionFromDatabase();
+            $operation = $schema->dumpDatabase($definition, $dump_config, $dump_what);
             call_user_func($var_dump, $operation);
         } elseif ($_REQUEST['action'] == 'create') {
             $disable_query = false;
