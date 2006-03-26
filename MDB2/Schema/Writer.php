@@ -187,9 +187,9 @@ class MDB2_Schema_Writer
 
         if (array_key_exists('on', $sequence_definition)) {
             $buffer.= "  <on>$eol";
-            $buffer.= "   <table>".$sequence_definition['on']['table'].
-                "</table>$eol   <field>".$sequence_definition['on']['field'].
-                "</field>$eol  </on>$eol";
+            $buffer.= "   <table>".$sequence_definition['on']['table'];
+            $buffer.= "</table>$eol   <field>".$sequence_definition['on']['field'];
+            $buffer.= "</field>$eol  </on>$eol";
         }
         $buffer.= " </sequence>$eol";
 
@@ -255,10 +255,10 @@ class MDB2_Schema_Writer
             }
         }
 
-        $buffer.= '<?xml version="1.0" encoding="ISO-8859-1" ?>'.$eol;
+        $buffer = '<?xml version="1.0" encoding="ISO-8859-1" ?>'.$eol;
         $buffer.= "<database>$eol$eol <name>".$database_definition['name']."</name>";
-        $buffer.= "$eol <create>".$this->_dumpBoolean($field['create'])."</create>";
-        $buffer.= "$eol <overwrite>".$this->_dumpBoolean($field['overwrite'])."</overwrite>$eol";
+        $buffer.= "$eol <create>".$this->_dumpBoolean($database_definition['create'])."</create>";
+        $buffer.= "$eol <overwrite>".$this->_dumpBoolean($database_definition['overwrite'])."</overwrite>$eol";
 
         if ($output) {
             $output($buffer);
@@ -266,10 +266,9 @@ class MDB2_Schema_Writer
             fwrite($fp, $buffer);
         }
 
-        $buffer = '';
         if (array_key_exists('tables', $database_definition) && is_array($database_definition['tables'])) {
             foreach ($database_definition['tables'] as $table_name => $table) {
-                $buffer.= "$eol <table>$eol$eol  <name>$table_name</name>$eol";
+                $buffer = "$eol <table>$eol$eol  <name>$table_name</name>$eol";
                 if ($dump == MDB2_SCHEMA_DUMP_ALL || $dump == MDB2_SCHEMA_DUMP_STRUCTURE) {
                     $buffer.= "$eol  <declaration>$eol";
                     if (array_key_exists('fields', $table) && is_array($table['fields'])) {
@@ -279,7 +278,7 @@ class MDB2_Schema_Writer
                                     'it was not specified the type of the field "'.
                                     $field_name.'" of the table "'.$table_name);
                             }
-                            if (!isset($this->valid_types[$field['type']])) {
+                            if (!empty($this->valid_types) && !array_key_exists($field['type'], $this->valid_types)) {
                                 return $this->raiseError('type "'.$field['type'].
                                     '" is not yet supported');
                             }
@@ -296,7 +295,9 @@ class MDB2_Schema_Writer
                             } else {
                                 $buffer.= "    <notnull>false</notnull>$eol";
                             }
-                            $buffer.= '    <default>'.$this->_escapeSpecialChars($field['default'])."</default>$eol";
+                            if (array_key_exists('default', $field)) {
+                                $buffer.= '    <default>'.$this->_escapeSpecialChars($field['default'])."</default>$eol";
+                            }
                             if (array_key_exists('autoincrement', $field)) {
                                 $buffer.= "    <autoincrement>" . $field['autoincrement'] ."</autoincrement>$eol";
                             }
@@ -308,11 +309,11 @@ class MDB2_Schema_Writer
                         foreach ($table['indexes'] as $index_name => $index) {
                             $buffer.= "$eol   <index>$eol    <name>$index_name</name>$eol";
                             if (array_key_exists('unique', $index)) {
-                                $buffer.= "    <unique>".$this->_dumpBoolean($field['unique'])."</unique>$eol";
+                                $buffer.= "    <unique>".$this->_dumpBoolean($index['unique'])."</unique>$eol";
                             }
 
                             if (array_key_exists('primary', $index)) {
-                                $buffer.= "    <primary>".$this->_dumpBoolean($field['primary'])."</primary>$eol";
+                                $buffer.= "    <primary>".$this->_dumpBoolean($index['primary'])."</primary>$eol";
                             }
 
                             foreach ($index['fields'] as $field_name => $field) {
@@ -340,7 +341,7 @@ class MDB2_Schema_Writer
                         && !empty($table['initialization'])
                         && is_array($table['initialization'])
                     ) {
-                        $buffer.= "$eol  <initialization>$eol";
+                        $buffer = "$eol  <initialization>$eol";
                         foreach ($table['initialization'] as $instruction) {
                             switch ($instruction['type']) {
                             case 'insert':
@@ -401,7 +402,7 @@ class MDB2_Schema_Writer
             }
         }
 
-        $buffer.= "$eol</database>$eol";
+        $buffer = "$eol</database>$eol";
         if ($output) {
             $output($buffer);
         } else {
