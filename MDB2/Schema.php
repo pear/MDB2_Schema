@@ -274,10 +274,46 @@ class MDB2_Schema extends PEAR
     }
 
     // }}}
+    // {{{ parseDatabaseDefinition()
+
+    /**
+     * Parse a database definition from a file or an array
+     *
+     * @param string|array the database schema array or file name
+     * @param bool if non readable files should be skipped
+     * @param array associative array that the defines the text string values
+     *              that are meant to be used to replace the variables that are
+     *              used in the schema description.
+     * @param bool make function fail on invalid names
+     * @param array database structure definition
+     * @access public
+     */
+    function parseDatabaseDefinition($schema, $skip_unreadable = false, $variables = array(),
+        $fail_on_invalid_names = true, $structure = false)
+    {
+        $database_definition = false;
+        if (is_string($schema)) {
+            // if $schema is not readable then we just skip it
+            // and simply copy the $current_schema file to that file name
+            if (is_readable($schema)) {
+                $database_definition = $this->parseDatabaseDefinitionFile(
+                    $schema, $variables, $fail_on_invalid_names, $structure
+                );
+            }
+        } elseif (is_array($schema)) {
+            $database_definition = $schema;
+        } else {
+            $database_definition = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                'invalid data type of schema');
+        }
+        return $database_definition;
+    }
+
+    // }}}
     // {{{ parseDatabaseDefinitionFile()
 
     /**
-     * Parse a database definition file by creating a Metabase schema format
+     * Parse a database definition file by creating a schema format
      * parser object and passing the file contents as parser input data stream.
      *
      * @param string the database schema file.
@@ -285,6 +321,7 @@ class MDB2_Schema extends PEAR
      *              that are meant to be used to replace the variables that are
      *              used in the schema description.
      * @param bool make function fail on invalid names
+     * @param array database structure definition
      * @access public
      */
     function parseDatabaseDefinitionFile($input_file, $variables = array(),
@@ -1820,29 +1857,24 @@ class MDB2_Schema extends PEAR
     /**
      * write initialization and sequences
      *
-     * @param string  data file
-     * @param string  structure file
+     * @param string|array  data file or data array
+     * @param string|array  structure file or array
      * @param array associative array that is passed to the argument
      * of the same name to the parseDatabaseDefinitionFile function. (there third
      * param)
      * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
-    function writeInitialization($data_file, $structure_file = false, $variables = array())
+    function writeInitialization($data, $structure = false, $variables = array())
     {
-        $structure = false;
-        if ($structure_file) {
-            $structure = $this->parseDatabaseDefinitionFile(
-                $structure_file, $variables
-            );
+        if ($structure) {
+            $structure = $this->parseDatabaseDefinition($structure, false, $variables);
             if (PEAR::isError($structure)) {
                 return $structure;
             }
         }
 
-        $data = $this->parseDatabaseDefinitionFile(
-            $data_file, $variables, false, $structure
-        );
+        $data = $this->parseDatabaseDefinition($data, false, $variables, false, $structure);
         if (PEAR::isError($data)) {
             return $data;
         }
@@ -1927,39 +1959,20 @@ class MDB2_Schema extends PEAR
     function updateDatabase($current_schema, $previous_schema = false
         , $variables = array(), $disable_query = false)
     {
-        if (is_string($current_schema)) {
-            $database_definition = $this->parseDatabaseDefinitionFile(
-                $current_schema,
-                $variables,
-                $this->options['fail_on_invalid_names']
-            );
-            if (PEAR::isError($database_definition)) {
-                return $database_definition;
-            }
-        } elseif (is_array($current_schema)) {
-            $database_definition = $current_schema;
-        } else {
-            return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                'invalid data type of current_schema');
+        $current_definition = $this->parseDatabaseDefinition(
+            $current_schema, false, $variables, $this->options['fail_on_invalid_names']
+        );
+        if (PEAR::isError($current_definition)) {
+            return $current_definition;
         }
 
         $previous_definition = false;
         if ($previous_schema) {
-            if (is_string($previous_schema)) {
-                // if $previous_schema is not readable then we just skip it
-                // and simply copy the $current_schema file to that file name
-                if (is_readable($previous_schema)) {
-                    $previous_definition = $this->parseDatabaseDefinitionFile(
-                        $previous_schema, $variables, false);
-                    if (PEAR::isError($previous_definition)) {
-                        return $previous_definition;
-                    }
-                }
-            } elseif (is_array($previous_schema)) {
-                $previous_definition = $previous_schema;
-            } else {
-                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'invalid data type of previous_schema');
+            $previous_definition = $this->parseDatabaseDefinition(
+                $previous_schema, true, $variables, $this->options['fail_on_invalid_names']
+            );
+            if (PEAR::isError($previous_definition)) {
+                return $previous_definition;
             }
         }
 
@@ -1973,10 +1986,10 @@ class MDB2_Schema extends PEAR
                     return $databases;
                 }
             } elseif (!is_array($databases) ||
-                !in_array($database_definition['name'], $databases)
+                !in_array($current_definition['name'], $databases)
             ) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'database to update does not exist: '.$database_definition['name']);
+                    'database to update does not exist: '.$current_definition['name']);
             }
 
             $changes = $this->compareDefinitions($current_definition, $previous_definition);
@@ -2001,7 +2014,7 @@ class MDB2_Schema extends PEAR
             }
         } else {
             $this->db->setOption('disable_query', $disable_query);
-            $result = $this->createDatabase($database_definition);
+            $result = $this->createDatabase($current_definition);
             $this->db->setOption('disable_query', false);
             if (PEAR::isError($result)) {
                 return $result;
