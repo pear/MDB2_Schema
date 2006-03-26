@@ -1810,7 +1810,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        $writer =& new $class_name();
+        $writer =& new $class_name($this->getOption('valid_types'));
         return $writer->dumpDatabase($database_definition, $arguments, $dump);
     }
 
