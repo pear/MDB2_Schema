@@ -487,7 +487,7 @@ class MDB2_Schema extends PEAR
                 $database_definition['sequences'][$sequence_name] = $definition;
             }
         }
-        return MDB2_OK;
+        return $database_definition;
     }
 
     // }}}
