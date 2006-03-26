@@ -281,7 +281,10 @@ class MDB2_Schema_Parser extends XML_Parser
                 }
             }
             /* Type check */
-            if (!array_key_exists('type', $this->field) || !array_key_exists($this->field['type'], $this->valid_types)) {
+            if (!array_key_exists('type', $this->field)) {
+                $this->raiseError('no field type specified', null, $xp);
+            }
+            if (!empty($this->valid_types) && !array_key_exists($this->field['type'], $this->valid_types)) {
                 $this->raiseError('no valid field type ("'.$this->field['type'].'") specified', null, $xp);
             }
             switch ($this->field['type']) {
