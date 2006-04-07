@@ -279,8 +279,8 @@ class MDB2_Schema_Writer
                                     $field_name.'" of the table "'.$table_name);
                             }
                             if (!empty($this->valid_types) && !array_key_exists($field['type'], $this->valid_types)) {
-                                return $this->raiseError('type "'.$field['type'].
-                                    '" is not yet supported');
+                                return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
+                                    'type "'.$field['type'].'" is not yet supported');
                             }
                             $buffer.= "$eol   <field>$eol    <name>$field_name</name>$eol    <type>";
                             $buffer.= $field['type']."</type>$eol";

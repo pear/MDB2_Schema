@@ -374,7 +374,8 @@ class MDB2_Schema extends PEAR
     {
         $database = $this->db->database_name;
         if (empty($database)) {
-            return $this->raiseError('it was not specified a valid database name');
+            return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
+                'it was not specified a valid database name');
         }
 
         $database_definition = array(
