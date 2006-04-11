@@ -23,6 +23,8 @@ $notes = <<<EOT
 - removed database_definition property and as a result reworked the API of most
   methods *BC BREAK*
 - added _dumpBoolean() in writer to better support variables in boolean fields
+- allow method callbacks in MDB2_Schema_Writer::dumpDatabase (bug #7363)
+- set error code in all raiseError() calls
 EOT;
 
 $description =<<<EOT
