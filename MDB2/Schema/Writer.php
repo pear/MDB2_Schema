@@ -232,7 +232,7 @@ class MDB2_Schema_Writer
             if (array_key_exists('output_mode', $arguments) && $arguments['output_mode'] == 'file') {
                 $fp = fopen($arguments['output'], 'w');
                 $output = false;
-            } elseif (function_exists($arguments['output'])) {
+            } elseif (is_callable($arguments['output'])) {
                 $output = $arguments['output'];
             } else {
                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
@@ -261,7 +261,7 @@ class MDB2_Schema_Writer
         $buffer.= "$eol <overwrite>".$this->_dumpBoolean($database_definition['overwrite'])."</overwrite>$eol";
 
         if ($output) {
-            $output($buffer);
+            call_user_func($output, $buffer);
         } else {
             fwrite($fp, $buffer);
         }
@@ -330,7 +330,7 @@ class MDB2_Schema_Writer
                 }
 
                 if ($output) {
-                    $output($buffer);
+                    call_user_func($output, $buffer);
                 } else {
                     fwrite($fp, $buffer);
                 }
@@ -359,7 +359,7 @@ class MDB2_Schema_Writer
                 }
                 $buffer.= "$eol </table>$eol";
                 if ($output) {
-                    $output($buffer);
+                    call_user_func($output, $buffer);
                 } else {
                     fwrite($fp, $buffer);
                 }
@@ -375,7 +375,7 @@ class MDB2_Schema_Writer
                         }
 
                         if ($output) {
-                            $output($result);
+                            call_user_func($output, $result);
                         } else {
                             fwrite($fp, $result);
                         }
@@ -395,7 +395,7 @@ class MDB2_Schema_Writer
                 }
 
                 if ($output) {
-                    $output($result);
+                    call_user_func($output, $result);
                 } else {
                     fwrite($fp, $result);
                 }
@@ -404,7 +404,7 @@ class MDB2_Schema_Writer
 
         $buffer = "$eol</database>$eol";
         if ($output) {
-            $output($buffer);
+            call_user_func($output, $buffer);
         } else {
             fwrite($fp, $buffer);
             fclose($fp);
