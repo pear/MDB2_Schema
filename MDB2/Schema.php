@@ -105,6 +105,31 @@ class MDB2_Schema extends PEAR
         return '0.4.3';
     }
 
+    /**
+     * Clobbers two arrays together.
+     *
+     * @param  array        array that should be clobbered
+     * @param  array        array that should be clobbered
+     * @return array|false  array on success and false on error
+     *
+     * @access public
+     * @author kc@hireability.com
+     */
+    function arrayMergeClobber($a1, $a2)
+    {
+        if (!is_array($a1) || !is_array($a2)) {
+            return false;
+        }
+        foreach ($a2 as $key => $val) {
+            if (is_array($val) && array_key_exists($key, $a1) && is_array($a1[$key])) {
+                $a1[$key] = MDB2_Schema::arrayMergeClobber($a1[$key], $val);
+            } else {
+                $a1[$key] = $val;
+            }
+        }
+        return $a1;
+    }
+
     // }}}
     // {{{ resetWarnings()
 
@@ -923,7 +948,7 @@ class MDB2_Schema extends PEAR
                     return $change;
                 }
                 if (!empty($change)) {
-                    $changes['tables']+= $change;
+                    $changes['tables'] = MDB2_Schema::arrayMergeClobber($changes['tables'], $change);
                 }
             }
             if (array_key_exists('tables', $previous_definition) && is_array($previous_definition['tables'])) {
@@ -951,7 +976,7 @@ class MDB2_Schema extends PEAR
                     return $change;
                 }
                 if (!empty($change)) {
-                    $changes['sequences']+= $change;
+                    $changes['sequences'] = MDB2_Schema::arrayMergeClobber($changes['sequences'], $change);
                 }
             }
             if (array_key_exists('sequences', $previous_definition) && is_array($previous_definition['sequences'])) {
@@ -1143,7 +1168,7 @@ class MDB2_Schema extends PEAR
             if (array_key_exists($was_table_name, $previous_definition)) {
                 $changes['change'][$was_table_name] = array();
                 if ($was_table_name != $table_name) {
-                    $changes['change'][$was_table_name]+= array('name' => $table_name);
+                    $changes['change'][$was_table_name] = array('name' => $table_name);
                 }
                 if (array_key_exists($was_table_name, $defined_tables)) {
                     return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
@@ -1169,7 +1194,8 @@ class MDB2_Schema extends PEAR
                         return $change;
                     }
                     if (!empty($change)) {
-                        $changes['change'][$was_table_name]+= $change;
+                        $changes['change'][$was_table_name]
+                        = MDB2_Schema::arrayMergeClobber($changes['change'][$was_table_name], $change);
                     }
                 }
                 if (array_key_exists('indexes', $current_definition) && is_array($current_definition['indexes'])) {
@@ -1191,7 +1217,8 @@ class MDB2_Schema extends PEAR
                     }
                     if (!empty($change)) {
                         if (isset($changes['change'][$was_table_name]['indexes'])) {
-                            $changes['change'][$was_table_name]['indexes']+= $change;
+                            $changes['change'][$was_table_name]['indexes']
+                                = MDB2_Schema::arrayMergeClobber($changes['change'][$was_table_name]['indexes'], $change);
                         } else {
                             $changes['change'][$was_table_name]['indexes'] = $change;
                         }
@@ -1433,7 +1460,6 @@ class MDB2_Schema extends PEAR
         if (empty($changes)) {
             return $alterations;
         }
-
         if (array_key_exists('remove', $changes)) {
             foreach ($changes['remove'] as $table_name => $table) {
                 $result = $this->db->manager->dropTable($table_name);
@@ -1583,15 +1609,16 @@ class MDB2_Schema extends PEAR
         if (array_key_exists('tables', $changes) && array_key_exists('tables', $current_definition)) {
             $current_tables = isset($current_definition['tables']) ? $current_definition['tables'] : array();
             $previous_tables = isset($previous_definition['tables']) ? $previous_definition['tables'] : array();
-            $result = $this->alterDatabaseTables($current_tables, $previous_tables, $changes);
+            $result = $this->alterDatabaseTables($current_tables, $previous_tables, $changes['tables']);
             if (is_numeric($result)) {
                 $alterations += $result;
             }
         }
+
         if (!PEAR::isError($result) && array_key_exists('sequences', $changes)) {
             $current_sequences = isset($current_definition['sequences']) ? $current_definition['sequences'] : array();
             $previous_sequences = isset($previous_definition['sequences']) ? $previous_definition['sequences'] : array();
-            $result = $this->alterDatabaseSequences($current_sequences, $previous_sequences, $changes);
+            $result = $this->alterDatabaseSequences($current_sequences, $previous_sequences, $changes['sequences']);
             if (is_numeric($result)) {
                 $alterations += $result;
             }
@@ -2022,7 +2049,8 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (is_string($previous_schema) && is_string($current_schema)
+        if (!$disable_query
+            && is_string($previous_schema) && is_string($current_schema)
             && !copy($current_schema, $previous_schema)
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
