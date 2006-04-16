@@ -1,6 +1,6 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <!--
-     @(#) $Id: MDB.xsl,v 1.2 2006-02-21 22:20:34 lsmith Exp $
+     @(#) $Id: MDB.xsl,v 1.3 2006-04-16 10:20:35 toggg Exp $
   -->
 <xsl:template match="/">
     <!--  -->
@@ -16,9 +16,9 @@
     <body>
     <!-- -->
     <br/><span class="titlemini">database
-    <xsl:value-of select="/database/name"/></span><br/><br/>
+    <xsl:value-of select="database/name"/></span><br/><br/>
     <TABLE class="tablemain">
-    <xsl:for-each select="/database/table">
+    <xsl:for-each select="database/table">
         <xsl:call-template name="showtable"/>
     </xsl:for-each>
     </TABLE>
@@ -31,11 +31,11 @@
     <tr><td colspan="4" class="tableheader"> <span class="titlemini">table
         <xsl:value-of select="name"/></span> </td></tr>
     <tr><td colspan="4"><span class="textmini">
-        <xsl:value-of select="comment"/></span></td></tr>
+        <xsl:value-of select="comments"/></span></td></tr>
 
     <tr><td class="tableheader">field</td>
     <td class="tableheader">type</td>
-    <td class="tableheader">comment</td>
+    <td class="tableheader">comments</td>
     <td class="tableheader">attributes</td>
     </tr>
 
@@ -56,7 +56,7 @@
     </span></td>
 
     <td class="tablebody"><span class="textmini">
-    <xsl:value-of select="comment"/></span></td>
+    <xsl:value-of select="comments"/></span></td>
 
     <td class="tablebody"><span class="textmini">
     <xsl:for-each select="descendant::default"><xsl:call-template name="showdefault"/>

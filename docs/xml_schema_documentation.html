@@ -154,10 +154,10 @@
 <p>Boolean flag property that specifies whether the table field should be created with the constraint <tt>NOT NULL</tt>.  As it suggests, this implies that it is not allowed to set this field value with <tt>NULL</tt>.  The parser does not allow that an index is declared on a field that is not declared with the <tt>notnull</tt> flag property.</p>
 <p><b>Default:</b> <tt>0</tt></p>
 <p><li><tt>autoincrement</tt></li></p>
-<p>Boolean flag property that specifies whether the field should be an auto incrementing not null integer field with a primary key. Note that some <i>DBMS</i> do not support unsigned integer fields.  In such case the <i>DBMS</i> driver will ignore this property but it issues a warning.</p>
+<p>Boolean flag property that specifies whether the field should be an auto incrementing not null integer field with a primary key. Note that some <i>DBMS</i> do not support auto increment natively in which case this is emulated with a trigger that updates a sequence.</p>
 <p><b>Default:</b> <tt>0</tt></p>
 <p><li><tt>unsigned</tt></li></p>
-<p>Boolean flag property that specifies whether an integer field should be declared as unsigned integer.  Note that some <i>DBMS</i> do not support auto increment natively in which case this is emulated with a trigger that updates a sequence.</p>
+<p>Boolean flag property that specifies whether an integer field should be declared as unsigned integer. Note that some <i>DBMS</i> do not support unsigned integer fields.  In such case the <i>DBMS</i> driver will ignore this property but it issues a warning.</p>
 <p><b>Default:</b> <tt>0</tt></p>
 <p><li><tt>length</tt></li></p>
 <p>Unsigned integer property that specifies the length of a text.  If this property is specified the text field may not have a longer length.  Text values shorter than the length are not padded.  If this property is not specified the length limit is determined by the <i>DBMS</i>.</p>
@@ -250,7 +250,7 @@
 <p>Free text property meant for describing the purpose of the sequence. This field is not processed by the schema parser. It may contain text or other XML well formed tags that may be useful for embedding additional data structures for documentation applications or other purposes.</p>
 <p><b>Default:</b> none</p>
 <p><li><tt>comments</tt></li></p>
-<p>Additional table comments. This field is not processed by the schema parser. It may contain text or other XML well formed tags that may be useful for embedding additional data structures for documentation applications or other purposes.</p>
+<p>Additional sequence comments. This field is not processed by the schema parser. It may contain text or other XML well formed tags that may be useful for embedding additional data structures for documentation applications or other purposes.</p>
 <p><b>Default:</b> none</p>
 </ul>
 <h4><a name="239.3.9"><li>sequence <tt>on</tt> table field</li></a></h4>
