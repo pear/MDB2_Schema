@@ -25,6 +25,7 @@ $notes = <<<EOT
 - added _dumpBoolean() in writer to better support variables in boolean fields
 - allow method callbacks in MDB2_Schema_Writer::dumpDatabase (bug #7363)
 - set error code in all raiseError() calls
+- minor updates to the xml schema xsl and documentation (thx Bertrand)
 EOT;
 
 $description =<<<EOT
