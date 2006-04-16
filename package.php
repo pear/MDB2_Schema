@@ -2,30 +2,8 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = '0.5.0';
+$version = 'XXX';
 $notes = <<<EOT
-- expanded reserved word handling
-- fix LOB data dumping
-- added overwrite support to writer class
-- added comment for idxname_format setting to example
-- added autoincrement and primary to the documentation and .xsl/.dtd
-- if we cannot create the database, then assume it was created manually in the
-  test suite
-- added option valid_types
-- added option to set parser and writer class
-- automatically let the installer set the API Version
-- make sure that the Datatype module is loaded
-- added valid_types property to determine if a given type is valid
-  schema and to set missing default values
-- allow CURRENT_* as default in temporal types (bug #6416)
-- improve test suite documentation
-- added parseDatabaseDefinition() that can work with a file or array definition
-- removed database_definition property and as a result reworked the API of most
-  methods *BC BREAK*
-- added _dumpBoolean() in writer to better support variables in boolean fields
-- allow method callbacks in MDB2_Schema_Writer::dumpDatabase (bug #7363)
-- set error code in all raiseError() calls
-- minor updates to the xml schema xsl and documentation (thx Bertrand)
 EOT;
 
 $description =<<<EOT
