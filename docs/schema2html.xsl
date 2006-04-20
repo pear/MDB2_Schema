@@ -9,7 +9,7 @@
  * @author     Bertrand Gugger <bertrand@toggg.com>
  * @copyright  2006 bertrand Gugger
  * @license    http://www.opensource.org/licenses/bsd-license.php BSD license
- * @version    CVS: $Id: schema2html.xsl,v 1.1 2006-04-20 13:21:24 toggg Exp $
+ * @version    CVS: $Id: schema2html.xsl,v 1.2 2006-04-20 14:52:10 toggg Exp $
  * @link       http://pear.php.net/package/MDB2_Schema
  *
 -->
@@ -69,7 +69,6 @@
     </td></tr>
 
 <!-- They had fields -->
-
     <tr class="tableheader label">
     <td>field</td><td>type</td><td>indexes</td>
     <td style="text-align: center">N</td>
@@ -82,7 +81,6 @@
     </xsl:for-each>
 
 <!-- Then made some order on them -->
-
     <xsl:choose>
 
     <xsl:when test="declaration/index">
@@ -157,7 +155,11 @@
         <xsl:if test="unique != 0">U</xsl:if>
     </span></td><td colspan="1"><span class="attributes">
         <xsl:if test="primary != 0">P</xsl:if>
-    </span></td><td colspan="3"><span class="field">...
+    </span></td><td colspan="3"><span class="indexfield">
+        <xsl:for-each select="field">
+            <xsl:choose>
+            <xsl:when test="sorting = 'descending'">-</xsl:when><xsl:otherwise>+</xsl:otherwise></xsl:choose><xsl:value-of select="name"/>
+        </xsl:for-each>
     </span></td><td colspan="1"><span class="comments"><xsl:value-of select="comments"/>
     </span></td></tr>
 </xsl:template>
