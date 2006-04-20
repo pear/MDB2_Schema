@@ -9,7 +9,7 @@
  * @author     Bertrand Gugger <bertrand@toggg.com>
  * @copyright  2006 bertrand Gugger
  * @license    http://www.opensource.org/licenses/bsd-license.php BSD license
- * @version    CVS: $Id: schema2html.xsl,v 1.2 2006-04-20 14:52:10 toggg Exp $
+ * @version    CVS: $Id: schema2html.xsl,v 1.3 2006-04-20 21:03:56 toggg Exp $
  * @link       http://pear.php.net/package/MDB2_Schema
  *
 -->
@@ -120,8 +120,6 @@
     <xsl:for-each select="following-sibling::index">
          <xsl:if test="$curfield=field/name">
          <xsl:value-of select="name"/>
-            <!-- xsl:if test="unique"> unique</xsl:if>
-            <xsl:if test="primary"> primary</xsl:if -->
          </xsl:if>
     </xsl:for-each >
 
