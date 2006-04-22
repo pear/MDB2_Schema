@@ -9,7 +9,7 @@
  * @author     Bertrand Gugger <bertrand@toggg.com>
  * @copyright  2006 bertrand Gugger
  * @license    http://www.opensource.org/licenses/bsd-license.php BSD license
- * @version    CVS: $Id: description.schema.xml,v 1.1 2006-04-20 13:22:47 toggg Exp $
+ * @version    CVS: $Id: description.schema.xml,v 1.2 2006-04-22 15:32:37 toggg Exp $
  * @link       http://pear.php.net/package/MDB2_Schema
  *
 -->
@@ -70,7 +70,9 @@
  <table>
   <name>table</name>
   <description>Describes each table of the database</description>
-  <comments>A child of &lt;database&gt;, must contain a &lt;declaration&gt; with at least 1 &lt;field&gt; and eventually some &lt;index&gt;. &lt;table&gt; may also have a &lt;initialization&gt;</comments>
+  <comments>A child of &lt;database&gt;, must contain a &lt;declaration&gt; with at least 1
+   &lt;field&gt; and eventually some &lt;index&gt;.<br />
+   &lt;table&gt; may also have a &lt;initialization&gt; with some  &lt;insert&gt;</comments>
   <declaration>
    <field>
     <name>name</name> <type>text</type><length></length>
@@ -226,7 +228,7 @@
     Index Field
  -->
  <table>
-  <name>indexfield</name>
+  <name>index_field</name>
   <description>Describes what fields make an index in a table</description>
   <comments>&lt;field&gt; as a child of &lt;index&gt;</comments>
   <declaration>
@@ -234,12 +236,53 @@
     <name>name</name> <type>text</type><length></length>
     <notnull>1</notnull>
     <description>Referenced field name</description>
-    <comments>The value should reference the name of some uncle &lt;field&gt;</comments>
+    <comments>This should reference the name of some uncle &lt;field&gt;</comments>
    </field>
    <field>
     <name>sorting</name> <type>text</type>
     <description>Field's order in the sort</description>
     <comments>Valid: ascending or descending</comments>
+   </field>
+   <field>
+    <name>description</name> <type>text</type>
+    <description>index field description</description>
+    <comments>Ignored by the parser</comments>
+   </field>
+   <field>
+    <name>comments</name> <type>text</type>
+    <description>Free comments</description>
+    <comments>Ignored by the parser</comments>
+   </field>
+  </declaration>
+ </table>
+
+<!--
+    Insert field
+ -->
+ <table>
+  <name>insert_field</name>
+  <description>Describes each field in an insert for table initialization</description>
+  <comments>child of &lt;insert&gt; from &lt;initialization&gt; so great-grand-child of &lt;table&gt;</comments>
+  <declaration>
+   <field>
+    <name>name</name> <type>text</type><length></length>
+    <notnull>1</notnull>
+    <description>field name</description>
+    <comments>This should reference the name of some grand-uncle &lt;field&gt;</comments>
+   </field>
+   <field>
+    <name>value</name> <type>text</type>
+    <description>field value</description>
+   </field>
+   <field>
+    <name>description</name> <type>text</type>
+    <description>insert field description</description>
+    <comments>Ignored by the parser</comments>
+   </field>
+   <field>
+    <name>comments</name> <type>text</type>
+    <description>Free comments</description>
+    <comments>Ignored by the parser</comments>
    </field>
   </declaration>
  </table>
