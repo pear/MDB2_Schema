@@ -9,7 +9,7 @@
  * @author     Bertrand Gugger <bertrand@toggg.com>
  * @copyright  2006 bertrand Gugger
  * @license    http://www.opensource.org/licenses/bsd-license.php BSD license
- * @version    CVS: $Id: description.schema.xml,v 1.2 2006-04-22 15:32:37 toggg Exp $
+ * @version    CVS: $Id: description.schema.xml,v 1.3 2006-04-22 18:18:38 toggg Exp $
  * @link       http://pear.php.net/package/MDB2_Schema
  *
 -->
@@ -110,7 +110,9 @@
  <table>
   <name>field</name>
   <description>Describes each field in a table</description>
-  <comments>&lt;field&gt; as a child of &lt;declaration&gt; so grand-child of &lt;table&gt;</comments>
+  <comments>
+   &lt;field&gt; as a child of &lt;declaration&gt; so grand-child of &lt;table&gt;
+  </comments>
   <declaration>
    <field>
     <name>name</name> <type>text</type><length></length>
@@ -126,7 +128,9 @@
     <name>type</name> <type>text</type>
     <notnull>1</notnull>
     <description>Field type</description>
-    <comments>Valid types: integer, text, boolean, date, timestamp, time, float, decimal, clob and blob.</comments>
+    <comments>Valid types:
+     integer, text, boolean, date, timestamp, time, float, decimal, clob and blob.
+    </comments>
    </field>
    <field>
     <name>default</name> <type>text</type>
@@ -284,6 +288,48 @@
     <description>Free comments</description>
     <comments>Ignored by the parser</comments>
    </field>
+  </declaration>
+ </table>
+
+<!--
+    Sequence
+ -->
+ <table>
+  <name>sequence</name>
+  <description>Describes each sequence of the database</description>
+  <comments>A child of &lt;database&gt; , may contain one &lt;on&gt;</comments>
+  <declaration>
+   <field>
+    <name>name</name> <type>text</type><length></length>
+    <notnull>1</notnull>
+    <description>Sequence name</description>
+    <comments></comments>
+   </field>
+   <field>
+    <name>was</name> <type>text</type>
+    <description>Sequence previous name</description>
+   </field>
+   <field>
+    <name>start</name> <type>integer</type>
+    <description>Sequence start value</description>
+   </field>
+   <field>
+    <name>description</name> <type>text</type>
+    <description>Sequence description</description>
+    <comments>Ignored by the parser</comments>
+   </field>
+   <field>
+    <name>comments</name> <type>text</type>
+    <description>Free comments</description>
+    <comments>Ignored by the parser</comments>
+   </field>
+
+   <index>
+    <name>name_index</name>
+    <unique>1</unique>
+    <field> <name>name</name> </field>
+    <comments>Indicates that 2 sequences should not have the same name within a database</comments>
+   </index>
   </declaration>
  </table>
 
