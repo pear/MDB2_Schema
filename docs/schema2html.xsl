@@ -9,7 +9,7 @@
  * @author     Bertrand Gugger <bertrand@toggg.com>
  * @copyright  2006 bertrand Gugger
  * @license    http://www.opensource.org/licenses/bsd-license.php BSD license
- * @version    CVS: $Id: schema2html.xsl,v 1.3 2006-04-20 21:03:56 toggg Exp $
+ * @version    CVS: $Id: schema2html.xsl,v 1.4 2006-04-22 10:32:11 toggg Exp $
  * @link       http://pear.php.net/package/MDB2_Schema
  *
 -->
@@ -31,7 +31,7 @@
     </td><td colspan="4">
      <span class="description"><xsl:value-of select="database/description"/></span>
     </td><td colspan="1">
-     <span class="comments"><xsl:value-of select="database/comments"/></span>
+     <span class="comments"><xsl:copy-of select="database/comments"/></span>
     </td></tr>
     <tr class="menu"><td colspan="8">
     <xsl:for-each select="database/table">
@@ -65,7 +65,7 @@
      <span class="description"><xsl:value-of select="description"/></span>
     </td></tr>
     <tr><td class="comments" colspan="9">
-     <span><xsl:value-of select="comments"/></span>
+     <xsl:copy-of select="comments"/>
     </td></tr>
 
 <!-- They had fields -->
@@ -85,8 +85,8 @@
 
     <xsl:when test="declaration/index">
     <tr class="tableheader label">
-    <td colspan="2">index</td>
-    <td class="indexes">/\/\</td>
+    <td colspan="2">indexes</td>
+    <td style="text-align: center">^ ^ ^</td>
     <td style="text-align: center">U</td>
     <td style="text-align: center">P</td>
     <td colspan="3">Involved fields</td>
@@ -113,17 +113,20 @@
         <xsl:for-each select="descendant::length"><xsl:call-template name="showlength"/>
         </xsl:for-each>
     </span></td>
-    <td><span class="indexes">
-
+    <td class="indexes">
     <xsl:variable name="curfield" select="current()/name"/>
-
-    <xsl:for-each select="following-sibling::index">
-         <xsl:if test="$curfield=field/name">
-         <xsl:value-of select="name"/>
-         </xsl:if>
-    </xsl:for-each >
-
-    </span></td>
+    <xsl:for-each select="../index">
+         <xsl:choose>
+         <xsl:when test="field[name = $curfield]"><xsl:for-each select="field[name = $curfield]">
+         <xsl:choose>
+            <xsl:when test="sorting = 'descending'">-</xsl:when>
+            <xsl:otherwise>+</xsl:otherwise></xsl:choose>
+            <xsl:number count="index" format="A"/><xsl:number count="index/field" format="1"/>
+         </xsl:for-each></xsl:when>
+         <xsl:otherwise>&#160;&#160;&#160;</xsl:otherwise>
+         </xsl:choose>
+    </xsl:for-each>
+    </td>
     <td><span class="attributes">
         <xsl:if test="descendant::notnull != 0">N</xsl:if>
     </span></td>
@@ -136,7 +139,7 @@
     <td><span class="description"><xsl:value-of select="description"/></span></td>
 
     <td><span class="default"><xsl:value-of select="default"/></span></td>
-    <td><span class="comments"><xsl:value-of select="comments"/></span></td>
+    <td><span class="comments"><xsl:copy-of select="comments"/></span></td>
     </tr>
 </xsl:template>
 
@@ -148,17 +151,24 @@
      and <index> refering these <field> in the same <table> -->
 <xsl:template name="showindex">
     <tr class="tablebody"><td colspan="2"><span class="name"><xsl:value-of select="name"/>
-    </span></td><td colspan="1"><span class="up">/\/\
-    </span></td><td colspan="1"><span class="attributes">
+    </span></td><td colspan="1" class="indexes">
+        <xsl:variable name="curindex" select="current()/name"/>
+    <xsl:for-each select="../index">
+         <xsl:choose>
+         <xsl:when test="$curindex = name">&#160;<xsl:number format="A"/>&#160;</xsl:when>
+         <xsl:otherwise>&#160;&#160;&#160;</xsl:otherwise>
+         </xsl:choose>
+    </xsl:for-each >
+    </td><td colspan="1"><span class="attributes">
         <xsl:if test="unique != 0">U</xsl:if>
     </span></td><td colspan="1"><span class="attributes">
         <xsl:if test="primary != 0">P</xsl:if>
     </span></td><td colspan="3"><span class="indexfield">
         <xsl:for-each select="field">
             <xsl:choose>
-            <xsl:when test="sorting = 'descending'">-</xsl:when><xsl:otherwise>+</xsl:otherwise></xsl:choose><xsl:value-of select="name"/>
+            <xsl:when test="sorting = 'descending'">-</xsl:when><xsl:otherwise>+</xsl:otherwise></xsl:choose><xsl:value-of select="name"/>&#160;
         </xsl:for-each>
-    </span></td><td colspan="1"><span class="comments"><xsl:value-of select="comments"/>
+    </span></td><td colspan="1"><span class="comments"><xsl:copy-of select="comments"/>
     </span></td></tr>
 </xsl:template>
 

@@ -85,7 +85,7 @@ td.comments {
 }
 .indexes {
     font-weight: bold;
-    font-family: sans-serif;
+    font-family: monospace;
 }
 .attributes {
     font-weight: bold;
