@@ -9,7 +9,7 @@
  * @author     Bertrand Gugger <bertrand@toggg.com>
  * @copyright  2006 bertrand Gugger
  * @license    http://www.opensource.org/licenses/bsd-license.php BSD license
- * @version    CVS: $Id: schema2html.xsl,v 1.4 2006-04-22 10:32:11 toggg Exp $
+ * @version    CVS: $Id: schema2html.xsl,v 1.5 2006-04-22 12:40:15 toggg Exp $
  * @link       http://pear.php.net/package/MDB2_Schema
  *
 -->
@@ -38,7 +38,7 @@
        <a>
         <xsl:attribute name="href">#<xsl:value-of select="name"/></xsl:attribute>
         <xsl:value-of select="name"/>
-       </a>
+       </a><xsl:text> </xsl:text>
     </xsl:for-each>
     </td><td colspan="1" align="right">
      <span class="comments">N=notnull, A=autoincrement, +=unsigned, U=unique, P=primary</span>

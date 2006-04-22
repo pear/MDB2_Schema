@@ -28,8 +28,8 @@ span {
 .database .comments {
     font-size: x-small;
 }
-.menu a {
-    padding: 0 10px;
+.menu {
+    word-spacing: 5px;
 }
 .name {
     font-size: large;
