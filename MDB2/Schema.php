@@ -472,11 +472,12 @@ class MDB2_Schema extends PEAR
                    $index_definitions[$index_name] = $definition;
                 }
             }
-            $constraints = $this->db->manager->listTableConstraints($table_name);
 
+            $constraints = $this->db->manager->listTableConstraints($table_name);
             if (PEAR::isError($constraints)) {
                 return $constraints;
             }
+
             if (is_array($constraints) && !empty($constraints)
                 && !array_key_exists('indexes', $table_definition)
             ) {
@@ -509,6 +510,21 @@ class MDB2_Schema extends PEAR
                 $definition = $this->db->reverse->getSequenceDefinition($sequence_name);
                 if (PEAR::isError($definition)) {
                     return $definition;
+                }
+                if (isset($database_definition['tables'][$sequence_name])
+                    && isset($database_definition['tables'][$sequence_name]['indexes'])
+                ) {
+                    foreach ($database_definition['tables'][$sequence_name]['indexes'] as $index) {
+                        if (isset($index['primary']) && $index['primary']
+                            && count($index['fields'] == 1)
+                        ) {
+                            $definition['on'] = array(
+                                'table' => $sequence_name,
+                                'field' => key($index['fields']),
+                            );
+                            break;
+                        }
+                    }
                 }
                 $database_definition['sequences'][$sequence_name] = $definition;
             }
