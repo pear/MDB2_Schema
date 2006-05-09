@@ -4,6 +4,9 @@ require_once 'PEAR/PackageFileManager.php';
 
 $version = 'XXX';
 $notes = <<<EOT
+- added new XSL and CSS for xml schema file rendering (thx Bertrand)
+- automatically generate <on> tags in <sequence> tags if there is a table with
+  the same name and a single column primary key
 EOT;
 
 $description =<<<EOT
