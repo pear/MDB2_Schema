@@ -295,7 +295,9 @@ class MDB2_Schema_Writer
                             } else {
                                 $buffer.= "    <notnull>false</notnull>$eol";
                             }
-                            if (array_key_exists('default', $field)) {
+                            if (array_key_exists('default', $field)
+                                && $field['type'] !== 'clob' && $field['type'] !== 'blob'
+                            ) {
                                 $buffer.= '    <default>'.$this->_escapeSpecialChars($field['default'])."</default>$eol";
                             }
                             if (array_key_exists('autoincrement', $field)) {
