@@ -94,6 +94,7 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
         'debug' => true,
         'log_line_break' => '<br>',
 #        'idxname_format' => '%s',
+#        'quote_identifier' => true,
     );
     $schema =& MDB2_Schema::factory($dsn, $options);
     if (PEAR::isError($schema)) {
