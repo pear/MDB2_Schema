@@ -287,36 +287,21 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!empty($this->valid_types) && !array_key_exists($this->field['type'], $this->valid_types)) {
                 $this->raiseError('no valid field type ("'.$this->field['type'].'") specified', null, $xp);
             }
-            switch ($this->field['type']) {
-            case 'integer':
-                if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
-                    $this->raiseError('unsigned has to be a boolean value', null, $xp);
-                }
-            case 'text':
-            case 'clob':
-            case 'blob':
-                if (array_key_exists('length', $this->field) && ((int)$this->field['length']) <= 0) {
-                    $this->raiseError('length has to be an integer greater 0', null, $xp);
-                }
-                break;
-            case 'boolean':
-            case 'date':
-            case 'timestamp':
-            case 'time':
-            case 'float':
-            case 'decimal':
-                break;
-            default:
-                $this->raiseError('no valid field type ("'.$this->field['type'].'") specified', null, $xp);
+            if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
+                $this->raiseError('unsigned has to be a boolean value', null, $xp);
+            }
+            if (array_key_exists('fixed', $this->field) && !$this->isBoolean($this->field['fixed'])) {
+                $this->raiseError('fixed has to be a boolean value', null, $xp);
+            }
+            if (array_key_exists('length', $this->field) && ((int)$this->field['length']) <= 0) {
+                $this->raiseError('length has to be an integer greater 0', null, $xp);
             }
             if (!array_key_exists('was', $this->field)) {
                 $this->field['was'] = $this->field_name;
             }
-
             if (!array_key_exists('notnull', $this->field)) {
                 $this->field['notnull'] = false;
             }
-
             if (!$this->isBoolean($this->field['notnull'])) {
                 $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
@@ -324,9 +309,6 @@ class MDB2_Schema_Parser extends XML_Parser
                 && $this->field['type'] != 'clob' && $this->field['type'] != 'blob'
             ) {
                 $this->field['default'] = $this->valid_types[$this->field['type']];
-            }
-            if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
-                $this->raiseError('field "unsigned" has to be a boolean value', null, $xp);
             }
 
             if (array_key_exists('default', $this->field)) {
@@ -700,6 +682,13 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->field['notnull'] .= $data;
             } else {
                 $this->field['notnull'] = $data;
+            }
+            break;
+        case 'database-table-declaration-field-fixed':
+            if (array_key_exists('fixed', $this->field)) {
+                $this->field['fixed'] .= $data;
+            } else {
+                $this->field['fixed'] = $data;
             }
             break;
         case 'database-table-declaration-field-unsigned':

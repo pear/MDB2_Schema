@@ -295,6 +295,9 @@ class MDB2_Schema_Writer
                             } else {
                                 $buffer.= "    <notnull>false</notnull>$eol";
                             }
+                            if (array_key_exists('fixed', $field) && $field['type'] === 'text') {
+                                $buffer.= "    <fixed>".$this->_dumpBoolean($field['fixed'])."</fixed>$eol";
+                            }
                             if (array_key_exists('default', $field)
                                 && $field['type'] !== 'clob' && $field['type'] !== 'blob'
                             ) {
