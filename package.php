@@ -8,6 +8,7 @@ $notes = <<<EOT
 - automatically generate <on> tags in <sequence> tags if there is a table with
   the same name and a single column primary key
 - do not dump default for LOB fields (Bug #7596)
+- added support for "fixed" (needs more testing)
 EOT;
 
 $description =<<<EOT
