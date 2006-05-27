@@ -147,7 +147,8 @@ class MDB2_Schema extends PEAR
     // {{{ getWarnings()
 
     /**
-     * get all warnings in reverse order.
+     * Get all warnings in reverse order.
+     *
      * This means that the last warning is the first element in the array
      *
      * @return array with warnings
@@ -211,9 +212,9 @@ class MDB2_Schema extends PEAR
      * type
      *
      * @param string|array|MDB2_Driver_Common   'data source name', see the
-                    MDB2::parseDSN method for a description of the dsn format.
+     *              @see MDB2::parseDSN method for a description of the dsn format.
      *              Can also be specified as an array of the
-     *              format returned by MDB2::parseDSN.
+     *              format returned by @see MDB2::parseDSN.
      *              Finally you can also pass an existing db object to be used.
      * @param array An associative array of option names and their values.
      * @return bool|MDB2_Error MDB2_OK or error object
@@ -238,9 +239,9 @@ class MDB2_Schema extends PEAR
      * database
      *
      * @param string|array|MDB2_Driver_Common   'data source name', see the
-                    MDB2::parseDSN method for a description of the dsn format.
+     *              @see MDB2::parseDSN method for a description of the dsn format.
      *              Can also be specified as an array of the
-     *              format returned by MDB2::parseDSN.
+     *              format returned by @see MDB2::parseDSN.
      *              Finally you can also pass an existing db object to be used.
      * @param array An associative array of option names and their values.
      * @return bool|MDB2_Error MDB2_OK or error object
@@ -536,7 +537,7 @@ class MDB2_Schema extends PEAR
     // {{{ createTableIndexes()
 
     /**
-     * create a indexes om a table
+     * Create indexes on a table
      *
      * @param string  name of the table
      * @param array   indexes to be created
@@ -621,10 +622,10 @@ class MDB2_Schema extends PEAR
     // {{{ createTable()
 
     /**
-     * create a table and inititialize the table if data is available
+     * Create a table and inititialize the table if data is available
      *
      * @param string name of the table to be created
-     * @param array  multi dimensional array that containts the
+     * @param array  multi dimensional array that contains the
      *               structure and optional data of the table
      * @param bool   if the table/index should be overwritten if it already exists
      * @return bool|MDB2_Error MDB2_OK or error object
@@ -682,10 +683,10 @@ class MDB2_Schema extends PEAR
     // {{{ initializeTable()
 
     /**
-     * inititialize the table with data
+     * Inititialize the table with data
      *
      * @param string name of the table
-     * @param array  multi dimensional array that containts the
+     * @param array  multi dimensional array that contains the
      *               structure and optional data of the table
      * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
@@ -728,10 +729,10 @@ class MDB2_Schema extends PEAR
     // {{{ createSequence()
 
     /**
-     * create a sequence
+     * Create a sequence
      *
      * @param string name of the sequence to be created
-     * @param array  multi dimensional array that containts the
+     * @param array  multi dimensional array that contains the
      *               structure and optional data of the table
      * @param bool  if the sequence should be overwritten if it already exists
      * @return bool|MDB2_Error MDB2_OK or error object
@@ -941,7 +942,7 @@ class MDB2_Schema extends PEAR
     // {{{ compareDefinitions()
 
     /**
-     * compare a previous definition with the currenlty parsed definition
+     * Compare a previous definition with the currently parsed definition
      *
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
@@ -1010,11 +1011,12 @@ class MDB2_Schema extends PEAR
     // {{{ compareTableFieldsDefinitions()
 
     /**
-     * compare a previous definition with the currenlty parsed definition
+     * Compare a previous definition with the currently parsed definition
      *
      * @param string name of the table
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
+     * @param array 
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
@@ -1075,11 +1077,12 @@ class MDB2_Schema extends PEAR
     // {{{ compareTableIndexesDefinitions()
 
     /**
-     * compare a previous definition with the currenlty parsed definition
+     * Compare a previous definition with the currently parsed definition
      *
      * @param string name of the table
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
+     * @param array 
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
@@ -1163,11 +1166,12 @@ class MDB2_Schema extends PEAR
     // {{{ compareTableDefinitions()
 
     /**
-     * compare a previous definition with the currenlty parsed definition
+     * Compare a previous definition with the currently parsed definition
      *
      * @param string name of the table
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
+     * @param array 
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
@@ -1263,11 +1267,12 @@ class MDB2_Schema extends PEAR
     // {{{ compareSequenceDefinitions()
 
     /**
-     * compare a previous definition with the currenlty parsed definition
+     * Compare a previous definition with the currently parsed definition
      *
      * @param string name of the sequence
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
+     * @param array 
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
@@ -1330,7 +1335,7 @@ class MDB2_Schema extends PEAR
     // {{{ verifyAlterDatabase()
 
     /**
-     * verify that the changes requested are supported
+     * Verify that the changes requested are supported
      *
      * @param array associative array that contains the definition of the changes
      *              that are meant to be applied to the database structure.
@@ -1829,7 +1834,7 @@ class MDB2_Schema extends PEAR
      * @param array multi dimensional array that contains the current definition
      * @param array associative array that takes pairs of tag
      * names and values that define dump options.
-     *                 array (
+     *                 <pre>array (
      *                     'output_mode'    =>    String
      *                         'file' :   dump into a file
      *                         default:   dump using a function
@@ -1840,11 +1845,11 @@ class MDB2_Schema extends PEAR
      *                     'end_of_line'        =>    String
      *                         end of line delimiter that should be used
      *                         default: "\n"
-     *                 );
+     *                 );</pre>
      * @param int that determines what data to dump
-     *                      MDB2_SCHEMA_DUMP_ALL       : the entire db
-     *                      MDB2_SCHEMA_DUMP_STRUCTURE : only the structure of the db
-     *                      MDB2_SCHEMA_DUMP_CONTENT   : only the content of the db
+     *              + MDB2_SCHEMA_DUMP_ALL       : the entire db
+     *              + MDB2_SCHEMA_DUMP_STRUCTURE : only the structure of the db
+     *              + MDB2_SCHEMA_DUMP_CONTENT   : only the content of the db
      * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
@@ -1899,7 +1904,7 @@ class MDB2_Schema extends PEAR
     // {{{ writeInitialization()
 
     /**
-     * write initialization and sequences
+     * Write initialization and sequences
      *
      * @param string|array  data file or data array
      * @param string|array  structure file or array
@@ -2082,8 +2087,8 @@ class MDB2_Schema extends PEAR
      * Return a textual error message for a MDB2 error code
      *
      * @param   int|array integer error code,
-                          null to get the current error code-message map,
-                          or an array with a new error code-message map
+     *                     <code>null</code> to get the current error code-message map,
+     *                    or an array with a new error code-message map
      * @return  string  error message, or false if the error code was not recognized
      * @access public
      */
@@ -2132,6 +2137,7 @@ class MDB2_Schema extends PEAR
      *                 either as a function name, or as an array of an
      *                 object and method name.  For other error modes this
      *                 parameter is ignored.
+     * @param array    Options, depending on the mode, @see PEAR::setErrorHandling 
      * @param string   Extra debug information.  Defaults to the last
      *                 query and native error code.
      * @return object  a PEAR error object
@@ -2148,7 +2154,7 @@ class MDB2_Schema extends PEAR
     // {{{ isError()
 
     /**
-     * Tell whether a value is a MDB2_Schema error.
+     * Tell whether a value is an MDB2_Schema error.
      *
      * @param   mixed the value to test
      * @param   int   if $data is an error object, return true only if $code is
