@@ -251,7 +251,7 @@ class MDB2_Schema extends PEAR
     function connect(&$db, $options = array())
     {
         $db_options = array();
-        if (is_array($options) && !empty($options)) {
+        if (is_array($options)) {
             foreach ($options as $option => $value) {
                 if (array_key_exists($option, $this->options)) {
                     $err = $this->setOption($option, $value);
@@ -432,9 +432,7 @@ class MDB2_Schema extends PEAR
                     return $definition;
                 }
 
-                if (array_key_exists('autoincrement', $definition[0])
-                    && $definition[0]['autoincrement']
-                ) {
+                if (!empty($definition[0]['autoincrement'])) {
                     $definition[0]['default'] = 0;
                 }
                 $table_definition['fields'][$field_name] = $definition[0];
@@ -457,10 +455,7 @@ class MDB2_Schema extends PEAR
                 return $indexes;
             }
 
-            if (is_array($indexes) && !empty($indexes)
-                && !array_key_exists('indexes', $table_definition)
-            ) {
-                $table_definition['indexes'] = array();
+            if (is_array($indexes) && empty($table_definition['indexes'])) {
                 foreach ($indexes as $index_name) {
                     $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     $definition = $this->db->reverse->getTableIndexDefinition($table_name, $index_name);
@@ -480,10 +475,7 @@ class MDB2_Schema extends PEAR
                 return $constraints;
             }
 
-            if (is_array($constraints) && !empty($constraints)
-                && !array_key_exists('indexes', $table_definition)
-            ) {
-                $table_definition['indexes'] = array();
+            if (is_array($constraints) && empty($table_definition['indexes'])) {
                 foreach ($constraints as $index_name) {
                     $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     $definition = $this->db->reverse->getTableConstraintDefinition($table_name, $index_name);
@@ -507,7 +499,7 @@ class MDB2_Schema extends PEAR
             return $sequences;
         }
 
-        if (is_array($sequences) && !empty($sequences)) {
+        if (is_array($sequences)) {
             foreach ($sequences as $sequence_name) {
                 $definition = $this->db->reverse->getSequenceDefinition($sequence_name);
                 if (PEAR::isError($definition)) {
@@ -557,9 +549,7 @@ class MDB2_Schema extends PEAR
         foreach ($indexes as $index_name => $index) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
-            if ((array_key_exists('primary', $index) && $index['primary'])
-                || (array_key_exists('unique', $index) && $index['unique'])
-            ) {
+            if (!empty($index['primary']) || !empty($index['unique'])) {
                 $indexes = $this->db->manager->listTableConstraints($table_name);
             } else {
                 $indexes = $this->db->manager->listTableIndexes($table_name);
@@ -574,7 +564,7 @@ class MDB2_Schema extends PEAR
                     $this->db->debug('Index already exists: '.$index_name);
                     return MDB2_OK;
                 }
-                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
+                if (!empty($index['primary']) || !empty($index['unique'])) {
                     $result = $this->db->manager->dropConstraint($table_name, $index_name);
                 } else {
                     $result = $this->db->manager->dropIndex($table_name, $index_name);
@@ -586,7 +576,7 @@ class MDB2_Schema extends PEAR
             }
 
             // check if primary is being used and if it's supported
-            if (array_key_exists('primary', $index) && $index['primary'] && !$supports_primary_key) {
+            if (!empty($index['primary']) && !$supports_primary_key) {
                 /**
                  * Primary not supported so we fallback to UNIQUE
                  * and making the field NOT NULL
@@ -612,9 +602,7 @@ class MDB2_Schema extends PEAR
                 }
             }
 
-            if ((array_key_exists('primary', $index) && $index['primary'])
-                || (array_key_exists('unique', $index) && $index['unique'])
-            ) {
+            if (!empty($index['primary']) || !empty($index['unique'])) {
                 $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
             } else {
                 $result = $this->db->manager->createIndex($table_name, $index_name, $index);
@@ -670,14 +658,14 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (array_key_exists('initialization', $table) && is_array($table['initialization'])) {
+        if (!empty($table['initialization']) && is_array($table['initialization'])) {
             $result = $this->initializeTable($table_name, $table);
             if (PEAR::isError($result)) {
                 return $result;
             }
         }
 
-        if (array_key_exists('indexes', $table) && is_array($table['indexes'])) {
+        if (!empty($table['indexes']) && is_array($table['indexes'])) {
             $result = $this->createTableIndexes($table_name, $table['indexes'], $overwrite);
             if (PEAR::isError($result)) {
                 return $result;
@@ -716,7 +704,7 @@ class MDB2_Schema extends PEAR
         foreach ($table['initialization'] as $instruction) {
             switch ($instruction['type']) {
             case 'insert':
-                if (array_key_exists('fields', $instruction) && is_array($instruction['fields'])) {
+                if (!empty($instruction['fields']) && is_array($instruction['fields'])) {
                     $result = $stmt->bindParamArray($instruction['fields']);
                     if (PEAR::isError($result)) {
                         return $result;
@@ -776,7 +764,7 @@ class MDB2_Schema extends PEAR
 
         $start = 1;
         $field = '';
-        if (array_key_exists('on', $sequence)) {
+        if (!empty($sequence['on'])) {
             $table = $sequence['on']['table'];
             $field = $sequence['on']['field'];
 
@@ -804,7 +792,7 @@ class MDB2_Schema extends PEAR
             } else {
                 $this->warnings[] = 'Could not sync sequence: '.$sequence_name;
             }
-        } elseif (array_key_exists('start', $sequence) && is_numeric($sequence['start'])) {
+        } elseif (!empty($sequence['start']) && is_numeric($sequence['start'])) {
             $start = $sequence['start'];
             $table = '';
         }
@@ -961,11 +949,11 @@ class MDB2_Schema extends PEAR
     {
         $changes = array();
 
-        if (array_key_exists('tables', $current_definition) && is_array($current_definition['tables'])) {
+        if (!empty($current_definition['tables']) && is_array($current_definition['tables'])) {
             $changes['tables'] = $defined_tables = array();
             foreach ($current_definition['tables'] as $table_name => $table) {
                 $previous_tables = array();
-                if (array_key_exists('tables', $previous_definition) && is_array($previous_definition)) {
+                if (!empty($previous_definition) && is_array($previous_definition)) {
                     $previous_tables = $previous_definition['tables'];
                 }
                 $change = $this->compareTableDefinitions($table_name, $table, $previous_tables, $defined_tables);
@@ -976,19 +964,19 @@ class MDB2_Schema extends PEAR
                     $changes['tables'] = MDB2_Schema::arrayMergeClobber($changes['tables'], $change);
                 }
             }
-            if (array_key_exists('tables', $previous_definition) && is_array($previous_definition['tables'])) {
+            if (!empty($previous_definition['tables']) && is_array($previous_definition['tables'])) {
                 foreach ($previous_definition['tables'] as $table_name => $table) {
-                    if (!array_key_exists($table_name, $defined_tables)) {
+                    if (empty($defined_tables[$table_name])) {
                         $changes['remove'][$table_name] = true;
                     }
                 }
             }
         }
-        if (array_key_exists('sequences', $current_definition) && is_array($current_definition['sequences'])) {
+        if (!empty($current_definition['sequences']) && is_array($current_definition['sequences'])) {
             $changes['sequences'] = $defined_sequences = array();
             foreach ($current_definition['sequences'] as $sequence_name => $sequence) {
                 $previous_sequences = array();
-                if (array_key_exists('sequences', $previous_definition) && is_array($previous_definition)) {
+                if (!empty($previous_definition) && is_array($previous_definition)) {
                     $previous_sequences = $previous_definition['sequences'];
                 }
                 $change = $this->compareSequenceDefinitions(
@@ -1004,9 +992,9 @@ class MDB2_Schema extends PEAR
                     $changes['sequences'] = MDB2_Schema::arrayMergeClobber($changes['sequences'], $change);
                 }
             }
-            if (array_key_exists('sequences', $previous_definition) && is_array($previous_definition['sequences'])) {
+            if (!empty($previous_definition['sequences']) && is_array($previous_definition['sequences'])) {
                 foreach ($previous_definition['sequences'] as $sequence_name => $sequence) {
-                    if (!array_key_exists($sequence_name, $defined_sequences)) {
+                    if (empty($defined_sequences[$sequence_name])) {
                         $changes['remove'][$sequence_name] = true;
                     }
                 }
@@ -1036,17 +1024,17 @@ class MDB2_Schema extends PEAR
         if (is_array($current_definition)) {
             foreach ($current_definition as $field_name => $field) {
                 $was_field_name = $field['was'];
-                if (array_key_exists($field_name, $previous_definition)
+                if (!empty($previous_definition[$field_name])
                     && isset($previous_definition[$field_name]['was'])
                     && $previous_definition[$field_name]['was'] == $was_field_name
                 ) {
                     $was_field_name = $field_name;
                 }
-                if (array_key_exists($was_field_name, $previous_definition)) {
+                if (!empty($previous_definition[$was_field_name])) {
                     if ($was_field_name != $field_name) {
                         $changes['rename'][$was_field_name] = array('name' => $field_name, 'definition' => $field);
                     }
-                    if (array_key_exists($was_field_name, $defined_fields)) {
+                    if (!empty($defined_fields[$was_field_name])) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'the field "'.$was_field_name.
                             '" was specified as base of more than one field of table');
@@ -1073,7 +1061,7 @@ class MDB2_Schema extends PEAR
         }
         if (isset($previous_definition) && is_array($previous_definition)) {
             foreach ($previous_definition as $field_previous_name => $field_previous) {
-                if (!array_key_exists($field_previous_name, $defined_fields)) {
+                if (empty($defined_fields[$field_previous_name])) {
                     $changes['remove'][$field_previous_name] = true;
                 }
             }
@@ -1102,39 +1090,46 @@ class MDB2_Schema extends PEAR
         if (is_array($current_definition)) {
             foreach ($current_definition as $index_name => $index) {
                 $was_index_name = $index['was'];
-                if (array_key_exists($index_name, $previous_definition)
+                if (!empty($previous_definition[$index_name])
                     && isset($previous_definition[$index_name]['was'])
                     && $previous_definition[$index_name]['was'] == $was_index_name
                 ) {
                     $was_index_name = $index_name;
                 }
-                if (array_key_exists($was_index_name, $previous_definition)) {
+                if (!empty($previous_definition[$was_index_name])) {
                     $change = array();
                     if ($was_index_name != $index_name) {
                         $change['name'] = $was_index_name;
                     }
-                    if (array_key_exists($was_index_name, $defined_indexes)) {
+                    if (!empty($defined_indexes[$was_index_name])) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'the index "'.$was_index_name.'" was specified as base of'.
                             ' more than one index of table "'.$table_name.'"');
                     }
                     $defined_indexes[$was_index_name] = true;
 
-                    $previous_unique = isset($previous_definition[$was_index_name]['unique']);
-                    $unique = array_key_exists('unique', $index);
+                    $previous_unique = array_key_exists('unique', $previous_definition[$was_index_name])
+                        ? $previous_definition[$was_index_name]['unique'] : false;
+                    $unique = array_key_exists('unique', $index) ? $index['unique'] : false;
                     if ($previous_unique != $unique) {
                         $change['unique'] = $unique;
                     }
+                    $previous_primary = array_key_exists('primary', $previous_definition[$was_index_name])
+                        ? $previous_definition[$was_index_name]['primary'] : false;
+                    $primary = array_key_exists('primary', $index) ? $index['primary'] : false;
+                    if ($previous_primary != $primary) {
+                        $change['primary'] = $primary;
+                    }
                     $defined_fields = array();
                     $previous_fields = $previous_definition[$was_index_name]['fields'];
-                    if (array_key_exists('fields', $index) && is_array($index['fields'])) {
+                    if (!empty($index['fields']) && is_array($index['fields'])) {
                         foreach ($index['fields'] as $field_name => $field) {
-                            if (array_key_exists($field_name, $previous_fields)) {
+                            if (!empty($previous_fields[$field_name])) {
                                 $defined_fields[$field_name] = true;
-                                $sorting = (array_key_exists('sorting', $field) ? $field['sorting'] : '');
-                                $previous_sorting = (isset($previous_fields[$field_name]['sorting'])
-                                    ? $previous_fields[$field_name]['sorting'] : '');
-                                if ($sorting != $previous_sorting) {
+                                $previous_sorting = array_key_exists('sorting', $previous_fields[$field_name])
+                                    ? $previous_fields[$field_name]['sorting'] : '';
+                                $sorting = array_key_exists('sorting', $field) ? $field['sorting'] : '';
+                                if ($previous_sorting != $sorting) {
                                     $change['change'] = true;
                                 }
                             } else {
@@ -1144,7 +1139,7 @@ class MDB2_Schema extends PEAR
                     }
                     if (isset($previous_fields) && is_array($previous_fields)) {
                         foreach ($previous_fields as $field_name => $field) {
-                            if (!array_key_exists($field_name, $defined_fields)) {
+                            if (empty($defined_fields[$field_name])) {
                                 $change['change'] = true;
                             }
                         }
@@ -1163,7 +1158,7 @@ class MDB2_Schema extends PEAR
             }
         }
         foreach ($previous_definition as $index_previous_name => $index_previous) {
-            if (!array_key_exists($index_previous_name, $defined_indexes)) {
+            if (empty($defined_indexes[$index_previous_name])) {
                 $changes['remove'][$index_previous_name] = true;
             }
         }
@@ -1190,21 +1185,21 @@ class MDB2_Schema extends PEAR
 
         if (is_array($current_definition)) {
             $was_table_name = $table_name;
-            if (array_key_exists('was', $current_definition)) {
+            if (!empty($current_definition['was'])) {
                 $was_table_name = $current_definition['was'];
             }
-            if (array_key_exists($was_table_name, $previous_definition)) {
+            if (!empty($previous_definition[$was_table_name])) {
                 $changes['change'][$was_table_name] = array();
                 if ($was_table_name != $table_name) {
                     $changes['change'][$was_table_name] = array('name' => $table_name);
                 }
-                if (array_key_exists($was_table_name, $defined_tables)) {
+                if (!empty($defined_tables[$was_table_name])) {
                     return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'the table "'.$was_table_name.
                         '" was specified as base of more than of table of the database');
                 }
                 $defined_tables[$was_table_name] = true;
-                if (array_key_exists('fields', $current_definition) && is_array($current_definition['fields'])) {
+                if (!empty($current_definition['fields']) && is_array($current_definition['fields'])) {
                     $previous_fields = array();
                     if (isset($previous_definition[$was_table_name]['fields'])
                         && is_array($previous_definition[$was_table_name]['fields'])
@@ -1226,7 +1221,7 @@ class MDB2_Schema extends PEAR
                         = MDB2_Schema::arrayMergeClobber($changes['change'][$was_table_name], $change);
                     }
                 }
-                if (array_key_exists('indexes', $current_definition) && is_array($current_definition['indexes'])) {
+                if (!empty($current_definition['indexes']) && is_array($current_definition['indexes'])) {
                     $previous_indexes = array();
                     if (isset($previous_definition[$was_table_name]['indexes'])
                         && is_array($previous_definition[$was_table_name]['indexes'])
@@ -1291,26 +1286,26 @@ class MDB2_Schema extends PEAR
 
         if (is_array($current_definition)) {
             $was_sequence_name = $sequence_name;
-            if (array_key_exists($sequence_name, $previous_definition)
+            if (!empty($previous_definition[$sequence_name])
                 && isset($previous_definition[$sequence_name]['was'])
                 && $previous_definition[$sequence_name]['was'] == $was_sequence_name
             ) {
                 $was_sequence_name = $sequence_name;
-            } elseif (array_key_exists('was', $current_definition)) {
+            } elseif (!empty($current_definition['was'])) {
                 $was_sequence_name = $current_definition['was'];
             }
-            if (array_key_exists($was_sequence_name, $previous_definition)) {
+            if (!empty($previous_definition[$was_sequence_name])) {
                 if ($was_sequence_name != $sequence_name) {
                     $changes['change'][$was_sequence_name]['name'] = $sequence_name;
                 }
-                if (array_key_exists($was_sequence_name, $defined_sequences)) {
+                if (!empty($defined_sequences[$was_sequence_name])) {
                     return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'the sequence "'.$was_sequence_name.'" was specified as base'.
                         ' of more than of sequence of the database');
                 }
                 $defined_sequences[$was_sequence_name] = true;
                 $change = array();
-                if (array_key_exists('start', $current_definition)
+                if (!empty($current_definition['start'])
                     && isset($previous_definition[$was_sequence_name]['start'])
                     && $current_definition['start'] != $previous_definition[$was_sequence_name]['start']
                 ) {
@@ -1352,23 +1347,21 @@ class MDB2_Schema extends PEAR
      */
     function verifyAlterDatabase($changes)
     {
-        if (array_key_exists('tables', $changes) && is_array($changes['tables'])
-            && array_key_exists('change', $changes['tables'])
-        ) {
+        if (!empty($changes['tables']['change']) && is_array($changes['tables']['change'])) {
             foreach ($changes['tables']['change'] as $table_name => $table) {
-                if (array_key_exists('indexes', $table) && is_array($table['indexes'])) {
+                if (!empty($table['indexes']) && is_array($table['indexes'])) {
                     if (!$this->db->supports('indexes')) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
                             'indexes are not supported');
                     }
                     $table_changes = count($table['indexes']);
-                    if (array_key_exists('add', $table['indexes'])) {
+                    if (!empty($table['indexes']['add'])) {
                         $table_changes--;
                     }
-                    if (array_key_exists('remove', $table['indexes'])) {
+                    if (!empty($table['indexes']['remove'])) {
                         $table_changes--;
                     }
-                    if (array_key_exists('change', $table['indexes'])) {
+                    if (!empty($table['indexes']['change'])) {
                         $table_changes--;
                     }
                     if ($table_changes) {
@@ -1383,19 +1376,19 @@ class MDB2_Schema extends PEAR
                 }
             }
         }
-        if (array_key_exists('sequences', $changes) && is_array($changes['sequences'])) {
+        if (!empty($changes['sequences']) && is_array($changes['sequences'])) {
             if (!$this->db->supports('sequences')) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
                     'sequences are not supported');
             }
             $sequence_changes = count($changes['sequences']);
-            if (array_key_exists('add', $changes['sequences'])) {
+            if (!empty($changes['sequences']['add'])) {
                 $sequence_changes--;
             }
-            if (array_key_exists('remove', $changes['sequences'])) {
+            if (!empty($changes['sequences']['remove'])) {
                 $sequence_changes--;
             }
-            if (array_key_exists('change', $changes['sequences'])) {
+            if (!empty($changes['sequences']['change'])) {
                 $sequence_changes--;
             }
             if ($sequence_changes) {
@@ -1426,9 +1419,9 @@ class MDB2_Schema extends PEAR
             return $alterations;
         }
 
-        if (array_key_exists('change', $changes)) {
+        if (!empty($changes['change']) && is_array($changes['change'])) {
             foreach ($changes['change'] as $index_name => $index) {
-                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
+                if (!empty($index['primary']) || !empty($index['unique'])) {
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);
@@ -1439,9 +1432,9 @@ class MDB2_Schema extends PEAR
                 $alterations++;
             }
         }
-        if (array_key_exists('add', $changes)) {
+        if (!empty($changes['add']) && is_array($changes['add'])) {
             foreach ($changes['add'] as $index_name => $index) {
-                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
+                if (!empty($index['primary']) || !empty($index['unique'])) {
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);
@@ -1452,9 +1445,9 @@ class MDB2_Schema extends PEAR
                 $alterations++;
             }
         }
-        if (array_key_exists('remove', $changes)) {
+        if (!empty($changes['remove']) && is_array($changes['remove'])) {
             foreach ($changes['remove'] as $index_name => $index) {
-                if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
+                if (!empty($index['primary']) || !empty($index['unique'])) {
                     $result = $this->db->manager->dropConstraint($table_name, $index_name);
                 } else {
                     $result = $this->db->manager->dropIndex($table_name, $index_name);
@@ -1489,7 +1482,8 @@ class MDB2_Schema extends PEAR
         if (empty($changes)) {
             return $alterations;
         }
-        if (array_key_exists('remove', $changes)) {
+
+        if (!empty($changes['remove']) && is_array($changes['remove'])) {
             foreach ($changes['remove'] as $table_name => $table) {
                 $result = $this->db->manager->dropTable($table_name);
                 if (PEAR::isError($result)) {
@@ -1499,7 +1493,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (array_key_exists('add', $changes)) {
+        if (!empty($changes['add']) && is_array($changes['add'])) {
             foreach ($changes['add'] as $table_name => $table) {
                 $result = $this->createTable($table_name, $current_definition[$table_name]);
                 if (PEAR::isError($result)) {
@@ -1509,14 +1503,14 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (array_key_exists('change', $changes)) {
+        if (!empty($changes['change']) && is_array($changes['change'])) {
             foreach ($changes['change'] as $table_name => $table) {
                 $indexes = array();
-                if (array_key_exists('indexes', $table)) {
+                if (!empty($table['indexes'])) {
                     $indexes = $table['indexes'];
                     unset($table['indexes']);
                 }
-                if (array_key_exists('remove', $indexes)) {
+                if (!empty($indexes['remove'])) {
                     $result = $this->alterDatabaseIndexes($table_name, array('remove' => $indexes['remove']));
                     if (PEAR::isError($result)) {
                         return $result;
@@ -1563,7 +1557,7 @@ class MDB2_Schema extends PEAR
             return $alterations;
         }
 
-        if (array_key_exists('add', $changes)) {
+        if (!empty($changes['add']) && is_array($changes['add'])) {
             foreach ($changes['add'] as $sequence_name => $sequence) {
                 $result = $this->createSequence($sequence_name, $current_definition[$sequence_name]);
                 if (PEAR::isError($result)) {
@@ -1573,7 +1567,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (array_key_exists('remove', $changes)) {
+        if (!empty($changes['remove']) && is_array($changes['remove'])) {
             foreach ($changes['remove'] as $sequence_name => $sequence) {
                 $result = $this->db->manager->dropSequence($sequence_name);
                 if (PEAR::isError($result)) {
@@ -1583,7 +1577,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (array_key_exists('change', $changes)) {
+        if (!empty($changes['change']) && is_array($changes['change'])) {
             foreach ($changes['change'] as $sequence_name => $sequence) {
                 $result = $this->db->manager->dropSequence($previous_definition[$sequence_name]['was']);
                 if (PEAR::isError($result)) {
@@ -1626,16 +1620,17 @@ class MDB2_Schema extends PEAR
             return $result;
         }
 
-        if (array_key_exists('name', $current_definition)) {
+        if (!empty($current_definition['name'])) {
             $previous_database_name = $this->db->setDatabase($current_definition['name']);
         }
+
         if (($support_transactions = $this->db->supports('transactions'))
             && PEAR::isError($result = $this->db->beginTransaction())
         ) {
             return $result;
         }
 
-        if (array_key_exists('tables', $changes) && array_key_exists('tables', $current_definition)) {
+        if (!empty($changes['tables']) && !empty($current_definition['tables'])) {
             $current_tables = isset($current_definition['tables']) ? $current_definition['tables'] : array();
             $previous_tables = isset($previous_definition['tables']) ? $previous_definition['tables'] : array();
             $result = $this->alterDatabaseTables($current_tables, $previous_tables, $changes['tables']);
@@ -1644,7 +1639,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (!PEAR::isError($result) && array_key_exists('sequences', $changes)) {
+        if (!PEAR::isError($result) && !empty($changes['sequences'])) {
             $current_sequences = isset($current_definition['sequences']) ? $current_definition['sequences'] : array();
             $previous_sequences = isset($previous_definition['sequences']) ? $previous_definition['sequences'] : array();
             $result = $this->alterDatabaseSequences($current_sequences, $previous_sequences, $changes['sequences']);
@@ -1694,86 +1689,86 @@ class MDB2_Schema extends PEAR
      */
     function dumpDatabaseChanges($changes)
     {
-        if (array_key_exists('tables', $changes)) {
-            if (array_key_exists('add', $changes['tables'])) {
+        if (!empty($changes['tables'])) {
+            if (!empty($changes['tables']['add']) && is_array($changes['tables']['add'])) {
                 foreach ($changes['tables']['add'] as $table_name => $table) {
                     $this->db->debug("$table_name:");
                     $this->db->debug("\tAdded table '$table_name'");
                 }
             }
-            if (array_key_exists('remove', $changes['tables'])) {
+            if (!empty($changes['tables']['remove']) && is_array($changes['tables']['remove'])) {
                 foreach ($changes['tables']['remove'] as $table_name => $table) {
                     $this->db->debug("$table_name:");
                     $this->db->debug("\tRemoved table '$table_name'");
                 }
             }
-            if (array_key_exists('change', $changes['tables'])) {
+            if (!empty($changes['tables']['change']) && is_array($changes['tables']['change'])) {
                 foreach ($changes['tables']['change'] as $table_name => $table) {
                     if (array_key_exists('name', $table)) {
                         $this->db->debug("\tRenamed table '$table_name' to '".
                             $table['name']."'");
                     }
-                    if (array_key_exists('add', $table)) {
+                    if (!empty($table['add']) && is_array($table['add'])) {
                         foreach ($table['add'] as $field_name => $field) {
                             $this->db->debug("\tAdded field '".$field_name."'");
                         }
                     }
-                    if (array_key_exists('remove', $table)) {
+                    if (!empty($table['remove']) && is_array($table['remove'])) {
                         foreach ($table['remove'] as $field_name => $field) {
                             $this->db->debug("\tRemoved field '".$field_name."'");
                         }
                     }
-                    if (array_key_exists('rename', $table)) {
+                    if (!empty($table['rename']) && is_array($table['rename'])) {
                         foreach ($table['rename'] as $field_name => $field) {
                             $this->db->debug("\tRenamed field '".$field_name."' to '".
                                 $field['name']."'");
                         }
                     }
-                    if (array_key_exists('change', $table)) {
+                    if (!empty($table['change']) && is_array($table['change'])) {
                         foreach ($table['change'] as $field_name => $field) {
+                            $field = $field['definition'];
                             if (array_key_exists('type', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' type to '".
-                                        $field['definition']['type']."'");
+                                        $field['type']."'");
                             }
                             if (array_key_exists('unsigned', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' type to '".
-                                    (array_key_exists('unsigned', $field['definition']) && $field['definition']['unsigned'] ? '' : 'not ')."unsigned'");
+                                    (!empty($field['unsigned']) && $field['unsigned'] ? '' : 'not ')."unsigned'");
                             }
                             if (array_key_exists('length', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' length to '".
-                                    ((!array_key_exists('length', $field['definition']) || $field['definition']['length'] == 0)
-                                        ? 'no length' : $field['definition']['length'])."'");
+                                    (!empty($field['length']) ? $field['length']: 'no length')."'");
                             }
                             if (array_key_exists('default', $field)) {
                                 $this->db->debug(
                                     "\tChanged field '$field_name' default to ".
-                                    (array_key_exists('default', $field['definition']) ? "'".$field['definition']['default']."'" : 'NULL'));
+                                    (isset($field['default']) ? "'".$field['default']."'" : 'NULL'));
                             }
                             if (array_key_exists('notnull', $field)) {
                                 $this->db->debug(
                                    "\tChanged field '$field_name' notnull to ".
-                                    (array_key_exists('notnull', $field['definition']) && $field['definition']['notnull'] ? 'true' : 'false')
+                                    (!empty($field['notnull']) && $field['notnull'] ? 'true' : 'false')
                                 );
                             }
                         }
                     }
-                    if (array_key_exists('indexes', $table)) {
-                        if (array_key_exists('add', $table['indexes'])) {
+                    if (!empty($table['indexes']) && is_array($table['indexes'])) {
+                        if (!empty($table['indexes']['add']) && is_array($table['indexes']['add'])) {
                             foreach ($table['indexes']['add'] as $index_name => $index) {
                                 $this->db->debug("\tAdded index '".$index_name.
                                     "' of table '$table_name'");
                             }
                         }
-                        if (array_key_exists('remove', $table['indexes'])) {
+                        if (!empty($table['indexes']['remove']) && is_array($table['indexes']['remove'])) {
                             foreach ($table['indexes']['remove'] as $index_name => $index) {
                                 $this->db->debug("\tRemoved index '".$index_name.
                                     "' of table '$table_name'");
                             }
                         }
-                        if (array_key_exists('change', $table['indexes'])) {
+                        if (!empty($table['indexes']['change']) && is_array($table['indexes']['change'])) {
                             foreach ($table['indexes']['change'] as $index_name => $index) {
                                 if (array_key_exists('name', $index)) {
                                     $this->db->debug(
@@ -1783,7 +1778,12 @@ class MDB2_Schema extends PEAR
                                 if (array_key_exists('unique', $index)) {
                                     $this->db->debug(
                                         "\tChanged index '".$index_name."' unique to '".
-                                        array_key_exists('unique', $index)."' on table '$table_name'");
+                                        !empty($index['unique'])."' on table '$table_name'");
+                                }
+                                if (array_key_exists('primary', $index)) {
+                                    $this->db->debug(
+                                        "\tChanged index '".$index_name."' primary to '".
+                                        !empty($index['primary'])."' on table '$table_name'");
                                 }
                                 if (array_key_exists('change', $index)) {
                                     $this->db->debug("\tChanged index '".$index_name.
@@ -1795,27 +1795,27 @@ class MDB2_Schema extends PEAR
                 }
             }
         }
-        if (array_key_exists('sequences', $changes)) {
-            if (array_key_exists('add', $changes['sequences'])) {
+        if (!empty($changes['sequences'])) {
+            if (!empty($changes['sequences']['add']) && is_array($changes['sequences']['add'])) {
                 foreach ($changes['sequences']['add'] as $sequence_name => $sequence) {
                     $this->db->debug("$sequence_name:");
                     $this->db->debug("\tAdded sequence '$sequence_name'");
                 }
             }
-            if (array_key_exists('remove', $changes['sequences'])) {
+            if (!empty($changes['sequences']['remove']) && is_array($changes['sequences']['remove'])) {
                 foreach ($changes['sequences']['remove'] as $sequence_name => $sequence) {
                     $this->db->debug("$sequence_name:");
                     $this->db->debug("\tAdded sequence '$sequence_name'");
                 }
             }
-            if (array_key_exists('change', $changes['sequences'])) {
+            if (!empty($changes['sequences']['change']) && is_array($changes['sequences']['change'])) {
                 foreach ($changes['sequences']['change'] as $sequence_name => $sequence) {
                     if (array_key_exists('name', $sequence)) {
                         $this->db->debug(
                             "\tRenamed sequence '$sequence_name' to '".
                             $sequence['name']."'");
                     }
-                    if (array_key_exists('change', $sequence)) {
+                    if (!empty($sequence['change']) && is_array($sequence['change'])) {
                         foreach ($sequence['change'] as $sequence_name => $sequence) {
                             if (array_key_exists('start', $sequence)) {
                                 $this->db->debug(
@@ -1937,15 +1937,15 @@ class MDB2_Schema extends PEAR
         }
 
         $previous_database_name = null;
-        if (array_key_exists('name', $data)) {
+        if (!empty($data['name'])) {
             $previous_database_name = $this->db->setDatabase($data['name']);
-        } elseif(array_key_exists('name', $structure)) {
+        } elseif(!empty($structure['name'])) {
             $previous_database_name = $this->db->setDatabase($structure['name']);
         }
 
-        if (array_key_exists('tables', $data) && is_array($data['tables'])) {
+        if (!empty($data['tables']) && is_array($data['tables'])) {
             foreach ($data['tables'] as $table_name => $table) {
-                if (!array_key_exists('initialization', $table)) {
+                if (empty($table['initialization'])) {
                     continue;
                 }
                 $result = $this->initializeTable($table_name, $table);
@@ -1955,7 +1955,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (array_key_exists('sequences', $structure) && is_array($structure['sequences'])) {
+        if (!empty($structure['sequences']) && is_array($structure['sequences'])) {
             foreach ($structure['sequences'] as $sequence_name => $sequence) {
                 if (isset($data['sequences'][$sequence_name])
                     || !isset($sequence['on']['table'])
@@ -1969,7 +1969,7 @@ class MDB2_Schema extends PEAR
                 }
             }
         }
-        if (array_key_exists('sequences', $data) && is_array($data['sequences'])) {
+        if (!empty($data['sequences']) && is_array($data['sequences'])) {
             foreach ($data['sequences'] as $sequence_name => $sequence) {
                 $result = $this->createSequence($sequence_name, $sequence, true);
                 if (PEAR::isError($result)) {
@@ -2125,7 +2125,7 @@ class MDB2_Schema extends PEAR
             $value = $value->getCode();
         }
 
-        return array_key_exists($value, $errorMessages) ?
+        return !empty($errorMessages[$value]) ?
            $errorMessages[$value] : $errorMessages[MDB2_SCHEMA_ERROR];
     }
 

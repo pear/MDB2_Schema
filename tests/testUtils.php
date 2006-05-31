@@ -58,7 +58,7 @@ function getBacktrace()
         }
         $message.= $trace_item['function'];
 
-        if (array_key_exists('args', $trace_item) && is_array($trace_item['args'])) {
+        if (!empty($trace_item['args']) && is_array($trace_item['args'])) {
             $message.= '('.@implode(', ', $trace_item['args']).')';
         } else {
             $message.= '()';
