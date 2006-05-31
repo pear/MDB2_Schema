@@ -328,9 +328,10 @@ class MDB2_Schema extends PEAR
             }
         } elseif (is_array($schema)) {
             $database_definition = $schema;
-        } else {
+        }
+        if (!$database_definition && !$skip_unreadable) {
             $database_definition = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                'invalid data type of schema');
+                'invalid data type of schema or unreadable data source');
         }
         return $database_definition;
     }
@@ -556,7 +557,9 @@ class MDB2_Schema extends PEAR
         foreach ($indexes as $index_name => $index) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
-            if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
+            if ((array_key_exists('primary', $index) && $index['primary'])
+                || (array_key_exists('unique', $index) && $index['unique'])
+            ) {
                 $indexes = $this->db->manager->listTableConstraints($table_name);
             } else {
                 $indexes = $this->db->manager->listTableIndexes($table_name);
@@ -583,30 +586,35 @@ class MDB2_Schema extends PEAR
             }
 
             // check if primary is being used and if it's supported
-            if (array_key_exists('primary', $index) && !$supports_primary_key) {
+            if (array_key_exists('primary', $index) && $index['primary'] && !$supports_primary_key) {
                 /**
                  * Primary not supported so we fallback to UNIQUE
                  * and making the field NOT NULL
                  */
                 unset($index['primary']);
                 $index['unique'] = true;
-                $fields = $index['fields'];
 
                 $changes = array();
 
-                foreach ($fields as $field => $empty) {
+                foreach ($index['fields'] as $field => $empty) {
                     $field_info = $this->db->reverse->getTableFieldDefinition($table_name, $field);
                     if (PEAR::isError($field_info)) {
                         return $field_info;
                     }
 
-                    $changes['change'][$field] = $field_info[0][0];
-                    $changes['change'][$field]['notnull'] = true;
+                    if (!$field_info[0]['notnull']) {
+                        $changes['change'][$field] = $field_info[0];
+                        $changes['change'][$field]['notnull'] = true;
+                    }
                 }
-                $this->db->manager->alterTable($table_name, $changes, false);
+                if (!empty($changes)) {
+                    $this->db->manager->alterTable($table_name, $changes, false);
+                }
             }
 
-            if (array_key_exists('primary', $index) || array_key_exists('unique', $index)) {
+            if ((array_key_exists('primary', $index) && $index['primary'])
+                || (array_key_exists('unique', $index) && $index['unique'])
+            ) {
                 $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
             } else {
                 $result = $this->db->manager->createIndex($table_name, $index_name, $index);
