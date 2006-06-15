@@ -1448,7 +1448,7 @@ class MDB2_Schema extends PEAR
         if (!empty($changes['remove']) && is_array($changes['remove'])) {
             foreach ($changes['remove'] as $index_name => $index) {
                 if (!empty($index['primary']) || !empty($index['unique'])) {
-                    $result = $this->db->manager->dropConstraint($table_name, $index_name);
+                    $result = $this->db->manager->dropConstraint($table_name, $index_name, !empty($index['primary']));
                 } else {
                     $result = $this->db->manager->dropIndex($table_name, $index_name);
                 }
