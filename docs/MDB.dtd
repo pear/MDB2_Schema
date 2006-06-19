@@ -21,7 +21,7 @@
 <!ELEMENT field (#PCDATA | name | was | type | default | notnull | autoincrement | unsigned | description | comments | length | sorting | value)*>
 <!ELEMENT table (#PCDATA | name | was | description | comments | declaration | initialization)*>
 <!ELEMENT sequence (name+ | was? | start? | on+ | description? | comments?)*>
-<!ELEMENT index (name+ | was? | unique? | primary? | field+)>
+<!ELEMENT index (name+ | was? | unique? | primary? | field+)*>
 <!ELEMENT declaration (field+, index?)>
 <!ELEMENT initialization (insert)>
 <!ELEMENT insert (field+)>
