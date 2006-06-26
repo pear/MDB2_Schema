@@ -85,7 +85,9 @@ class MDB2_Schema_Parser extends XML_Parser
 
     function __construct($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array())
     {
-        parent::XML_Parser();
+        // force ISO-8859-1 due to different defaults for PHP4 and PHP5
+        // todo: this probably needs to be investigated some more andcleaned up
+        parent::XML_Parser('ISO-8859-1');
         $this->variables = $variables;
         if (is_array($fail_on_invalid_names)) {
             $this->fail_on_invalid_names
