@@ -705,12 +705,7 @@ class MDB2_Schema extends PEAR
             switch ($instruction['type']) {
             case 'insert':
                 if (!empty($instruction['fields']) && is_array($instruction['fields'])) {
-                    $result = $stmt->bindParamArray($instruction['fields']);
-                    if (PEAR::isError($result)) {
-                        return $result;
-                    }
-
-                    $result = $stmt->execute();
+                    $result = $stmt->execute($instruction['fields']);
                     if (PEAR::isError($result)) {
                         return $result;
                     }
