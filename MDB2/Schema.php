@@ -460,10 +460,10 @@ class MDB2_Schema extends PEAR
                     $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     $definition = $this->db->reverse->getTableIndexDefinition($table_name, $index_name);
                     $this->db->popExpect();
-                    if (PEAR::isError($definition, MDB2_ERROR_NOT_FOUND)) {
-                        continue;
-                    }
                     if (PEAR::isError($definition)) {
+                        if (PEAR::isError($definition, MDB2_ERROR_NOT_FOUND)) {
+                            continue;
+                        }
                         return $definition;
                     }
                    $index_definitions[$index_name] = $definition;
@@ -480,10 +480,10 @@ class MDB2_Schema extends PEAR
                     $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     $definition = $this->db->reverse->getTableConstraintDefinition($table_name, $index_name);
                     $this->db->popExpect();
-                    if (PEAR::isError($definition, MDB2_ERROR_NOT_FOUND)) {
-                        continue;
-                    }
                     if (PEAR::isError($definition)) {
+                        if (PEAR::isError($definition, MDB2_ERROR_NOT_FOUND)) {
+                            continue;
+                        }
                         return $definition;
                     }
                     $index_definitions[$index_name] = $definition;
@@ -1140,7 +1140,7 @@ class MDB2_Schema extends PEAR
                         }
                     }
                     if (!empty($change)) {
-                        $changes['change'][$index_name] = $change;
+                        $changes['change'][$index_name] = $current_definition[$index_name];
                     }
                 } else {
                     if ($index_name != $was_index_name) {
@@ -1212,8 +1212,8 @@ class MDB2_Schema extends PEAR
                         return $change;
                     }
                     if (!empty($change)) {
-                        $changes['change'][$was_table_name]
-                        = MDB2_Schema::arrayMergeClobber($changes['change'][$was_table_name], $change);
+                        $changes['change'][$was_table_name] =
+                            MDB2_Schema::arrayMergeClobber($changes['change'][$was_table_name], $change);
                     }
                 }
                 if (!empty($current_definition['indexes']) && is_array($current_definition['indexes'])) {
@@ -1234,12 +1234,7 @@ class MDB2_Schema extends PEAR
                         return $change;
                     }
                     if (!empty($change)) {
-                        if (isset($changes['change'][$was_table_name]['indexes'])) {
-                            $changes['change'][$was_table_name]['indexes']
-                                = MDB2_Schema::arrayMergeClobber($changes['change'][$was_table_name]['indexes'], $change);
-                        } else {
-                            $changes['change'][$was_table_name]['indexes'] = $change;
-                        }
+                        $changes['change'][$was_table_name]['indexes'] = $change;
                     }
                 }
                 if (empty($changes['change'][$was_table_name])) {
@@ -1414,11 +1409,32 @@ class MDB2_Schema extends PEAR
             return $alterations;
         }
 
+        if (!empty($changes['remove']) && is_array($changes['remove'])) {
+            foreach ($changes['remove'] as $index_name => $index) {
+                if (!empty($index['primary']) || !empty($index['unique'])) {
+                    $result = $this->db->manager->dropConstraint($table_name, $index_name, !empty($index['primary']));
+                } else {
+                    $result = $this->db->manager->dropIndex($table_name, $index_name);
+                }
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
+                $alterations++;
+            }
+        }
         if (!empty($changes['change']) && is_array($changes['change'])) {
             foreach ($changes['change'] as $index_name => $index) {
                 if (!empty($index['primary']) || !empty($index['unique'])) {
+                    $result = $this->db->manager->dropConstraint($table_name, $index_name, !empty($index['primary']));
+                    if (PEAR::isError($result)) {
+                        return $result;
+                    }
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
+                    $result = $this->db->manager->dropIndex($table_name, $index_name);
+                    if (PEAR::isError($result)) {
+                        return $result;
+                    }
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);
                 }
                 if (PEAR::isError($result)) {
@@ -1433,19 +1449,6 @@ class MDB2_Schema extends PEAR
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);
-                }
-                if (PEAR::isError($result)) {
-                    return $result;
-                }
-                $alterations++;
-            }
-        }
-        if (!empty($changes['remove']) && is_array($changes['remove'])) {
-            foreach ($changes['remove'] as $index_name => $index) {
-                if (!empty($index['primary']) || !empty($index['unique'])) {
-                    $result = $this->db->manager->dropConstraint($table_name, $index_name, !empty($index['primary']));
-                } else {
-                    $result = $this->db->manager->dropIndex($table_name, $index_name);
                 }
                 if (PEAR::isError($result)) {
                     return $result;
