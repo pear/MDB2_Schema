@@ -22,7 +22,7 @@
 <!ELEMENT table (#PCDATA | name | was | description | comments | declaration | initialization)*>
 <!ELEMENT sequence (name+ | was? | start? | on+ | description? | comments?)*>
 <!ELEMENT index (name+ | was? | unique? | primary? | field+)*>
-<!ELEMENT declaration (field+, index?)>
+<!ELEMENT declaration (field+, index*)>
 <!ELEMENT initialization (insert)>
 <!ELEMENT insert (field+)>
 <!ELEMENT on (table, field)+>
