@@ -82,8 +82,9 @@ class MDB2_Schema_Parser extends XML_Parser
     var $fail_on_invalid_names = true;
     var $structure = false;
     var $valid_types = array();
+    var $force_defaults = true;
 
-    function __construct($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array())
+    function __construct($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
     {
         // force ISO-8859-1 due to different defaults for PHP4 and PHP5
         // todo: this probably needs to be investigated some more andcleaned up
@@ -99,11 +100,12 @@ class MDB2_Schema_Parser extends XML_Parser
         }
         $this->structure = $structure;
         $this->valid_types = $valid_types;
+        $this->force_defaults = $force_defaults;
     }
 
-    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array())
+    function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
     {
-        $this->__construct($variables, $fail_on_invalid_names, $structure, $valid_types);
+        $this->__construct($variables, $fail_on_invalid_names, $structure, $valid_types, $force_defaults);
     }
 
     function startHandler($xp, $element, $attribs)
@@ -304,7 +306,8 @@ class MDB2_Schema_Parser extends XML_Parser
             if (!$this->isBoolean($this->field['notnull'])) {
                 $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
             }
-            if (!array_key_exists('default', $this->field)
+            if ($this->force_defaults
+                && !array_key_exists('default', $this->field)
                 && $this->field['type'] != 'clob' && $this->field['type'] != 'blob'
             ) {
                 $this->field['default'] = $this->valid_types[$this->field['type']];

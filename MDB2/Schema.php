@@ -87,6 +87,7 @@ class MDB2_Schema extends PEAR
         'fail_on_invalid_names' => true,
         'dtd_file' => false,
         'valid_types' => array(),
+        'force_defaults' => true,
         'parser' => 'MDB2_Schema_Parser',
         'writer' => 'MDB2_Schema_Writer',
     );
@@ -354,7 +355,7 @@ class MDB2_Schema extends PEAR
     function parseDatabaseDefinitionFile($input_file, $variables = array(),
         $fail_on_invalid_names = true, $structure = false)
     {
-        $dtd_file = $this->getOption('dtd_file');
+        $dtd_file = $this->options['dtd_file'];
         if ($dtd_file) {
             require_once 'XML/DTD/XmlValidator.php';
             $dtd =& new XML_DTD_XmlValidator;
@@ -363,13 +364,13 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        $class_name = $this->getOption('parser');
+        $class_name = $this->options['parser'];
         $result = MDB2::loadClass($class_name, $this->db->getOption('debug'));
         if (PEAR::isError($result)) {
             return $result;
         }
 
-        $parser =& new $class_name($variables, $fail_on_invalid_names, $structure, $this->getOption('valid_types'));
+        $parser =& new $class_name($variables, $fail_on_invalid_names, $structure, $this->options['valid_types'], $this->options['force_defaults']);
         $result = $parser->setInputFile($input_file);
         if (PEAR::isError($result)) {
             return $result;
@@ -1860,7 +1861,7 @@ class MDB2_Schema extends PEAR
      */
     function dumpDatabase($database_definition, $arguments, $dump = MDB2_SCHEMA_DUMP_ALL)
     {
-        $class_name = $this->getOption('writer');
+        $class_name = $this->options['writer'];
         $result = MDB2::loadClass($class_name, $this->db->getOption('debug'));
         if (PEAR::isError($result)) {
             return $result;
@@ -1901,7 +1902,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        $writer =& new $class_name($this->getOption('valid_types'));
+        $writer =& new $class_name($this->options['valid_types']);
         return $writer->dumpDatabase($database_definition, $arguments, $dump);
     }
 
