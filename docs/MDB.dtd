@@ -23,6 +23,6 @@
 <!ELEMENT sequence (name+ | was? | start? | on+ | description? | comments?)*>
 <!ELEMENT index (name+ | was? | unique? | primary? | field+)*>
 <!ELEMENT declaration (field+, index*)>
-<!ELEMENT initialization (insert)>
+<!ELEMENT initialization (insert+)>
 <!ELEMENT insert (field+)>
 <!ELEMENT on (table, field)+>
