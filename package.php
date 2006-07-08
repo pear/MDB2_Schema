@@ -9,6 +9,19 @@ $notes = <<<EOT
   the same name and a single column primary key
 - do not dump default for LOB fields (Bug #7596)
 - added support for "fixed" (needs more testing)
+- phpdoc tweaks (thx Stoyan)
+- fixed primary key emulation and some other minor issues in createTableIndexes() (Bug #7758)
+- implemented skip_unreadable parameter in parseDatabaseDefinition() (Bug #7756)
+- switched most array_key_exists() calls to !empty() to improve readability and performance
+- fixed a few edge cases and potential warnings
+- add method name as scope for call debug() calls
+- use getValidTypes() from MDB2
+- hint if dropping a primary constraint
+- minor code tweak in how initialization data is set in the prepared statement
+- force ISO-8859-1 when parsing XML due to different defaults for PHP4 and PHP5
+- fixed handling for changes in indexes/constaints (Bug #7901)
+- made forcing of defaults optional via the 'force_defaults' option (Request #8074)
+- fixed several issues in the DTD (Bug #7890)
 EOT;
 
 $description =<<<EOT
