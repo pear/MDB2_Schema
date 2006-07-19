@@ -16,7 +16,7 @@
   <name>users</name>
   <declaration>
    <field> <name>user_name</name>     <type>text</type>      <length>12</length> <fixed>false</fixed>  </field>
-   <field> <name>user_password</name> <type>text</type>                                                </field>
+   <field> <name>user_password</name> <type>text</type>      <length>8</length>  <fixed>true</fixed>   </field>
    <field> <name>subscribed</name>    <type>boolean</type>                                             </field>
    <field> <name>user_id</name>       <type>integer</type>   <default>0</default> <notnull>1</notnull> </field>
    <field> <name>quota</name>         <type>decimal</type>                                             </field>
