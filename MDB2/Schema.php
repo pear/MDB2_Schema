@@ -862,7 +862,7 @@ class MDB2_Schema extends PEAR
         }
         $previous_database_name = $this->db->setDatabase($database_definition['name']);
         if (($support_transactions = $this->db->supports('transactions'))
-            && PEAR::isError($result = $this->db->beginTransaction())
+            && PEAR::isError($result = $this->db->beginNestedTransaction())
         ) {
             return $result;
         }
@@ -893,28 +893,17 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (PEAR::isError($result)) {
-            if ($created_objects) {
-                if ($support_transactions) {
-                    $res = $this->db->rollback();
-                    if (PEAR::isError($res))
-                        $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                            'Could not rollback the partially created database alterations ('.
-                            $result->getMessage().' ('.$result->getUserinfo().'))');
-                } else {
-                    $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                        'the database was only partially created ('.
-                        $result->getMessage().' ('.$result->getUserinfo().'))');
-                }
+        if ($support_transactions) {
+            $res = $this->db->completeNestedTransaction();
+            if (PEAR::isError($res)) {
+                $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                    'Could not end transaction ('.
+                    $res->getMessage().' ('.$res->getUserinfo().'))');
             }
-        } else {
-            if ($support_transactions) {
-                $res = $this->db->commit();
-                if (PEAR::isError($res))
-                    $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                        'Could not end transaction after successfully created the database ('.
-                        $res->getMessage().' ('.$res->getUserinfo().'))');
-            }
+        } elseif (PEAR::isError($result) && $created_objects) {
+            $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                'the database was only partially created ('.
+                $result->getMessage().' ('.$result->getUserinfo().'))');
         }
 
         $this->db->setDatabase($previous_database_name);
@@ -1624,7 +1613,7 @@ class MDB2_Schema extends PEAR
         }
 
         if (($support_transactions = $this->db->supports('transactions'))
-            && PEAR::isError($result = $this->db->beginTransaction())
+            && PEAR::isError($result = $this->db->beginNestedTransaction())
         ) {
             return $result;
         }
@@ -1647,27 +1636,19 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (PEAR::isError($result)) {
-            if ($support_transactions) {
-                $res = $this->db->rollback();
-                if (PEAR::isError($res))
-                    $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                        'Could not rollback the partially created database alterations ('.
-                        $result->getMessage().' ('.$result->getUserinfo().'))');
-            } else {
-                $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'the requested database alterations were only partially implemented ('.
-                    $result->getMessage().' ('.$result->getUserinfo().'))');
-            }
-        }
         if ($support_transactions) {
-            $result = $this->db->commit();
-            if (PEAR::isError($result)) {
+            $res = $this->db->completeNestedTransaction();
+            if (PEAR::isError($res)) {
                 $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'Could not end transaction after successfully implemented the requested database alterations ('.
-                    $result->getMessage().' ('.$result->getUserinfo().'))');
+                    'Could not end transaction ('.
+                    $res->getMessage().' ('.$res->getUserinfo().'))');
             }
+        } elseif (PEAR::isError($result) && $created_objects) {
+            $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                'the requested database alterations were only partially implemented ('.
+                $result->getMessage().' ('.$result->getUserinfo().'))');
         }
+
         if (isset($previous_database_name)) {
             $this->db->setDatabase($previous_database_name);
         }
