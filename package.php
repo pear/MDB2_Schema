@@ -22,6 +22,8 @@ $notes = <<<EOT
 - fixed handling for changes in indexes/constaints (Bug #7901)
 - made forcing of defaults optional via the 'force_defaults' option (Request #8074)
 - fixed several issues in the DTD (Bug #7890)
+- set length and fixed for user_password in the test suite
+- use nested transactions instead of normal transactions
 EOT;
 
 $description =<<<EOT
