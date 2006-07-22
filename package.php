@@ -2,7 +2,7 @@
 
 require_once 'PEAR/PackageFileManager.php';
 
-$version = 'XXX';
+$version = '0.6.0';
 $notes = <<<EOT
 - added new XSL and CSS for xml schema file rendering (thx Bertrand)
 - automatically generate <on> tags in <sequence> tags if there is a table with
@@ -69,7 +69,7 @@ $package->addMaintainer('ifeghali', 'developer', 'Igor Feghali', 'ifeghali@php.n
 
 $package->addDependency('php',     '4.2.0', 'ge',  'php', false);
 $package->addDependency('PEAR',    '1.0b1', 'ge',  'pkg', false);
-$package->addDependency('MDB2',    '2.0.1', 'ge',  'pkg', false);
+$package->addDependency('MDB2',    '2.2.0', 'ge',  'pkg', false);
 $package->addDependency('XML_Parser', true, 'has', 'pkg', false);
 $package->addDependency('XML_DTD',    true, 'has', 'pkg', true);
 
