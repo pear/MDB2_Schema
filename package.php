@@ -5,6 +5,8 @@ require_once 'PEAR/PackageFileManager.php';
 $version = 'XXX';
 $notes = <<<EOT
 
+open todo items:
+- make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
 EOT;
 
 $description =<<<EOT
