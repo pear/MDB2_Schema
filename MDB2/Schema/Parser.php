@@ -647,7 +647,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-table-was':
-            if (array_key_exists($this->table['was'])) {
+            if (isset($this->table['was'])) {
                 $this->table['was'] .= $data;
             } else {
                 $this->table['was'] = $data;
