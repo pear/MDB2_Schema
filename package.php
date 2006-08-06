@@ -4,6 +4,8 @@ require_once 'PEAR/PackageFileManager.php';
 
 $version = 'XXX';
 $notes = <<<EOT
+- fixed warning due to not checking with isset()
+- return an error if a name placeholder name is used twice inside a single statement
 
 open todo items:
 - make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
