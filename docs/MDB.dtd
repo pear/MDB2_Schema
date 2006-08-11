@@ -2,20 +2,20 @@
 
 <!-- MAIN ELEMENTS -->
 
-<!ELEMENT database (name+ | create? | overwrite? | description? | comments? | table+ | sequence?)*>
+<!ELEMENT database (name | create? | overwrite? | description? | comments? | table+ | sequence?)*>
 <!ELEMENT table (#PCDATA | name | was | description | comments | declaration | initialization)*>
-<!ELEMENT initialization (insert | update | delete)+>
-<!ELEMENT insert (field*)>
+<!ELEMENT initialization (insert | update | delete)*>
+<!ELEMENT insert (field+)>
 <!ELEMENT update (field+, where?)>
 <!ELEMENT delete (where)>
 
 <!-- CHILD ELEMENTS -->
 
-<!ELEMENT sequence (name+ | was? | start? | on+ | description? | comments?)*>
+<!ELEMENT sequence (name | was? | start? | on+ | description? | comments?)*>
 <!ELEMENT on (table, field)+>
 
 <!ELEMENT declaration (field+, index*)>
-<!ELEMENT index (name+ | was? | unique? | primary? | field+)*>
+<!ELEMENT index (name | was? | unique? | primary? | field+)*>
 
 <!ELEMENT where (expression)>
 <!ELEMENT expression (expression?, ((value | column | function)?, operator, (value | column | function | expression))?)>
