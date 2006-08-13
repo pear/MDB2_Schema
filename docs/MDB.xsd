@@ -126,7 +126,7 @@
 
 <xsd:complexType name="field">
 	<xsd:sequence>
-		<xsd:element ref="column"/>
+		<xsd:element ref="name"/>
 		<xsd:group ref="operant"/>
 	</xsd:sequence>
 </xsd:complexType>
