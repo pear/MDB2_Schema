@@ -235,39 +235,6 @@ class MDB2_Schema_Parser extends XML_Parser
         return $this->error;
     }
 
-    function isBoolean(&$value)
-    {
-        if (is_bool($value)) {
-            return true;
-        }
-        if ($value === 0 || $value === 1) {
-            $value = (bool)$value;
-            return true;
-        }
-        if (!is_string($value)) {
-            return false;
-        }
-        switch ($value) {
-        case '0':
-        case 'N':
-        case 'n':
-        case 'no':
-        case 'false':
-            $value = false;
-            break;
-        case '1':
-        case 'Y':
-        case 'y':
-        case 'yes':
-        case 'true':
-            $value = true;
-            break;
-        default:
-            return false;
-        }
-        return true;
-    }
-
     function cdataHandler($xp, $data)
     {
         if ($this->var_mode == true) {

@@ -57,6 +57,39 @@
 class MDB2_Schema_Validate
 {
 
+    function isBoolean(&$value)
+    {
+        if (is_bool($value)) {
+            return true;
+        }
+        if ($value === 0 || $value === 1) {
+            $value = (bool)$value;
+            return true;
+        }
+        if (!is_string($value)) {
+            return false;
+        }
+        switch ($value) {
+        case '0':
+        case 'N':
+        case 'n':
+        case 'no':
+        case 'false':
+            $value = false;
+            break;
+        case '1':
+        case 'Y':
+        case 'y':
+        case 'yes':
+        case 'true':
+            $value = true;
+            break;
+        default:
+            return false;
+        }
+        return true;
+    }
+
     /* Definition */
     function validateTable(&$schema)
     {
@@ -163,10 +196,10 @@ class MDB2_Schema_Validate
         if (!empty($schema->valid_types) && !array_key_exists($schema->field['type'], $schema->valid_types)) {
             $schema->raiseError('no valid field type ("'.$schema->field['type'].'") specified', null, $xp);
         }
-        if (array_key_exists('unsigned', $schema->field) && !$schema->isBoolean($schema->field['unsigned'])) {
+        if (array_key_exists('unsigned', $schema->field) && !$this->isBoolean($schema->field['unsigned'])) {
             $schema->raiseError('unsigned has to be a boolean value', null, $xp);
         }
-        if (array_key_exists('fixed', $schema->field) && !$schema->isBoolean($schema->field['fixed'])) {
+        if (array_key_exists('fixed', $schema->field) && !$this->isBoolean($schema->field['fixed'])) {
             $schema->raiseError('fixed has to be a boolean value', null, $xp);
         }
         if (array_key_exists('length', $schema->field) && $schema->field['length'] <= 0) {
@@ -178,7 +211,7 @@ class MDB2_Schema_Validate
         if (empty($schema->field['notnull'])) {
             $schema->field['notnull'] = false;
         }
-        if (!$schema->isBoolean($schema->field['notnull'])) {
+        if (!$this->isBoolean($schema->field['notnull'])) {
             $schema->raiseError('field "notnull" has to be a boolean value', null, $xp);
         }
         if ($schema->force_defaults
@@ -220,10 +253,10 @@ class MDB2_Schema_Validate
         if (isset($schema->table['indexes'][$schema->index_name])) {
             $schema->raiseError('index "'.$schema->index_name.'" already exists', null, $xp);
         }
-        if (array_key_exists('unique', $schema->index) && !$schema->isBoolean($schema->index['unique'])) {
+        if (array_key_exists('unique', $schema->index) && !$this->isBoolean($schema->index['unique'])) {
             $schema->raiseError('field "unique" has to be a boolean value', null, $xp);
         }
-        if (array_key_exists('primary', $schema->index) && !$schema->isBoolean($schema->index['primary'])) {
+        if (array_key_exists('primary', $schema->index) && !$this->isBoolean($schema->index['primary'])) {
             $schema->raiseError('field "primary" has to be a boolean value', null, $xp);
         }
 
@@ -302,12 +335,12 @@ class MDB2_Schema_Validate
         }
 
         if (isset($schema->database_definition['create'])
-            && !$schema->isBoolean($schema->database_definition['create'])
+            && !$this->isBoolean($schema->database_definition['create'])
         ) {
             $schema->raiseError('field "create" has to be a boolean value', null, $xp);
         }
         if (isset($schema->database_definition['overwrite'])
-            && !$schema->isBoolean($schema->database_definition['overwrite'])
+            && !$this->isBoolean($schema->database_definition['overwrite'])
         ) {
             $schema->raiseError('field "overwrite" has to be a boolean value', null, $xp);
         }
@@ -393,7 +426,7 @@ class MDB2_Schema_Validate
             }
             break;
         case 'boolean':
-            if (!$schema->isBoolean($field_value)) {
+            if (!$this->isBoolean($field_value)) {
                 return $schema->raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }
