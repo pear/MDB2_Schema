@@ -84,6 +84,7 @@ class MDB2_Schema_Parser extends XML_Parser
     var $structure = false;
     var $valid_types = array();
     var $force_defaults = true;
+    var $val;
 
     function __construct($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
     {
@@ -102,6 +103,7 @@ class MDB2_Schema_Parser extends XML_Parser
         $this->structure = $structure;
         $this->valid_types = $valid_types;
         $this->force_defaults = $force_defaults;
+        $this->val = new MDB2_Schema_Validate;
     }
 
     function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
@@ -155,8 +157,6 @@ class MDB2_Schema_Parser extends XML_Parser
 
     function endHandler($xp, $element)
     {
-        $val = new MDB2_Schema_Validate;
-
         if (strtolower($element) == 'variable') {
             $this->var_mode = false;
             return;
@@ -165,125 +165,46 @@ class MDB2_Schema_Parser extends XML_Parser
         switch ($this->element) {
         /* Initialization */
         case 'database-table-initialization-insert-field':
-            $result = $val->validateInsertField($this);
+            $result = $this->val->validateInsertField($this);
             break;
         case 'database-table-initialization-insert':
-            $result = $val->validateInsert($this);
+            $result = $this->val->validateInsert($this);
             break;
 
         /* Table definition */
         case 'database-table':
-            $result = $val->validateTable($this);
+            $result = $this->val->validateTable($this);
             break;
         case 'database-table-name':
-            $result = $val->validateTableName($this);
+            $result = $this->val->validateTableName($this);
             break;
 
         /* Field declaration */
         case 'database-table-declaration-field':
-            $result = $val->validateField($this);
+            $result = $this->val->validateField($this);
             break;
 
         /* Index declaration */
         case 'database-table-declaration-index':
-            $result = $val->validateIndex($this);
+            $result = $this->val->validateIndex($this);
             break;
         case 'database-table-declaration-index-field':
-            $result = $val->validateIndexField($this);
+            $result = $this->val->validateIndexField($this);
             break;
 
         /* Sequence declaration */
         case 'database-sequence':
-            $result = $val->validateSequence($this);
+            $result = $this->val->validateSequence($this);
             break;
 
         /* End of File */
         case 'database':
-            $result = $val->validateDatabase($this);
+            $result = $this->val->validateDatabase($this);
             break;
         }
 
         unset($this->elements[--$this->count]);
         $this->element = implode('-', $this->elements);
-    }
-
-    function validateFieldValue($field_name, &$field_value, &$xp)
-    {
-        if (!isset($this->table['fields'][$field_name])) {
-            return $this->raiseError('"'.$field_name.'" is not defined', null, $xp);
-        }
-        $field_def = $this->table['fields'][$field_name];
-        switch ($field_def['type']) {
-        case 'text':
-        case 'clob':
-            if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
-                return $this->raiseError('"'.$field_value.'" is larger than "'.
-                    $field_def['length'].'"', null, $xp);
-            }
-            break;
-        case 'blob':
-            /*
-            if (!preg_match('/^([0-9a-f]{2})*$/i', $field_value)) {
-                return $this->raiseError('"'.$field_value.'" is not of type "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            */
-            $field_value = pack('H*', $field_value);
-            if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
-                return $this->raiseError('"'.$field_value.'" is larger than "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            break;
-        case 'integer':
-            if ($field_value != ((int)$field_value)) {
-                return $this->raiseError('"'.$field_value.'" is not of type "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            $field_value = (int) $field_value;
-            if (!empty($field_def['unsigned']) && $field_def['unsigned'] && $field_value < 0) {
-                return $this->raiseError('"'.$field_value.'" signed instead of unsigned', null, $xp);
-            }
-            break;
-        case 'boolean':
-            if (!$this->isBoolean($field_value)) {
-                return $this->raiseError('"'.$field_value.'" is not of type "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            break;
-        case 'date':
-            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/', $field_value)
-                && $field_value !== 'CURRENT_DATE'
-            ) {
-                return $this->raiseError('"'.$field_value.'" is not of type "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            break;
-        case 'timestamp':
-            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})/', $field_value)
-                && $field_value !== 'CURRENT_TIMESTAMP'
-            ) {
-                return $this->raiseError('"'.$field_value.'" is not of type "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            break;
-        case 'time':
-            if (!preg_match("/([0-9]{2}):([0-9]{2}):([0-9]{2})/", $field_value)
-                && $field_value !== 'CURRENT_TIME'
-            ) {
-                return $this->raiseError('"'.$field_value.'" is not of type "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            break;
-        case 'float':
-        case 'double':
-            if ($field_value != (double)$field_value) {
-                return $this->raiseError('"'.$field_value.'" is not of type "'.
-                    $field_def['type'].'"', null, $xp);
-            }
-            $field_value = (double) $field_value;
-            break;
-        }
-        return true;
     }
 
     function &raiseError($msg = null, $ecode = 0, $xp = null)

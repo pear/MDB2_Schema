@@ -39,6 +39,7 @@
 // | WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE          |
 // | POSSIBILITY OF SUCH DAMAGE.                                          |
 // +----------------------------------------------------------------------+
+// | Author: Christian Dickmann <dickmann@php.net>                        |
 // | Author: Igor Feghali <ifeghali@php.net>                              |
 // +----------------------------------------------------------------------+
 //
@@ -202,7 +203,7 @@ class MDB2_Schema_Validate
         $schema->table['fields'][$schema->field_name] = $schema->field;
 
         if (isset($schema->field['default'])
-            && !$schema->validateFieldValue($schema->field_name,
+            && !$this->validateFieldValue($schema, $schema->field_name,
                 $schema->table['fields'][$schema->field_name]['default'], $xp
             )
         ) {
@@ -340,7 +341,7 @@ class MDB2_Schema_Validate
             $schema->raiseError('unknown field "'.$schema->init_name.'"', null, $xp);
         }
         if ($schema->init_value !== ''
-            && !$schema->validateFieldValue($schema->init_name, $schema->init_value, $xp)
+            && !$this->validateFieldValue($schema, $schema->init_name, $schema->init_value, $xp)
         ) {
             $schema->raiseError('field "'.$schema->init_name.'" has wrong value', null, $xp);
         }
@@ -353,6 +354,86 @@ class MDB2_Schema_Validate
         $schema->table['initialization'][] = $schema->init;
         return true;
     }
+
+    function validateFieldValue(&$schema, $field_name, &$field_value, &$xp)
+    {
+        if (!isset($schema->table['fields'][$field_name])) {
+            return $schema->raiseError('"'.$field_name.'" is not defined', null, $xp);
+        }
+        $field_def = $schema->table['fields'][$field_name];
+        switch ($field_def['type']) {
+        case 'text':
+        case 'clob':
+            if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
+                return $schema->raiseError('"'.$field_value.'" is larger than "'.
+                    $field_def['length'].'"', null, $xp);
+            }
+            break;
+        case 'blob':
+            /*
+            if (!preg_match('/^([0-9a-f]{2})*$/i', $field_value)) {
+                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            */
+            $field_value = pack('H*', $field_value);
+            if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
+                return $schema->raiseError('"'.$field_value.'" is larger than "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            break;
+        case 'integer':
+            if ($field_value != ((int)$field_value)) {
+                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            $field_value = (int) $field_value;
+            if (!empty($field_def['unsigned']) && $field_def['unsigned'] && $field_value < 0) {
+                return $schema->raiseError('"'.$field_value.'" signed instead of unsigned', null, $xp);
+            }
+            break;
+        case 'boolean':
+            if (!$schema->isBoolean($field_value)) {
+                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            break;
+        case 'date':
+            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/', $field_value)
+                && $field_value !== 'CURRENT_DATE'
+            ) {
+                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            break;
+        case 'timestamp':
+            if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})/', $field_value)
+                && $field_value !== 'CURRENT_TIMESTAMP'
+            ) {
+                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            break;
+        case 'time':
+            if (!preg_match("/([0-9]{2}):([0-9]{2}):([0-9]{2})/", $field_value)
+                && $field_value !== 'CURRENT_TIME'
+            ) {
+                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            break;
+        case 'float':
+        case 'double':
+            if ($field_value != (double)$field_value) {
+                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                    $field_def['type'].'"', null, $xp);
+            }
+            $field_value = (double) $field_value;
+            break;
+        }
+        return true;
+    }
+
 }
 
 ?>
