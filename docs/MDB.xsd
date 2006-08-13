@@ -50,7 +50,7 @@
 </xsd:complexType>
 
 <xsd:complexType name="insert">
-	<xsd:element ref="fieldInsert" maxOccurs="unbounded"/>
+	<xsd:element ref="field" maxOccurs="unbounded"/>
 </xsd:complexType>
 
 <xsd:complexType name="update">
@@ -154,14 +154,7 @@
 	</xsd:sequence>
 </xsd:complexType>
 
-<xsd:complexType name="fieldInsert">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="value"/>
-	</xsd:sequence>
-</xsd:complexType>
-
-<xsd:complexType name="funtion">
+<xsd:complexType name="function">
 	<xsd:sequence>
 		<xsd:element ref="name"/>
 		<xsd:element ref="parameter" minOccurs="0" maxOccurs="unbounded"/>
