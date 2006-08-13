@@ -46,6 +46,7 @@
 //
 
 require_once 'XML/Parser.php';
+require_once 'MDB2/Schema/Validate.php';
 
 if (empty($GLOBALS['_MDB2_Schema_Reserved'])) {
     $GLOBALS['_MDB2_Schema_Reserved'] = array();
@@ -154,6 +155,8 @@ class MDB2_Schema_Parser extends XML_Parser
 
     function endHandler($xp, $element)
     {
+        $val = new MDB2_Schema_Validate;
+
         if (strtolower($element) == 'variable') {
             $this->var_mode = false;
             return;
@@ -162,287 +165,41 @@ class MDB2_Schema_Parser extends XML_Parser
         switch ($this->element) {
         /* Initialization */
         case 'database-table-initialization-insert-field':
-            if (!$this->init_name) {
-                $this->raiseError('field-name has to be specified', null, $xp);
-            }
-            if (isset($this->init['fields'][$this->init_name])) {
-                $this->raiseError('field "'.$this->init_name.'" already filled', null, $xp);
-            }
-            if (!isset($this->table['fields'][$this->init_name])) {
-                $this->raiseError('unknown field "'.$this->init_name.'"', null, $xp);
-            }
-            if ($this->init_value !== ''
-                && !$this->validateFieldValue($this->init_name, $this->init_value, $xp)
-            ) {
-                $this->raiseError('field "'.$this->init_name.'" has wrong value', null, $xp);
-            }
-            $this->init['fields'][$this->init_name] = $this->init_value;
+            $result = $val->validateInsertField($this);
             break;
         case 'database-table-initialization-insert':
-            $this->table['initialization'][] = $this->init;
+            $result = $val->validateInsert($this);
             break;
 
         /* Table definition */
         case 'database-table':
-            if (!$this->table_name) {
-                $this->raiseError('a table has to have a name', null, $xp);
-            } elseif ($this->fail_on_invalid_names) {
-                $name = strtoupper($this->table_name);
-                foreach ($this->fail_on_invalid_names as $rdbms) {
-                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                        $this->raiseError('table name "'.$this->table_name.'" is a reserved word in: '.$rdbms, null, $xp);
-                        break;
-                    }
-                }
-            }
-
-            if (isset($this->database_definition['tables'][$this->table_name])) {
-                $this->raiseError('table "'.$this->table_name.'" already exists', null, $xp);
-            }
-
-            if (empty($this->table['was'])) {
-                $this->table['was'] = $this->table_name;
-            }
-
-            $autoinc = $primary = false;
-            if (empty($this->table['fields']) || !is_array($this->table['fields'])) {
-                $this->raiseError('tables need one or more fields', null, $xp);
-            } else {
-                foreach ($this->table['fields'] as $field_name => $field) {
-                    if (!empty($field['autoincrement'])) {
-                        if ($primary) {
-                            $this->raiseError('there was already an autoincrement field in "'.$this->table_name.'" before "'.$field_name.'"', null, $xp);
-                        } else {
-                            $autoinc = $primary = true;
-                        }
-
-                        if (!$this->table['fields'][$field_name]['notnull']) {
-                            $this->raiseError('all autoincrement fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
-                        }
-
-                        if (empty($field['default'])) {
-                            $this->table['fields'][$field_name]['default'] = '0';
-                        } elseif ($field['default'] !== '0' && $field['default'] !== 0) {
-                            $this->raiseError('all autoincrement fields must be defined default "0" in "'.$this->table_name.'"', null, $xp);
-                        }
-                    }
-                }
-            }
-            if (!empty($this->table['indexes']) && is_array($this->table['indexes'])) {
-                foreach ($this->table['indexes'] as $name => $index) {
-                    $skip_index = false;
-                    if (!empty($index['primary'])) {
-                        /*
-                         * Lets see if we should skip this index since there is
-                         * already a auto increment on this field this implying
-                         * a primary key index.
-                         */
-                        if ($autoinc && count($index['fields']) == '1') {
-                            $skip_index = true;
-                        } elseif ($primary) {
-                            $this->raiseError('there was already an primary index or autoincrement field in "'.$this->table_name.'" before "'.$name.'"', null, $xp);
-                        } else {
-                            $primary = true;
-                        }
-                    }
-
-                    if (!$skip_index && is_array($index['fields'])) {
-                        foreach ($index['fields'] as $field_name => $field) {
-                            if (!isset($this->table['fields'][$field_name])) {
-                                $this->raiseError('index field "'.$field_name.'" does not exist', null, $xp);
-                            } elseif (!empty($index['primary'])
-                                && !$this->table['fields'][$field_name]['notnull']
-                            ) {
-                                $this->raiseError('all primary key fields must be defined notnull in "'.$this->table_name.'"', null, $xp);
-                            }
-                        }
-                    } else {
-                        unset($this->table['indexes'][$name]);
-                    }
-                }
-            }
-            $this->database_definition['tables'][$this->table_name] = $this->table;
+            $result = $val->validateTable($this);
+            break;
+        case 'database-table-name':
+            $result = $val->validateTableName($this);
             break;
 
         /* Field declaration */
         case 'database-table-declaration-field':
-            if (!$this->field_name) {
-                $this->raiseError('field name missing', null, $xp);
-            } elseif (isset($this->table['fields'][$this->field_name])) {
-                $this->raiseError('field "'.$this->field_name.'" already exists', null, $xp);
-            }
-
-            if ($this->fail_on_invalid_names) {
-                $name = strtoupper($this->field_name);
-                foreach ($this->fail_on_invalid_names as $rdbms) {
-                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                        $this->raiseError('field name "'.$this->field_name.'" is a reserved word in: '.$rdbms, null, $xp);
-                        break;
-                    }
-                }
-            }
-            /* Type check */
-            if (empty($this->field['type'])) {
-                $this->raiseError('no field type specified', null, $xp);
-            }
-            if (!empty($this->valid_types) && !array_key_exists($this->field['type'], $this->valid_types)) {
-                $this->raiseError('no valid field type ("'.$this->field['type'].'") specified', null, $xp);
-            }
-            if (array_key_exists('unsigned', $this->field) && !$this->isBoolean($this->field['unsigned'])) {
-                $this->raiseError('unsigned has to be a boolean value', null, $xp);
-            }
-            if (array_key_exists('fixed', $this->field) && !$this->isBoolean($this->field['fixed'])) {
-                $this->raiseError('fixed has to be a boolean value', null, $xp);
-            }
-            if (array_key_exists('length', $this->field) && $this->field['length'] <= 0) {
-                $this->raiseError('length has to be an integer greater 0', null, $xp);
-            }
-            if (empty($this->field['was'])) {
-                $this->field['was'] = $this->field_name;
-            }
-            if (empty($this->field['notnull'])) {
-                $this->field['notnull'] = false;
-            }
-            if (!$this->isBoolean($this->field['notnull'])) {
-                $this->raiseError('field "notnull" has to be a boolean value', null, $xp);
-            }
-            if ($this->force_defaults
-                && !array_key_exists('default', $this->field)
-                && $this->field['type'] != 'clob' && $this->field['type'] != 'blob'
-            ) {
-                $this->field['default'] = $this->valid_types[$this->field['type']];
-            }
-
-            if (array_key_exists('default', $this->field)) {
-                if ($this->field['type'] == 'clob' || $this->field['type'] == 'blob') {
-                    $this->raiseError('"'.$this->field['type'].
-                        '"-fields are not allowed to have a default value', null, $xp);
-                }
-                if ($this->field['default'] === '') {
-                    if (!$this->field['notnull']) {
-                        $this->field['default'] = null;
-                    }
-                }
-            }
-
-            $this->table['fields'][$this->field_name] = $this->field;
-
-            if (isset($this->field['default'])
-                && !$this->validateFieldValue($this->field_name,
-                    $this->table['fields'][$this->field_name]['default'], $xp
-                )
-            ) {
-                $this->raiseError('default value of "'.$this->field_name.'" is of wrong type', null, $xp);
-            }
+            $result = $val->validateField($this);
             break;
 
         /* Index declaration */
         case 'database-table-declaration-index':
-            if (!$this->index_name) {
-                $this->raiseError('an index has to have a name', null, $xp);
-            }
-            if (isset($this->table['indexes'][$this->index_name])) {
-                $this->raiseError('index "'.$this->index_name.'" already exists', null, $xp);
-            }
-            if (array_key_exists('unique', $this->index) && !$this->isBoolean($this->index['unique'])) {
-                $this->raiseError('field "unique" has to be a boolean value', null, $xp);
-            }
-            if (array_key_exists('primary', $this->index) && !$this->isBoolean($this->index['primary'])) {
-                $this->raiseError('field "primary" has to be a boolean value', null, $xp);
-            }
-
-            if (empty($this->index['was'])) {
-                $this->index['was'] = $this->index_name;
-            }
-            $this->table['indexes'][$this->index_name] = $this->index;
+            $result = $val->validateIndex($this);
             break;
         case 'database-table-declaration-index-field':
-            if (!$this->field_name) {
-                $this->raiseError('the index-field-name is required', null, $xp);
-            }
-            if (!empty($this->field['sorting'])
-                && $this->field['sorting'] !== 'ascending' && $this->field['sorting'] !== 'descending') {
-                $this->raiseError('sorting type unknown', null, $xp);
-            } else {
-                $this->field['sorting'] = 'ascending';
-            }
-            $this->index['fields'][$this->field_name] = $this->field;
-            break;
-        case 'database-table-name':
-            if (isset($this->structure['tables'][$this->table_name])) {
-                $this->table = $this->structure['tables'][$this->table_name];
-            }
+            $result = $val->validateIndexField($this);
             break;
 
         /* Sequence declaration */
         case 'database-sequence':
-            if (!$this->seq_name) {
-                $this->raiseError('a sequence has to have a name', null, $xp);
-            } elseif ($this->fail_on_invalid_names) {
-                $name = strtoupper($this->seq_name);
-                foreach ($this->fail_on_invalid_names as $rdbms) {
-                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                        $this->raiseError('sequence name "'.$this->seq_name.'" is a reserved word in: '.$rdbms, null, $xp);
-                        break;
-                    }
-                }
-            }
-
-            if (isset($this->database_definition['sequences'][$this->seq_name])) {
-                $this->raiseError('sequence "'.$this->seq_name.'" already exists', null, $xp);
-            }
-
-            if (empty($this->seq['was'])) {
-                $this->seq['was'] = $this->seq_name;
-            }
-
-            if (!empty($this->seq['on'])) {
-                if (empty($this->seq['on']['table']) || empty($this->seq['on']['field'])) {
-                    $this->raiseError('sequence "'.$this->seq_name.
-                        '" was not properly defined', null, $xp);
-                }
-            }
-            $this->database_definition['sequences'][$this->seq_name] = $this->seq;
+            $result = $val->validateSequence($this);
             break;
 
         /* End of File */
         case 'database':
-            if (!isset($this->database_definition['name']) || !$this->database_definition['name']) {
-                $this->raiseError('a database has to have a name', null, $xp);
-            } elseif ($this->fail_on_invalid_names) {
-                $name = strtoupper($this->database_definition['name']);
-                foreach ($this->fail_on_invalid_names as $rdbms) {
-                    if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                        $this->raiseError('database name "'.$this->database_definition['name'].'" is a reserved word in: '.$rdbms, null, $xp);
-                        break;
-                    }
-                }
-            }
-
-            if (isset($this->database_definition['create'])
-                && !$this->isBoolean($this->database_definition['create'])
-            ) {
-                $this->raiseError('field "create" has to be a boolean value', null, $xp);
-            }
-            if (isset($this->database_definition['overwrite'])
-                && !$this->isBoolean($this->database_definition['overwrite'])
-            ) {
-                $this->raiseError('field "overwrite" has to be a boolean value', null, $xp);
-            }
-
-            if (isset($this->database_definition['sequences'])) {
-                foreach ($this->database_definition['sequences'] as $seq_name => $seq) {
-                    if (!empty($seq['on'])
-                        && empty($this->database_definition['tables'][$seq['on']['table']]['fields'][$seq['on']['field']])
-                    ) {
-                        $this->raiseError('sequence "'.$seq_name.
-                            '" was assigned on unexisting field/table', null, $xp);
-                    }
-                }
-            }
-            if (PEAR::isError($this->error)) {
-                $this->database_definition = $this->error;
-            }
+            $result = $val->validateDatabase($this);
             break;
         }
 
