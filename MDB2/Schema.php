@@ -696,7 +696,7 @@ class MDB2_Schema extends PEAR
         }
         $fields = implode(',', array_keys($table['fields']));
         $placeholders = implode(',', $placeholders);
-        $query = "INSERT INTO $table_name ($fields) VALUES ($placeholders)";
+        $query = "INSERT INTO ".$this->quoteIdentifier($table_name, true)." ($fields) VALUES ($placeholders)";
         $stmt = $this->db->prepare($query, $types, null, true);
         if (PEAR::isError($stmt)) {
             return $stmt;
@@ -776,9 +776,9 @@ class MDB2_Schema extends PEAR
                 is_array($tables) && in_array($table, $tables)
             ) {
                 if ($this->db->supports('summary_functions')) {
-                    $query = "SELECT MAX($field) FROM $table";
+                    $query = "SELECT MAX($field) FROM ".$this->quoteIdentifier($table, true);
                 } else {
-                    $query = "SELECT $field FROM $table ORDER BY $field DESC";
+                    $query = "SELECT $field FROM ".$this->quoteIdentifier($table, true)." ORDER BY $field DESC";
                 }
                 $start = $this->db->queryOne($query, 'integer');
                 if (PEAR::isError($start)) {
@@ -1854,12 +1854,12 @@ class MDB2_Schema extends PEAR
         ) {
             foreach ($database_definition['tables'] as $table_name => $table) {
                 $fields = array();
-                $types = array();
                 foreach ($table['fields'] as $field_name => $field) {
                     $fields[$field_name] = $field['type'];
                 }
-                $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM '.$table_name;
-                $data = $this->db->queryAll($query, $types, MDB2_FETCHMODE_ASSOC);
+                $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM ';
+                $query.= $this->db->quoteIdentifer($table_name, true);
+                $data = $this->db->queryAll($query, $fields, MDB2_FETCHMODE_ASSOC);
                 if (PEAR::isError($data)) {
                     return $data;
                 }
