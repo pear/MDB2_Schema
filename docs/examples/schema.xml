@@ -19,7 +19,7 @@
    <field>
     <name>birthday</name>
     <type>timestamp</type>
-   </field>   
+   </field>
   </declaration>
 
   <initialization>
