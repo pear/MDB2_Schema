@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<database>
+ <name>DataBase</name>
+
+ <table>
+  <name>Example</name>
+
+  <declaration>
+   <field>
+    <name>foo</name>
+    <type>integer</type>
+    <unsigned>true</unsigned>
+   </field>
+   <field>
+    <name>foolish</name>
+    <type>integer</type>
+    <unsigned>true</unsigned>
+   </field>
+   <field>
+    <name>birthday</name>
+    <type>timestamp</type>
+   </field>   
+  </declaration>
+
+  <initialization>
+   <insert>
+    <field>
+     <name>foo</name>
+     <value>2</value>
+    </field>
+    <field>
+     <name>birthday</name>
+     <function>
+      <name>now</name>
+     </function>
+    </field>
+    <field>
+     <name>foolish</name>
+     <expression>
+      <value>3</value>
+      <operator>PLUS</operator>
+      <column>foo</column>
+     </expression>
+    </field>
+   </insert>
+   <update>
+    <field>
+     <name>foo</name>
+     <value>10</value>
+    </field>
+    <where>
+     <expression>
+      <column>foo</column>
+      <operator>EQUAL</operator>
+      <value>2</value>
+     </expression>
+    </where>
+   </update>
+   <delete>
+    <where>
+     <expression>
+      <column>foolish</column>
+      <operator>LESS THAN</operator>
+      <value>15</value>
+     </expression>
+    </where>
+   </delete>
+  </initialization>
+
+ </table>
+
+</database>
