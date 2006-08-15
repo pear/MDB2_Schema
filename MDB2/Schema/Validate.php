@@ -382,7 +382,7 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateInsert(&$schema)
+    function validateDML(&$schema)
     {
         $schema->table['initialization'][] = $schema->init;
         return true;
