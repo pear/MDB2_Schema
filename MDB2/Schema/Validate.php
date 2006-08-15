@@ -191,7 +191,7 @@ class MDB2_Schema_Validate
         }
         /* Type check */
         if (empty($schema->field['type'])) {
-            $schema->raiseError('no field type specified', null, $xp);
+            return $schema->raiseError('no field type specified', null, $xp);
         }
         if (!empty($schema->valid_types) && !array_key_exists($schema->field['type'], $schema->valid_types)) {
             $schema->raiseError('no valid field type ("'.$schema->field['type'].'") specified', null, $xp);
