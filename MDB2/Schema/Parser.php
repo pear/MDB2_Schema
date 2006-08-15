@@ -208,7 +208,7 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-field':
             /* field are now accepting functions and expressions
             we can't determine the return type of them
-            $result = $this->val->validateInsertField($this); */
+            $result = $this->val->validateInsertField($this, $xp); */
             break;
         case 'database-table-initialization-insert-field-function':
         case 'database-table-initialization-update-field-function':
@@ -229,38 +229,38 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-insert':
         case 'database-table-initialization-delete':
         case 'database-table-initialization-update':
-            $result = $this->val->validateDML($this);
+            $result = $this->val->validateDML($this, $xp);
             break;
 
         /* Table definition */
         case 'database-table':
-            $result = $this->val->validateTable($this);
+            $result = $this->val->validateTable($this, $xp);
             break;
         case 'database-table-name':
-            $result = $this->val->validateTableName($this);
+            $result = $this->val->validateTableName($this, $xp);
             break;
 
         /* Field declaration */
         case 'database-table-declaration-field':
-            $result = $this->val->validateField($this);
+            $result = $this->val->validateField($this, $xp);
             break;
 
         /* Index declaration */
         case 'database-table-declaration-index':
-            $result = $this->val->validateIndex($this);
+            $result = $this->val->validateIndex($this, $xp);
             break;
         case 'database-table-declaration-index-field':
-            $result = $this->val->validateIndexField($this);
+            $result = $this->val->validateIndexField($this, $xp);
             break;
 
         /* Sequence declaration */
         case 'database-sequence':
-            $result = $this->val->validateSequence($this);
+            $result = $this->val->validateSequence($this, $xp);
             break;
 
         /* End of File */
         case 'database':
-            $result = $this->val->validateDatabase($this);
+            $result = $this->val->validateDatabase($this, $xp);
             break;
         }
 

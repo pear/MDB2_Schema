@@ -91,7 +91,7 @@ class MDB2_Schema_Validate
     }
 
     /* Definition */
-    function validateTable(&$schema)
+    function validateTable(&$schema, $xp)
     {
         if (!$schema->table_name) {
             $schema->raiseError('a table has to have a name', null, $xp);
@@ -173,7 +173,7 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateField(&$schema)
+    function validateField(&$schema, $xp)
     {
         if (!$schema->field_name) {
             $schema->raiseError('field name missing', null, $xp);
@@ -245,7 +245,7 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateIndex(&$schema)
+    function validateIndex(&$schema, $xp)
     {
         if (!$schema->index_name) {
             $schema->raiseError('an index has to have a name', null, $xp);
@@ -267,7 +267,7 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateIndexField(&$schema)
+    function validateIndexField(&$schema, $xp)
     {
         if (!$schema->field_name) {
             $schema->raiseError('the index-field-name is required', null, $xp);
@@ -282,7 +282,7 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateTableName(&$schema)
+    function validateTableName(&$schema, $xp)
     {
         if (isset($schema->structure['tables'][$schema->table_name])) {
             $schema->table = $schema->structure['tables'][$schema->table_name];
@@ -290,7 +290,7 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateSequence(&$schema)
+    function validateSequence(&$schema, $xp)
     {
         if (!$schema->seq_name) {
             $schema->raiseError('a sequence has to have a name', null, $xp);
@@ -321,7 +321,7 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateDatabase(&$schema)
+    function validateDatabase(&$schema, $xp)
     {
         if (!isset($schema->database_definition['name']) || !$schema->database_definition['name']) {
             $schema->raiseError('a database has to have a name', null, $xp);
@@ -362,7 +362,7 @@ class MDB2_Schema_Validate
     }
 
     /* Data Manipulation */
-    function validateInsertField(&$schema)
+    function validateInsertField(&$schema, $xp)
     {
         if (!$schema->init_name) {
             $schema->raiseError('field-name has to be specified', null, $xp);
@@ -382,13 +382,13 @@ class MDB2_Schema_Validate
         return true;
     }
 
-    function validateDML(&$schema)
+    function validateDML(&$schema, $xp)
     {
         $schema->table['initialization'][] = $schema->init;
         return true;
     }
 
-    function validateFieldValue(&$schema, $field_name, &$field_value, &$xp)
+    function validateFieldValue(&$schema, $field_name, &$field_value, $xp)
     {
         if (!isset($schema->table['fields'][$field_name])) {
             return $schema->raiseError('"'.$field_name.'" is not defined', null, $xp);
