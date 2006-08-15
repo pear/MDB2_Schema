@@ -45,6 +45,8 @@
 // $Id$
 //
 
+#ini_set('include_path', '../../'.PATH_SEPARATOR.ini_get('include_path'));
+
 include 'MDB2/Schema.php';
 include 'MDB2/Schema/Parser.php';
 
@@ -54,7 +56,7 @@ $result = $parser->parse();
 
 ?>
 <pre>
-<?
+<?php
 if (PEAR::isError($schema->error))
 {
 	print_r($parser->error);
