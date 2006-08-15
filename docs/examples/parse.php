@@ -50,20 +50,17 @@
 include 'MDB2/Schema.php';
 include 'MDB2/Schema/Parser.php';
 
-$parser =& new MDB2_Schema_Parser(array());
+$parser =& new MDB2_Schema_Parser(array(), false, false, $valid_types = array('integer' => 0, 'timestamp' => '0001-01-01 00:00:00'), true);
 $parser->setInputFile("schema.xml");
 $result = $parser->parse();
 
 ?>
 <pre>
 <?php
-if (PEAR::isError($schema->error))
-{
-	print_r($parser->error);
-}
-else
-{
-	print_r($parser->database_definition['tables']['Example']);
+if (PEAR::isError($result)) {
+    var_dump($result);
+} else {
+    var_dump($parser->database_definition);
 }
 
 ?>
