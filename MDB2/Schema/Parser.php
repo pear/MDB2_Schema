@@ -163,7 +163,7 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-where':
         case 'database-table-initialization-delete-where':
             $this->init_expression = array();
-            $this->init['data']['where'] = array('expression' => array());
+            $this->init['data']['where'] = array('type' => '', 'data' => array());
             break;
 
         /* Definition */
@@ -222,7 +222,8 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Delete and Update */
         case 'database-table-initialization-update-where-expression':
         case 'database-table-initialization-delete-where-expression':
-            $this->init['data']['where']['expression'] = $this->init_expression;
+            $this->init['data']['where']['type'] = 'expression';
+            $this->init['data']['where']['data'] = $this->init_expression;
             break;
 
         /* All */

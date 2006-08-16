@@ -690,31 +690,214 @@ class MDB2_Schema extends PEAR
      */
     function initializeTable($table_name, $table)
     {
-        foreach ($table['fields'] as $field_name => $field) {
-            $placeholders[$field_name] = ':'.$field_name;
-            $types[$field_name] = $field['type'];
-        }
-        $fields = implode(',', array_keys($table['fields']));
-        $placeholders = implode(',', $placeholders);
-        $query = "INSERT INTO ".$this->quoteIdentifier($table_name, true)." ($fields) VALUES ($placeholders)";
-        $stmt = $this->db->prepare($query, $types, null, true);
-        if (PEAR::isError($stmt)) {
-            return $stmt;
-        }
+        $query['i']  = 'INSERT INTO $table_name ($fields) VALUES ($values)';
+        $query['u']  = 'UPDATE $table_name SET $fields_values';
+        $query['uc'] = 'UPDATE $table_name SET $fields_values WHERE $where';
+        $query['d']  = 'DELETE FROM $table_name WHERE $where';
+        $query['last'] = '';
 
         foreach ($table['initialization'] as $instruction) {
             switch ($instruction['type']) {
             case 'insert':
-                if (!empty($instruction['fields']) && is_array($instruction['fields'])) {
-                    $result = $stmt->execute($instruction['fields']);
-                    if (PEAR::isError($result)) {
-                        return $result;
-                    }
+                $data = $this->getInstructionFields($instruction);
+                if (!empty($data)) {
+
+                    $fields = array_keys($data);
+                    $values = array_values($data);
+
+                    $fields = implode(',', $fields);
+                    $values = implode(',', $values);
+
+                    eval('$query[\'last\'] = "'.$query['i'].'";');
+                    $result = $this->db->exec($query['last']);
+                }
+                break;
+            case 'update':
+                $data = $this->getInstructionFields($instruction);
+                $where = $this->getInstructionWhere($instruction);
+                if (!empty($data)) {
+                    
+                    array_walk($data, array($this, 'buildFieldValue'));
+                    $fields_values = implode(',', $data);
+
+                    if (!empty($where))
+                        eval('$query[\'last\'] = "'.$query['uc'].'";');
+                    else
+                        eval('$query[\'last\'] = "'.$query['u'].'";');
+
+                    $result = $this->db->exec($query['last']);
+                }
+                break;
+            case 'delete':
+                $where = $this->getInstructionWhere($instruction);
+                if (!empty($where)) {
+                    eval('$query[\'last\'] = "'.$query['d'].'";');
+                    $result = $this->db->exec($query['last']);
                 }
                 break;
             }
+            if (PEAR::isError($result)) {
+                return $result;
+            }
         }
-        return $stmt->free();
+        return $result;
+    }
+
+    // }}}
+    // {{{ buildFieldValue()
+
+    /**
+     * Used with array_walk() to change values to key=value
+     * for a later UPDATE query
+     *
+     * @param array  multi dimensional array that contains the
+     *               parsed element.
+     * @return string
+     * @access public
+     */
+    function buildFieldValue(&$element, $key)
+    {
+       $element = $key."=$element";
+    }
+
+    // }}}
+    // {{{ getValue()
+
+    /**
+     * Translate the a parsed element to a string
+     *
+     * @param array  multi dimensional array that contains the
+     *               parsed element.
+     * @return string
+     * @access public
+     */
+    function getValue($element)
+    {
+        $str = "";
+        switch ($element['type'])
+        {
+            case 'value':
+                /* 2DO: Add string escape here */
+                $str .= $element['data'];
+            break;
+            case 'column':
+                /* 2DO: Add column escape here */
+                $str .= $element['data'];
+            break;
+            case 'function':
+                $str .= $element['data']['name']."(";
+                if (
+                       (!empty($element['data']['arguments'])) &&
+                       (is_array($element['data']['arguments']))
+                   )
+                {
+                    $arguments = array();
+                    foreach ($element['data']['arguments'] as $v)
+                        $arguments[] = $this->getValue($v);
+                    $str .= implode(",", $arguments);
+                }
+                $str .= ")";
+            break;
+            case 'expression':
+                $str .= "(";
+                $str .= $this->getValue($element['data']['operant'][0]);
+                $str .= $this->getOperator($element['data']['operator']);
+                $str .= $this->getValue($element['data']['operant'][1]);
+                $str .= ")";
+            break;
+        }
+        return $str;
+    }
+
+    // }}}
+    // {{{ getOperator()
+
+    /**
+     * Return the matching operator of the RDBMS
+     * (should be ported to MDB2/Driver ?)
+     *
+     * @param string parsed operator
+     * @return string
+     * @access public
+     */
+    function getOperator($op)
+    {
+        switch ($op)
+        {
+        case 'NOT':
+                return 'NOT';
+                break;
+            case 'AND':
+                return 'AND';
+                break;
+            case 'OR':
+                return 'OR';
+                break;
+            case 'PLUS':
+                return '+';
+                break;
+            case 'MINUS':
+                return '-';
+                break;
+            case 'EQUAL':
+                return '=';
+                break;
+            case 'LIKE':
+                return 'LIKE';
+                break;
+            case 'NOT EQUAL':
+                return '!=';
+                break;
+            case 'LESS THAN':
+                return '<';
+                break;
+            case 'GREATER THAN':
+                return '>';
+                break;
+        }
+    }
+
+    // }}}
+    // {{{ getInstructionFields()
+
+    /**
+     * Return the fields of the given initialization instruction
+     *
+     * @param array  multi dimensional array that contains the
+     *               the instruction to be analised
+     * @param array  multi dimensional array that contains the
+     *               structure and optional data of the table
+     * @return array
+     * @access public
+     */
+    function getInstructionFields($instruction)
+    {
+        $fields = array();
+        if ((!empty($instruction['data']['field'])) && (is_array($instruction['data']['field'])))
+        {
+            foreach ($instruction['data']['field'] as $field)
+                $fields[$field['name']] = $this->getValue($field['group']);
+        }
+        return $fields;
+    }
+
+    // }}}
+    // {{{ getInstructionWhere()
+
+    /**
+     * Return the translated WHERE statement of the instruction
+     *
+     * @param array  multi dimensional array that contains the
+     *               the instruction to be analised
+     * @return string
+     * @access public
+     */
+    function getInstructionWhere($instruction)
+    {
+        $where = '';
+        if (!empty($instruction['data']['where']))
+            $where = $this->getValue($instruction['data']['where']);
+        return $where;
     }
 
     // }}}
