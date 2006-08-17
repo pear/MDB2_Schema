@@ -46,22 +46,37 @@
 //
 
 #ini_set('include_path', '../../'.PATH_SEPARATOR.ini_get('include_path'));
+#ini_set('include_path', '../../../MDB2'.PATH_SEPARATOR.ini_get('include_path'));
 
-include 'MDB2/Schema.php';
-include 'MDB2/Schema/Parser.php';
+require_once 'MDB2.php';
 
-$parser =& new MDB2_Schema_Parser(array(), false, false, $valid_types = array('integer' => 0, 'timestamp' => '0001-01-01 00:00:00'), true);
-$parser->setInputFile("schema.xml");
-$result = $parser->parse();
+$dsn = array(
+    'phptype'   => 'mysql',
+    'username'  => 'root',
+    'password'  => '',
+    'hostspec'  => 'localhost',
+);
 
+$options = array();
+
+MDB2::loadFile('Schema');
+
+$manager =& MDB2_Schema::factory($dsn, $options);
+if (MDB2::isError($manager)) {
+    die($manager->getUserinfo());
+}
+
+$database_definition = $manager->parseDatabaseDefinitionFile('./schema.xml');
+
+$manager->db->setOption('disable_query', true);
+$manager->db->setOption('debug', true);
+
+$manager->writeInitialization($database_definition);
 ?>
 <pre>
 <?php
-if (PEAR::isError($result)) {
-    var_dump($result);
-} else {
-    var_dump($parser->database_definition);
-}
+var_dump($database_definition);
+var_dump($manager->db->getDebugOutput());
 
 ?>
 </pre>
