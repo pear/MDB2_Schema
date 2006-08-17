@@ -12,6 +12,12 @@
     <unsigned>true</unsigned>
    </field>
    <field>
+    <name>bar</name>
+    <type>text</type>
+    <length>10</length>
+    <default></default>
+   </field>
+   <field>
     <name>foolish</name>
     <type>integer</type>
     <unsigned>true</unsigned>
@@ -50,9 +56,12 @@
     </field>
     <where>
      <expression>
-      <column>foo</column>
+      <column>bar</column>
       <operator>EQUAL</operator>
-      <value>2</value>
+      <function>
+       <name>lower</name>
+       <value>somestring</value>
+      </function>
      </expression>
     </where>
    </update>
