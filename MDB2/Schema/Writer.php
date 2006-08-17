@@ -115,26 +115,26 @@ class MDB2_Schema_Writer
         for ($char = 0, $count = strlen($string); $char < $count; $char++) {
             switch ($string[$char]) {
             case '&':
-                $escaped .= '&amp;';
+                $escaped.= '&amp;';
                 break;
             case '>':
-                $escaped .= '&gt;';
+                $escaped.= '&gt;';
                 break;
             case '<':
-                $escaped .= '&lt;';
+                $escaped.= '&lt;';
                 break;
             case '"':
-                $escaped .= '&quot;';
+                $escaped.= '&quot;';
                 break;
             case '\'':
-                $escaped .= '&apos;';
+                $escaped.= '&apos;';
                 break;
             default:
                 $code = ord($string[$char]);
                 if ($code < 32 || $code > 127) {
-                    $escaped .= "&#$code;";
+                    $escaped.= "&#$code;";
                 } else {
-                    $escaped .= $string[$char];
+                    $escaped.= $string[$char];
                 }
                 break;
             }

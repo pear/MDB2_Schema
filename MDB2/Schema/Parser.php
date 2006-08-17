@@ -274,24 +274,24 @@ class MDB2_Schema_Parser extends XML_Parser
         if (is_null($this->error)) {
             $error = '';
             if (is_resource($msg)) {
-                $error .= 'Parser error: '.xml_error_string(xml_get_error_code($msg));
+                $error.= 'Parser error: '.xml_error_string(xml_get_error_code($msg));
                 $xp = $msg;
             } else {
-                $error .= 'Parser error: '.$msg;
+                $error.= 'Parser error: '.$msg;
                 if (!is_resource($xp)) {
                     $xp = $this->parser;
                 }
             }
             if ($error_string = xml_error_string($ecode)) {
-                $error .= ' - '.$error_string;
+                $error.= ' - '.$error_string;
             }
             if (is_resource($xp)) {
                 $byte = @xml_get_current_byte_index($xp);
                 $line = @xml_get_current_line_number($xp);
                 $column = @xml_get_current_column_number($xp);
-                $error .= " - Byte: $byte; Line: $line; Col: $column";
+                $error.= " - Byte: $byte; Line: $line; Col: $column";
             }
-            $error .= "\n";
+            $error.= "\n";
             $this->error =& MDB2::raiseError(MDB2_SCHEMA_ERROR_PARSE, null, null, $error);
         }
         return $this->error;
@@ -375,35 +375,35 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Database */
         case 'database-name':
             if (isset($this->database_definition['name'])) {
-                $this->database_definition['name'] .= $data;
+                $this->database_definition['name'].= $data;
             } else {
                 $this->database_definition['name'] = $data;
             }
             break;
         case 'database-create':
             if (isset($this->database_definition['create'])) {
-                $this->database_definition['create'] .= $data;
+                $this->database_definition['create'].= $data;
             } else {
                 $this->database_definition['create'] = $data;
             }
             break;
         case 'database-overwrite':
             if (isset($this->database_definition['overwrite'])) {
-                $this->database_definition['overwrite'] .= $data;
+                $this->database_definition['overwrite'].= $data;
             } else {
                 $this->database_definition['overwrite'] = $data;
             }
             break;
         case 'database-table-name':
             if (isset($this->table_name)) {
-                $this->table_name .= $data;
+                $this->table_name.= $data;
             } else {
                 $this->table_name = $data;
             }
             break;
         case 'database-table-was':
             if (isset($this->table['was'])) {
-                $this->table['was'] .= $data;
+                $this->table['was'].= $data;
             } else {
                 $this->table['was'] = $data;
             }
@@ -412,63 +412,63 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Field declaration */
         case 'database-table-declaration-field-name':
             if (isset($this->field_name)) {
-                $this->field_name .= $data;
+                $this->field_name.= $data;
             } else {
                 $this->field_name = $data;
             }
             break;
         case 'database-table-declaration-field-type':
             if (isset($this->field['type'])) {
-                $this->field['type'] .= $data;
+                $this->field['type'].= $data;
             } else {
                 $this->field['type'] = $data;
             }
             break;
         case 'database-table-declaration-field-was':
             if (isset($this->field['was'])) {
-                $this->field['was'] .= $data;
+                $this->field['was'].= $data;
             } else {
                 $this->field['was'] = $data;
             }
             break;
         case 'database-table-declaration-field-notnull':
             if (isset($this->field['notnull'])) {
-                $this->field['notnull'] .= $data;
+                $this->field['notnull'].= $data;
             } else {
                 $this->field['notnull'] = $data;
             }
             break;
         case 'database-table-declaration-field-fixed':
             if (isset($this->field['fixed'])) {
-                $this->field['fixed'] .= $data;
+                $this->field['fixed'].= $data;
             } else {
                 $this->field['fixed'] = $data;
             }
             break;
         case 'database-table-declaration-field-unsigned':
             if (isset($this->field['unsigned'])) {
-                $this->field['unsigned'] .= $data;
+                $this->field['unsigned'].= $data;
             } else {
                 $this->field['unsigned'] = $data;
             }
             break;
         case 'database-table-declaration-field-autoincrement':
             if (isset($this->field['autoincrement'])) {
-                $this->field['autoincrement'] .= $data;
+                $this->field['autoincrement'].= $data;
             } else {
                 $this->field['autoincrement'] = $data;
             }
             break;
         case 'database-table-declaration-field-default':
             if (isset($this->field['default'])) {
-                $this->field['default'] .= $data;
+                $this->field['default'].= $data;
             } else {
                 $this->field['default'] = $data;
             }
             break;
         case 'database-table-declaration-field-length':
             if (isset($this->field['length'])) {
-                $this->field['length'] .= $data;
+                $this->field['length'].= $data;
             } else {
                 $this->field['length'] = $data;
             }
@@ -477,42 +477,42 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Index declaration */
         case 'database-table-declaration-index-name':
             if (isset($this->index_name)) {
-                $this->index_name .= $data;
+                $this->index_name.= $data;
             } else {
                 $this->index_name = $data;
             }
             break;
         case 'database-table-declaration-index-primary':
             if (isset($this->index['primary'])) {
-                $this->index['primary'] .= $data;
+                $this->index['primary'].= $data;
             } else {
                 $this->index['primary'] = $data;
             }
             break;
         case 'database-table-declaration-index-unique':
             if (isset($this->index['unique'])) {
-                $this->index['unique'] .= $data;
+                $this->index['unique'].= $data;
             } else {
                 $this->index['unique'] = $data;
             }
             break;
         case 'database-table-declaration-index-was':
             if (isset($this->index['was'])) {
-                $this->index['was'] .= $data;
+                $this->index['was'].= $data;
             } else {
                 $this->index['was'] = $data;
             }
             break;
         case 'database-table-declaration-index-field-name':
             if (isset($this->field_name)) {
-                $this->field_name .= $data;
+                $this->field_name.= $data;
             } else {
                 $this->field_name = $data;
             }
             break;
         case 'database-table-declaration-index-field-sorting':
             if (isset($this->field['sorting'])) {
-                $this->field['sorting'] .= $data;
+                $this->field['sorting'].= $data;
             } else {
                 $this->field['sorting'] = $data;
             }
@@ -520,7 +520,7 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Add by Leoncx */
         case 'database-table-declaration-index-field-length':
             if (isset($this->field['length'])) {
-                $this->field['length'] .= $data;
+                $this->field['length'].= $data;
             } else {
                 $this->field['length'] = $data;
             }
@@ -529,35 +529,35 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Sequence declaration */
         case 'database-sequence-name':
             if (isset($this->seq_name)) {
-                $this->seq_name .= $data;
+                $this->seq_name.= $data;
             } else {
                 $this->seq_name = $data;
             }
             break;
         case 'database-sequence-was':
             if (isset($this->seq['was'])) {
-                $this->seq['was'] .= $data;
+                $this->seq['was'].= $data;
             } else {
                 $this->seq['was'] = $data;
             }
             break;
         case 'database-sequence-start':
             if (isset($this->seq['start'])) {
-                $this->seq['start'] .= $data;
+                $this->seq['start'].= $data;
             } else {
                 $this->seq['start'] = $data;
             }
             break;
         case 'database-sequence-on-table':
             if (isset($this->seq['on']['table'])) {
-                $this->seq['on']['table'] .= $data;
+                $this->seq['on']['table'].= $data;
             } else {
                 $this->seq['on']['table'] = $data;
             }
             break;
         case 'database-sequence-on-field':
             if (isset($this->seq['on']['field'])) {
-                $this->seq['on']['field'] .= $data;
+                $this->seq['on']['field'].= $data;
             } else {
                 $this->seq['on']['field'] = $data;
             }
