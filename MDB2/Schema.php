@@ -774,24 +774,22 @@ class MDB2_Schema extends PEAR
                 $str.= $this->db->quoteIdentifier($element['data'], true);
             break;
             case 'function':
+                $arguments = array();
+                if (!empty($element['data']['arguments'])
+                    && is_array($element['data']['arguments'])
+                ) {
+                    foreach ($element['data']['arguments'] as $v) {
+                        $arguments[] = $this->getExpression($v);
+                    }
+                }
                 if (method_exists($this->db->function, $element['data']['name'])) {
-                    $arguments = empty($element['data']['arguments'])
-                        ? array() : $element['data']['arguments'];
                     $str.= call_user_func_array(
                         array(&$this->db->function, $element['data']['name']),
                         $arguments
                     );
                 } else {
                     $str.= $element['data']['name'].'(';
-                    if (!empty($element['data']['arguments'])
-                        && is_array($element['data']['arguments'])
-                    ) {
-                        $arguments = array();
-                        foreach ($element['data']['arguments'] as $v) {
-                            $arguments[] = $this->getExpression($v);
-                        }
-                        $str.= implode(', ', $arguments);
-                    }
+                    $str.= implode(', ', $arguments);
                     $str.= ')';
                 }
             break;
