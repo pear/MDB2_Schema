@@ -444,7 +444,7 @@ class MDB2_Schema extends PEAR
                     $table_definition['fields'][$field_name]['choices'] = array();
                     foreach ($definition as $field_choice) {
                         $table_definition['fields'][$field_name]['choices'][] = $field_choice;
-                        $warning .= 'choice #'.($field_choice_cnt).': '.serialize($field_choice);
+                        $warning.= 'choice #'.($field_choice_cnt).': '.serialize($field_choice);
                         $field_choice_cnt++;
                     }
                     $this->warnings[] = $warning;
@@ -690,60 +690,52 @@ class MDB2_Schema extends PEAR
      */
     function initializeTable($table_name, $table)
     {
-        $query['i']  = 'INSERT INTO $table_name ($fields) VALUES ($values)';
-        $query['u']  = 'UPDATE $table_name SET $fields_values';
-        $query['uc'] = 'UPDATE $table_name SET $fields_values WHERE $where';
-        $query['d']  = 'DELETE FROM $table_name WHERE $where';
-        $query['last'] = '';
+        $query_insert = 'INSERT INTO %s (%s) VALUES (%s)';
+        $query_update = 'UPDATE %s SET %s %s';
+        $query_delete = 'DELETE FROM %s %s';
+
+        $table_name = $this->db->quoteIdentifier($table_name, true);
+
+        $result = MDB2_OK;
 
         foreach ($table['initialization'] as $instruction) {
+            $query = '';
             switch ($instruction['type']) {
             case 'insert':
                 $data = $this->getInstructionFields($instruction);
                 if (!empty($data)) {
+                    $fields = implode(', ', array_keys($data));
+                    $values = implode(', ', array_values($data));
 
-                    $fields = array_keys($data);
-                    $values = array_values($data);
-
-                    $fields = implode(',', $fields);
-                    $values = implode(',', $values);
-
-                    eval('$query[\'last\'] = "'.$query['i'].'";');
-                    $result = $this->db->exec($query['last']);
+                    $query = sprintf($query_insert, $table_name, $fields, $values);
                 }
                 break;
             case 'update':
                 $data = $this->getInstructionFields($instruction);
                 $where = $this->getInstructionWhere($instruction);
                 if (!empty($data)) {
-                    
                     array_walk($data, array($this, 'buildFieldValue'));
-                    $fields_values = implode(',', $data);
+                    $fields_values = implode(', ', $data);
 
-                    if (!empty($where))
-                        eval('$query[\'last\'] = "'.$query['uc'].'";');
-                    else
-                        eval('$query[\'last\'] = "'.$query['u'].'";');
-
-                    $result = $this->db->exec($query['last']);
+                    $query = sprintf($query_update, $table_name, $fields_values, $where);
                 }
                 break;
             case 'delete':
                 $where = $this->getInstructionWhere($instruction);
-                if (!empty($where)) {
-                    eval('$query[\'last\'] = "'.$query['d'].'";');
-                    $result = $this->db->exec($query['last']);
-                }
+                $query = sprintf($query_delete, $table_name, $where);
                 break;
             }
-            if (PEAR::isError($result)) {
-                return $result;
+            if ($query) {
+                $result = $this->db->exec($query);
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
             }
         }
         return $result;
     }
 
-    // }}}
+     // }}}
     // {{{ buildFieldValue()
 
     /**
@@ -761,7 +753,7 @@ class MDB2_Schema extends PEAR
     }
 
     // }}}
-    // {{{ getValue()
+    // {{{ getExpression()
 
     /**
      * Translate the a parsed element to a string
@@ -771,39 +763,44 @@ class MDB2_Schema extends PEAR
      * @return string
      * @access public
      */
-    function getValue($element)
+    function getExpression($element, $type = null)
     {
-        $str = "";
-        switch ($element['type'])
-        {
+        $str = '';
+        switch ($element['type']) {
             case 'value':
-                /* 2DO: Add string escape here */
-                $str .= $element['data'];
+                $str.= $this->db->quote($element['data'], $type);
             break;
             case 'column':
-                /* 2DO: Add column escape here */
-                $str .= $element['data'];
+                $str.= $this->db->quoteIdentifier($element['data'], true);
             break;
             case 'function':
-                $str .= $element['data']['name']."(";
-                if (
-                       (!empty($element['data']['arguments'])) &&
-                       (is_array($element['data']['arguments']))
-                   )
-                {
-                    $arguments = array();
-                    foreach ($element['data']['arguments'] as $v)
-                        $arguments[] = $this->getValue($v);
-                    $str .= implode(",", $arguments);
+                if (method_exists($this->db->function, $element['data']['name'])) {
+                    $arguments = empty($element['data']['arguments'])
+                        ? array() : $element['data']['arguments'];
+                    $str.= call_user_func_array(
+                        array(&$this->db->function, $element['data']['name']),
+                        $arguments
+                    );
+                } else {
+                    $str.= $element['data']['name'].'(';
+                    if (!empty($element['data']['arguments'])
+                        && is_array($element['data']['arguments'])
+                    ) {
+                        $arguments = array();
+                        foreach ($element['data']['arguments'] as $v) {
+                            $arguments[] = $this->getExpression($v);
+                        }
+                        $str.= implode(', ', $arguments);
+                    }
+                    $str.= ')';
                 }
-                $str .= ")";
             break;
             case 'expression':
-                $str .= "(";
-                $str .= $this->getValue($element['data']['operant'][0]);
-                $str .= $this->getOperator($element['data']['operator']);
-                $str .= $this->getValue($element['data']['operant'][1]);
-                $str .= ")";
+                $str.= '(';
+                $str.= $this->getExpression($element['data']['operant'][0]);
+                $str.= $this->getOperator($element['data']['operator']);
+                $str.= $this->getExpression($element['data']['operant'][1]);
+                $str.= ')';
             break;
         }
         return $str;
@@ -822,38 +819,27 @@ class MDB2_Schema extends PEAR
      */
     function getOperator($op)
     {
-        switch ($op)
-        {
+        switch ($op) {
         case 'NOT':
-                return 'NOT';
-                break;
-            case 'AND':
-                return 'AND';
-                break;
-            case 'OR':
-                return 'OR';
-                break;
-            case 'PLUS':
-                return '+';
-                break;
-            case 'MINUS':
-                return '-';
-                break;
-            case 'EQUAL':
-                return '=';
-                break;
-            case 'LIKE':
-                return 'LIKE';
-                break;
-            case 'NOT EQUAL':
-                return '!=';
-                break;
-            case 'LESS THAN':
-                return '<';
-                break;
-            case 'GREATER THAN':
-                return '>';
-                break;
+            return ' NOT ';
+        case 'AND':
+            return ' AND ';
+        case 'OR':
+            return ' OR ';
+        case 'PLUS':
+            return ' + ';
+        case 'MINUS':
+            return ' - ';
+        case 'EQUAL':
+            return ' = ';
+        case 'LIKE':
+            return ' LIKE ';
+        case 'NOT EQUAL':
+            return ' != ';
+        case 'LESS THAN':
+            return ' < ';
+        case 'GREATER THAN':
+            return ' > ';
         }
     }
 
@@ -873,10 +859,10 @@ class MDB2_Schema extends PEAR
     function getInstructionFields($instruction)
     {
         $fields = array();
-        if ((!empty($instruction['data']['field'])) && (is_array($instruction['data']['field'])))
-        {
-            foreach ($instruction['data']['field'] as $field)
-                $fields[$field['name']] = $this->getValue($field['group']);
+        if (!empty($instruction['data']['field']) && is_array($instruction['data']['field'])) {
+            foreach ($instruction['data']['field'] as $field) {
+                $fields[$field['name']] = $this->getExpression($field['group']);
+            }
         }
         return $fields;
     }
@@ -895,8 +881,9 @@ class MDB2_Schema extends PEAR
     function getInstructionWhere($instruction)
     {
         $where = '';
-        if (!empty($instruction['data']['where']))
-            $where = $this->getValue($instruction['data']['where']);
+        if (!empty($instruction['data']['where'])) {
+            $where = 'WHERE '.$this->getExpression($instruction['data']['where']);
+        }
         return $where;
     }
 
@@ -955,9 +942,7 @@ class MDB2_Schema extends PEAR
                  return $tables;
             }
 
-            if (!PEAR::isError($tables) &&
-                is_array($tables) && in_array($table, $tables)
-            ) {
+            if (!PEAR::isError($tables) && is_array($tables) && in_array($table, $tables)) {
                 if ($this->db->supports('summary_functions')) {
                     $query = "SELECT MAX($field) FROM ".$this->quoteIdentifier($table, true);
                 } else {
