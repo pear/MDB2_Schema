@@ -735,17 +735,19 @@ class MDB2_Schema extends PEAR
         return $result;
     }
 
-     // }}}
-    // {{{ buildFieldValue()
-
     /**
-     * Used with array_walk() to change values to key=value
-     * for a later UPDATE query
+     * Appends the contents of second argument + '=' to the beginning of first argument
      *
-     * @param array  multi dimensional array that contains the
-     *               parsed element.
-     * @return string
+     * Used with array_walk() in initializeTable() for the UPDATE query.
+     *
+     * @param string  value of array's element
+     * @param string  key of array's element
+     *
+     * @return void
+     *
      * @access public
+     * @static
+     * @see MDB2_Schema::initializeTable()
      */
     function buildFieldValue(&$element, $key)
     {
@@ -756,12 +758,18 @@ class MDB2_Schema extends PEAR
     // {{{ getExpression()
 
     /**
-     * Translate the a parsed element to a string
+     * Generates a string that represents a value that should be associated
+     * with a column in a SQL query.
      *
-     * @param array  multi dimensional array that contains the
-     *               parsed element.
+     * @param mixed  multi dimensional array that represents the parsed field
+     *                of an initialization instruction.
+     * @param string  type of column
+     *
      * @return string
+     *
      * @access public
+     * @static
+     * @see MDB2_Schema::getInstructionFields(), MDB2_Schema::getInstructionWhere()
      */
     function getExpression($element, $type = null)
     {
@@ -808,12 +816,15 @@ class MDB2_Schema extends PEAR
     // {{{ getOperator()
 
     /**
-     * Return the matching operator of the RDBMS
-     * (should be ported to MDB2/Driver ?)
+     * Returns the matching SQL operator
      *
-     * @param string parsed operator
+     * @param string parsed descriptive operator
+     *
      * @return string
+     *
      * @access public
+     * @static
+     * @see MDB2_Schema::getExpression()
      */
     function getOperator($op)
     {
@@ -845,14 +856,17 @@ class MDB2_Schema extends PEAR
     // {{{ getInstructionFields()
 
     /**
-     * Return the fields of the given initialization instruction
+     * Walks the parsed initialization instruction array, field by field,
+     * storing them and their processed values inside an array.
      *
-     * @param array  multi dimensional array that contains the
-     *               the instruction to be analised
-     * @param array  multi dimensional array that contains the
-     *               structure and optional data of the table
-     * @return array
+     * @param mixed  multi dimensional array that contains the parsed
+     *                initialization instruction to be processed.
+     *
+     * @return array  array of strings in the form 'field_name' => 'value'
+     *
      * @access public
+     * @static
+     * @see MDB2_Schema::initializeTable()
      */
     function getInstructionFields($instruction)
     {
@@ -869,12 +883,18 @@ class MDB2_Schema extends PEAR
     // {{{ getInstructionWhere()
 
     /**
-     * Return the translated WHERE statement of the instruction
+     * Walks the parsed WHERE statement of the initialization instruction
+     * array, field by field, storing them and their processed values
+     * inside an array.
      *
-     * @param array  multi dimensional array that contains the
-     *               the instruction to be analised
-     * @return string
+     * @param mixed  multi dimensional array that contains the parsed
+     *                initialization instruction to be processed.
+     *
+     * @return array  array of strings in the form 'field_name' => 'value'
+     *
      * @access public
+     * @static
+     * @see MDB2_Schema::initializeTable()
      */
     function getInstructionWhere($instruction)
     {
