@@ -73,7 +73,6 @@ class MDB2_Schema_Parser extends XML_Parser
     var $init = array();
     var $init_function = array();
     var $init_expression = array();
-    var $init_field = array();
     var $index = array();
     var $index_name = '';
     var $var_mode = false;
@@ -163,8 +162,12 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Update and Delete */
         case 'database-table-initialization-update-where':
         case 'database-table-initialization-delete-where':
-            $this->init_expression = array();
             $this->init['data']['where'] = array('type' => '', 'data' => array());
+            break;
+
+        case 'database-table-initialization-update-where-expression':
+        case 'database-table-initialization-delete-where-expression':
+            $this->init_expression = array();
             break;
 
         /* One level simulation of expression-function recursion */
@@ -173,6 +176,14 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-where-expression-function':
         case 'database-table-initialization-delete-where-expression-function':
             $this->init_function = array();
+            break;
+
+        /* One level simulation of function-expression recursion */
+        case 'database-table-initialization-insert-field-function-expression':
+        case 'database-table-initialization-update-field-function-expression':
+        case 'database-table-initialization-update-where-function-expression':
+        case 'database-table-initialization-delete-where-function-expression':
+            $this->init_expression = array();
             break;
 
         /* Definition */
@@ -247,7 +258,15 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-field-expression-function':
         case 'database-table-initialization-update-where-expression-function':
         case 'database-table-initialization-delete-where-expression-function':
-            $this->init_expression['operant'][] = array('type' => 'function', 'data' => $this->init_function);
+            $this->init_expression['operants'][] = array('type' => 'function', 'data' => $this->init_function);
+            break;
+
+        /* One level simulation of function-expression recursion */
+        case 'database-table-initialization-insert-field-function-expression':
+        case 'database-table-initialization-update-field-function-expression':
+        case 'database-table-initialization-update-where-function-expression':
+        case 'database-table-initialization-delete-where-function-expression':
+            $this->init_function['arguments'][] = array('type' => 'expression', 'data' => $this->init_expression);
             break;
 
         /* Table definition */
@@ -365,13 +384,13 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-field-expression-value':
         case 'database-table-initialization-update-where-expression-value':
         case 'database-table-initialization-delete-where-expression-value':
-            $this->init_expression['operant'][] = array('type' => 'value', 'data' => $data);
+            $this->init_expression['operants'][] = array('type' => 'value', 'data' => $data);
             break;
         case 'database-table-initialization-insert-field-expression-column':
         case 'database-table-initialization-update-field-expression-column':
         case 'database-table-initialization-update-where-expression-column':
         case 'database-table-initialization-delete-where-expression-column':
-            $this->init_expression['operant'][] = array('type' => 'column', 'data' => $data);
+            $this->init_expression['operants'][] = array('type' => 'column', 'data' => $data);
             break;
 
         case 'database-table-initialization-insert-field-function-function':
@@ -403,6 +422,20 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-where-expression-function-column':
         case 'database-table-initialization-delete-where-expression-function-column':
             $this->init_function['arguments'][] = array('type' => 'column', 'data' => $data);
+            break;
+
+        /* One level simulation of function-expression recursion */
+        case 'database-table-initialization-insert-field-function-expression-operator':
+        case 'database-table-initialization-update-field-function-expression-operator':
+            $this->init_expression['operator'] = $data;
+            break;
+        case 'database-table-initialization-insert-field-function-expression-value':
+        case 'database-table-initialization-update-field-function-expression-value':
+            $this->init_expression['operants'][] = array('type' => 'value', 'data' => $data);
+            break;
+        case 'database-table-initialization-insert-field-function-expression-column':
+        case 'database-table-initialization-update-field-function-expression-column':
+            $this->init_expression['operants'][] = array('type' => 'column', 'data' => $data);
             break;
 
         /* Database */
