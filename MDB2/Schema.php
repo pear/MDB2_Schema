@@ -702,7 +702,7 @@ class MDB2_Schema extends PEAR
             $query = '';
             switch ($instruction['type']) {
             case 'insert':
-                $data = $this->getInstructionFields($instruction);
+                $data = $this->getInstructionFields($instruction, $table['fields']);
                 if (!empty($data)) {
                     $fields = implode(', ', array_keys($data));
                     $values = implode(', ', array_values($data));
@@ -711,8 +711,8 @@ class MDB2_Schema extends PEAR
                 }
                 break;
             case 'update':
-                $data = $this->getInstructionFields($instruction);
-                $where = $this->getInstructionWhere($instruction);
+                $data = $this->getInstructionFields($instruction, $table['fields']);
+                $where = $this->getInstructionWhere($instruction, $table['fields']);
                 if (!empty($data)) {
                     array_walk($data, array($this, 'buildFieldValue'));
                     $fields_values = implode(', ', $data);
@@ -721,7 +721,7 @@ class MDB2_Schema extends PEAR
                 }
                 break;
             case 'delete':
-                $where = $this->getInstructionWhere($instruction);
+                $where = $this->getInstructionWhere($instruction, $table['fields']);
                 $query = sprintf($query_delete, $table_name, $where);
                 break;
             }
@@ -761,7 +761,7 @@ class MDB2_Schema extends PEAR
      * Generates a string that represents a value that should be associated
      * with a column in a SQL query.
      *
-     * @param mixed  multi dimensional array that represents the parsed field
+     * @param array  multi dimensional array that represents the parsed field
      *                of an initialization instruction.
      * @param string  type of column
      *
@@ -787,7 +787,7 @@ class MDB2_Schema extends PEAR
                     && is_array($element['data']['arguments'])
                 ) {
                     foreach ($element['data']['arguments'] as $v) {
-                        $arguments[] = $this->getExpression($v);
+                        $arguments[] = $this->getExpression($v, null);
                     }
                 }
                 if (method_exists($this->db->function, $element['data']['name'])) {
@@ -803,9 +803,9 @@ class MDB2_Schema extends PEAR
             break;
             case 'expression':
                 $str.= '(';
-                $str.= $this->getExpression($element['data']['operants'][0]);
+                $str.= $this->getExpression($element['data']['operants'][0], null);
                 $str.= $this->getOperator($element['data']['operator']);
-                $str.= $this->getExpression($element['data']['operants'][1]);
+                $str.= $this->getExpression($element['data']['operants'][1], null);
                 $str.= ')';
             break;
         }
@@ -859,8 +859,10 @@ class MDB2_Schema extends PEAR
      * Walks the parsed initialization instruction array, field by field,
      * storing them and their processed values inside an array.
      *
-     * @param mixed  multi dimensional array that contains the parsed
+     * @param array  multi dimensional array that contains the parsed
      *                initialization instruction to be processed.
+     * @param array  multi dimensional array that contains the definition
+     *                of the fields of the table.
      *
      * @return array  array of strings in the form 'field_name' => 'value'
      *
@@ -868,12 +870,12 @@ class MDB2_Schema extends PEAR
      * @static
      * @see MDB2_Schema::initializeTable()
      */
-    function getInstructionFields($instruction)
+    function getInstructionFields($instruction, $fields_definition = array())
     {
         $fields = array();
         if (!empty($instruction['data']['field']) && is_array($instruction['data']['field'])) {
             foreach ($instruction['data']['field'] as $field) {
-                $fields[$field['name']] = $this->getExpression($field['group']);
+                $fields[$field['name']] = $this->getExpression($field['group'], $fields_definition[$field['name']]['type']);
             }
         }
         return $fields;
@@ -887,8 +889,10 @@ class MDB2_Schema extends PEAR
      * array, field by field, storing them and their processed values
      * inside an array.
      *
-     * @param mixed  multi dimensional array that contains the parsed
+     * @param array  multi dimensional array that contains the parsed
      *                initialization instruction to be processed.
+     * @param array  multi dimensional array that contains the definition
+     *                of the fields of the table.
      *
      * @return array  array of strings in the form 'field_name' => 'value'
      *
@@ -896,11 +900,11 @@ class MDB2_Schema extends PEAR
      * @static
      * @see MDB2_Schema::initializeTable()
      */
-    function getInstructionWhere($instruction)
+    function getInstructionWhere($instruction, $fields_definition = array())
     {
         $where = '';
         if (!empty($instruction['data']['where'])) {
-            $where = 'WHERE '.$this->getExpression($instruction['data']['where']);
+            $where = 'WHERE '.$this->getExpression($instruction['data']['where'], $fields_definition[$field['name']]['type']);
         }
         return $where;
     }
