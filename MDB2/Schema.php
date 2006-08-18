@@ -803,9 +803,9 @@ class MDB2_Schema extends PEAR
             break;
             case 'expression':
                 $str.= '(';
-                $str.= $this->getExpression($element['data']['operant'][0]);
+                $str.= $this->getExpression($element['data']['operants'][0]);
                 $str.= $this->getOperator($element['data']['operator']);
-                $str.= $this->getExpression($element['data']['operant'][1]);
+                $str.= $this->getExpression($element['data']['operants'][1]);
                 $str.= ')';
             break;
         }
