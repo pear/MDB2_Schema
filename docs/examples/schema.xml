@@ -37,7 +37,12 @@
     <field>
      <name>birthday</name>
      <function>
-      <name>now</name>
+      <name>myfunc</name>
+      <expression>
+       <value>1</value>
+       <operator>PLUS</operator>
+       <value>2</value>
+      </expression>
      </function>
     </field>
     <field>
@@ -45,7 +50,11 @@
      <expression>
       <value>3</value>
       <operator>PLUS</operator>
-      <column>foo</column>
+      <function>
+       <name>functionA</name>
+       <value>1</value>
+       <value>2</value>
+      </function>
      </expression>
     </field>
    </insert>
@@ -53,6 +62,22 @@
     <field>
      <name>foo</name>
      <value>10</value>
+    </field>
+    <field>
+     <name>foolish</name>
+     <expression>
+      <function>
+       <name>functionA</name>
+       <value>1</value>
+       <value>2</value>
+      </function>
+      <operator>PLUS</operator>
+      <function>
+       <name>functionB</name>
+       <value>3</value>
+       <value>4</value>
+      </function>
+     </expression>
     </field>
     <where>
      <expression>
@@ -68,9 +93,17 @@
    <delete>
     <where>
      <expression>
-      <column>foolish</column>
-      <operator>LESS THAN</operator>
-      <value>15</value>
+      <function>
+       <name>functionA</name>
+       <value>1</value>
+       <value>2</value>
+      </function>
+      <operator>PLUS</operator>
+      <function>
+       <name>functionB</name>
+       <value>3</value>
+       <value>4</value>
+      </function>
      </expression>
     </where>
    </delete>
