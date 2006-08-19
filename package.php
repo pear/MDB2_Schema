@@ -4,11 +4,22 @@ require_once 'PEAR/PackageFileManager.php';
 
 $version = 'XXX';
 $notes = <<<EOT
-- fixed warning due to not checking with isset()
-- return an error if a name placeholder name is used twice inside a single statement
+- fixed warning due to not checking with isset() in the parser
+- various fixes to the DTD
+- added new XSD schema definition
+- added support for DML statements
+- moved validation code out of the parser into a separate class
+- ensure all identifiers are passed to quoteIdentifier() (Bug #8429)
+- added new example parse.php/schema.xml to demo the DML support
+
 
 open todo items:
 - make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- add ability to define variables inside the schema (like a version number)
+- allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). this would enable people to add DML statements that are only
+  executed when updating from a specific version.
 EOT;
 
 $description =<<<EOT
