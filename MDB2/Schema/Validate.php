@@ -144,58 +144,58 @@ class MDB2_Schema_Validate
     /* Definition */
     function validateTable(&$tables, &$table, $table_name, $fail_on_invalid_names = array(), $xp)
     {
-        if (!$schema->table_name) {
-            //$this->parser->raiseError('a table has to have a name', null, $xp);
+        if (!$table_name) {
+            //schem.raiseError('a table has to have a name', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_TABLE_NAME;
-        } elseif ($schema->fail_on_invalid_names) {
-            $name = strtoupper($schema->table_name);
-            foreach ($schema->fail_on_invalid_names as $rdbms) {
+        } elseif ($fail_on_invalid_names) {
+            $name = strtoupper($table_name);
+            foreach ($fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    //return $schema->raiseError('table name "'.$schema->table_name.'" is a reserved word in: '.$rdbms, null, $xp);
+                    //return schem.raiseError('table name "'.$table_name.'" is a reserved word in: '.$rdbms, null, $xp);
                     return MDB2_SCHEMA_VALIDATE_INVALID_TABLE_NAME;
                 }
             }
         }
 
-        if (isset($schema->database_definition['tables'][$schema->table_name])) {
-            //$schema->raiseError('table "'.$schema->table_name.'" already exists', null, $xp);
+        if (isset($tables[$table_name])) {
+            //schem.raiseError('table "'.$table_name.'" already exists', null, $xp);
             return MDB2_SCHEMA_VALIDATE_TABLE_EXISTS;
         }
 
-        if (empty($schema->table['was'])) {
-            $schema->table['was'] = $schema->table_name;
+        if (empty($table['was'])) {
+            $table['was'] = $table_name;
         }
 
         $autoinc = $primary = false;
-        if (empty($schema->table['fields']) || !is_array($schema->table['fields'])) {
-            //$schema->raiseError('tables need one or more fields', null, $xp);
+        if (empty($table['fields']) || !is_array($table['fields'])) {
+            //schem.raiseError('tables need one or more fields', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_FIELDS;
         } else {
-            foreach ($schema->table['fields'] as $field_name => $field) {
+            foreach ($table['fields'] as $field_name => $field) {
                 if (!empty($field['autoincrement'])) {
                     if ($primary) {
-                        //$schema->raiseError('there was already an autoincrement field in "'.$schema->table_name.'" before "'.$field_name.'"', null, $xp);
+                        //schem.raiseError('there was already an autoincrement field in "'.$table_name.'" before "'.$field_name.'"', null, $xp);
                         return MDB2_SCHEMA_VALIDATE_DUP_AUTOINC;
                     } else {
                         $autoinc = $primary = true;
                     }
 
-                    if (!$schema->table['fields'][$field_name]['notnull']) {
-                        //$schema->raiseError('all autoincrement fields must be defined notnull in "'.$schema->table_name.'"', null, $xp);
+                    if (!$table['fields'][$field_name]['notnull']) {
+                        //schem.raiseError('all autoincrement fields must be defined notnull in "'.$table_name.'"', null, $xp);
                         return MDB2_SCHEMA_VALIDATE_AUTOINC_NULL;
                     }
 
                     if (empty($field['default'])) {
-                        $schema->table['fields'][$field_name]['default'] = '0';
+                        $table['fields'][$field_name]['default'] = '0';
                     } elseif ($field['default'] !== '0' && $field['default'] !== 0) {
-                        //$schema->raiseError('all autoincrement fields must be defined default "0" in "'.$schema->table_name.'"', null, $xp);
+                        //schem.raiseError('all autoincrement fields must be defined default "0" in "'.$table_name.'"', null, $xp);
                         return MDB2_SCHEMA_VALIDATE_AUTOINC_INVALID_DEFAULT;
                     }
                 }
             }
         }
-        if (!empty($schema->table['indexes']) && is_array($schema->table['indexes'])) {
-            foreach ($schema->table['indexes'] as $name => $index) {
+        if (!empty($table['indexes']) && is_array($table['indexes'])) {
+            foreach ($table['indexes'] as $name => $index) {
                 $skip_index = false;
                 if (!empty($index['primary'])) {
                     /*
@@ -206,7 +206,7 @@ class MDB2_Schema_Validate
                     if ($autoinc && count($index['fields']) == '1') {
                         $skip_index = true;
                     } elseif ($primary) {
-                        //$schema->raiseError('there was already an primary index or autoincrement field in "'.$schema->table_name.'" before "'.$name.'"', null, $xp);
+                        //schem.raiseError('there was already an primary index or autoincrement field in "'.$table_name.'" before "'.$name.'"', null, $xp);
                         return MDB2_SCHEMA_VALIDATE_PRIMARY_EXISTS;
                     } else {
                         $primary = true;
@@ -215,103 +215,103 @@ class MDB2_Schema_Validate
 
                 if (!$skip_index && is_array($index['fields'])) {
                     foreach ($index['fields'] as $field_name => $field) {
-                        if (!isset($schema->table['fields'][$field_name])) {
-                            //$schema->raiseError('index field "'.$field_name.'" does not exist', null, $xp);
+                        if (!isset($table['fields'][$field_name])) {
+                            //schem.raiseError('index field "'.$field_name.'" does not exist', null, $xp);
                             return MDB2_SCHEMA_VALIDATE_BROKEN_INDEX;
                         } elseif (!empty($index['primary'])
-                            && !$schema->table['fields'][$field_name]['notnull']
+                            && !$table['fields'][$field_name]['notnull']
                         ) {
-                            //$schema->raiseError('all primary key fields must be defined notnull in "'.$schema->table_name.'"', null, $xp);
+                            //schem.raiseError('all primary key fields must be defined notnull in "'.$table_name.'"', null, $xp);
                             return MDB2_SCHEMA_VALIDATE_PRIMARY_NULL;
                         }
                     }
                 } else {
-                    unset($schema->table['indexes'][$name]);
+                    unset($table['indexes'][$name]);
                 }
             }
         }
-        $schema->database_definition['tables'][$schema->table_name] = $schema->table;
+        $tables[$table_name] = $table;
         return true;
     }
 
     function validateField(&$fields, &$field, $field_name, $force_defaults, $valid_types = array(), $fail_on_invalid_names = array(), $xp)
     {
-        if (!$schema->field_name) {
-            //$schema->raiseError('field name missing', null, $xp);
+        if (!$field_name) {
+            //schem.raiseError('field name missing', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_FIELD_NAME;
-        } elseif (isset($schema->table['fields'][$schema->field_name])) {
-            //$schema->raiseError('field "'.$schema->field_name.'" already exists', null, $xp);
+        } elseif (isset($fields[$field_name])) {
+            //schem.raiseError('field "'.$field_name.'" already exists', null, $xp);
             return MDB2_SCHEMA_VALIDATE_FIELD_EXISTS;
         }
 
-        if ($schema->fail_on_invalid_names) {
-            $name = strtoupper($schema->field_name);
-            foreach ($schema->fail_on_invalid_names as $rdbms) {
+        if ($fail_on_invalid_names) {
+            $name = strtoupper($field_name);
+            foreach ($fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    //return $schema->raiseError('field name "'.$schema->field_name.'" is a reserved word in: '.$rdbms, null, $xp);
+                    //return schem.raiseError('field name "'.$field_name.'" is a reserved word in: '.$rdbms, null, $xp);
                     return MDB2_SCHEMA_VALIDATE_INVALID_FIELD_NAME;
                 }
             }
         }
         /* Type check */
-        if (empty($schema->field['type'])) {
-            //return $schema->raiseError('no field type specified', null, $xp);
+        if (empty($field['type'])) {
+            //return schem.raiseError('no field type specified', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_FIELD_TYPE;
         }
-        if (!empty($schema->valid_types) && !array_key_exists($schema->field['type'], $schema->valid_types)) {
-            //$schema->raiseError('no valid field type ("'.$schema->field['type'].'") specified', null, $xp);
+        if (!empty($valid_types) && !array_key_exists($field['type'], $valid_types)) {
+            //schem.raiseError('no valid field type ("'.$field['type'].'") specified', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_FIELD_TYPE;
         }
-        if (array_key_exists('unsigned', $schema->field) && !$this->isBoolean($schema->field['unsigned'])) {
-            //$schema->raiseError('unsigned has to be a boolean value', null, $xp);
+        if (array_key_exists('unsigned', $field) && !$this->isBoolean($field['unsigned'])) {
+            //schem.raiseError('unsigned has to be a boolean value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_UNSIGNED;
         }
-        if (array_key_exists('fixed', $schema->field) && !$this->isBoolean($schema->field['fixed'])) {
-            //$schema->raiseError('fixed has to be a boolean value', null, $xp);
+        if (array_key_exists('fixed', $field) && !$this->isBoolean($field['fixed'])) {
+            //schem.raiseError('fixed has to be a boolean value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_FIXED;
         }
-        if (array_key_exists('length', $schema->field) && $schema->field['length'] <= 0) {
-            //$schema->raiseError('length has to be an integer greater 0', null, $xp);
+        if (array_key_exists('length', $field) && $field['length'] <= 0) {
+            //schem.raiseError('length has to be an integer greater 0', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_LENGTH;
         }
-        if (empty($schema->field['was'])) {
-            $schema->field['was'] = $schema->field_name;
+        if (empty($field['was'])) {
+            $field['was'] = $field_name;
         }
-        if (empty($schema->field['notnull'])) {
-            $schema->field['notnull'] = false;
+        if (empty($field['notnull'])) {
+            $field['notnull'] = false;
         }
-        if (!$this->isBoolean($schema->field['notnull'])) {
-            //$schema->raiseError('field "notnull" has to be a boolean value', null, $xp);
+        if (!$this->isBoolean($field['notnull'])) {
+            //schem.raiseError('field "notnull" has to be a boolean value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_NOTNULL;
         }
-        if ($schema->force_defaults
-            && !array_key_exists('default', $schema->field)
-            && $schema->field['type'] != 'clob' && $schema->field['type'] != 'blob'
+        if ($force_defaults
+            && !array_key_exists('default', $field)
+            && $field['type'] != 'clob' && $field['type'] != 'blob'
         ) {
-            $schema->field['default'] = $schema->valid_types[$schema->field['type']];
+            $field['default'] = $valid_types[$field['type']];
         }
 
-        if (array_key_exists('default', $schema->field)) {
-            if ($schema->field['type'] == 'clob' || $schema->field['type'] == 'blob') {
-                /*$schema->raiseError('"'.$schema->field['type'].
+        if (array_key_exists('default', $field)) {
+            if ($field['type'] == 'clob' || $field['type'] == 'blob') {
+                /*schem.raiseError('"'.$field['type'].
                     '"-fields are not allowed to have a default value', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DEFAULT_NOT_ALLOWED;
             }
-            if ($schema->field['default'] === '') {
-                if (!$schema->field['notnull']) {
-                    $schema->field['default'] = null;
+            if ($field['default'] === '') {
+                if (!$field['notnull']) {
+                    $field['default'] = null;
                 }
             }
         }
 
-        $schema->table['fields'][$schema->field_name] = $schema->field;
+        $fields[$field_name] = $field;
 
-        if (isset($schema->field['default'])
-            && !$this->validateFieldValue($schema, $schema->field_name,
-                $schema->table['fields'][$schema->field_name]['default'], $xp
+        if (isset($field['default'])
+            && !$this->validateFieldValue($fields, $field_name,
+                $fields[$field_name]['default'], $xp
             )
         ) {
-            //$schema->raiseError('default value of "'.$schema->field_name.'" is of wrong type', null, $xp);
+            //schem.raiseError('default value of "'.$field_name.'" is of wrong type', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_DEFAULT;
         }
         return true;
@@ -319,178 +319,178 @@ class MDB2_Schema_Validate
 
     function validateIndex(&$table_indexes, &$index, $index_name, $xp)
     {
-        if (!$schema->index_name) {
-            //$schema->raiseError('an index has to have a name', null, $xp);
+        if (!$index_name) {
+            //schem.raiseError('an index has to have a name', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_INDEX_NAME;
         }
-        if (isset($schema->table['indexes'][$schema->index_name])) {
-            //$schema->raiseError('index "'.$schema->index_name.'" already exists', null, $xp);
+        if (isset($table_indexes[$index_name])) {
+            //schem.raiseError('index "'.$index_name.'" already exists', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INDEX_EXISTS;
         }
-        if (array_key_exists('unique', $schema->index) && !$this->isBoolean($schema->index['unique'])) {
-            //$schema->raiseError('field "unique" has to be a boolean value', null, $xp);
+        if (array_key_exists('unique', $index) && !$this->isBoolean($index['unique'])) {
+            //schem.raiseError('field "unique" has to be a boolean value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_UNIQUE;
         }
-        if (array_key_exists('primary', $schema->index) && !$this->isBoolean($schema->index['primary'])) {
-            //$schema->raiseError('field "primary" has to be a boolean value', null, $xp);
+        if (array_key_exists('primary', $index) && !$this->isBoolean($index['primary'])) {
+            //schem.raiseError('field "primary" has to be a boolean value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_PRIMARY;
         }
 
-        if (empty($schema->index['was'])) {
-            $schema->index['was'] = $schema->index_name;
+        if (empty($index['was'])) {
+            $index['was'] = $index_name;
         }
-        $schema->table['indexes'][$schema->index_name] = $schema->index;
+        $table_indexes[$index_name] = $index;
         return true;
     }
 
     function validateIndexField(&$index_fields, &$field, $field_name, $xp)
     {
-        if (!$schema->field_name) {
-            //$schema->raiseError('the index-field-name is required', null, $xp);
+        if (!$field_name) {
+            //schem.raiseError('the index-field-name is required', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_INDEX_FIELD_NAME;
         }
-        if (!empty($schema->field['sorting'])
-            && $schema->field['sorting'] !== 'ascending' && $schema->field['sorting'] !== 'descending') {
-            //$schema->raiseError('sorting type unknown', null, $xp);
+        if (!empty($field['sorting'])
+            && $field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending') {
+            //schem.raiseError('sorting type unknown', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_SORT;
         } else {
-            $schema->field['sorting'] = 'ascending';
+            $field['sorting'] = 'ascending';
         }
-        $schema->index['fields'][$schema->field_name] = $schema->field;
+        $index['fields'][$field_name] = $field;
         return true;
     }
 
     function validateTableName(&$table, $table_name, $structure_tables, $xp)
     {
-        if (isset($schema->structure['tables'][$schema->table_name])) {
-            $schema->table = $schema->structure['tables'][$schema->table_name];
+        if (isset($structure_tables[$table_name])) {
+            $table = $structure_tables[$table_name];
         }
         return true;
     }
 
-    function validateSequence(&$sequences, &$sequence, $seq_name, $fail_on_invalid_names = array(), $xp)
+    function validateSequence(&$sequences, &$sequence, $sequence_name, $fail_on_invalid_names = array(), $xp)
     {
-        if (!$schema->seq_name) {
-            //$schema->raiseError('a sequence has to have a name', null, $xp);
+        if (!$sequence_name) {
+            //schem.raiseError('a sequence has to have a name', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_SEQUENCE_NAME;
-        } elseif ($schema->fail_on_invalid_names) {
-            $name = strtoupper($schema->seq_name);
-            foreach ($schema->fail_on_invalid_names as $rdbms) {
+        } elseif ($fail_on_invalid_names) {
+            $name = strtoupper($sequence_name);
+            foreach ($fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    //return $schema->raiseError('sequence name "'.$schema->seq_name.'" is a reserved word in: '.$rdbms, null, $xp);
+                    //return schem.raiseError('sequence name "'.$sequence_name.'" is a reserved word in: '.$rdbms, null, $xp);
                     return MDB2_SCHEMA_VALIDATE_INVALID_SEQUENCE_NAME;
                 }
             }
         }
 
-        if (isset($schema->database_definition['sequences'][$schema->seq_name])) {
-            //$schema->raiseError('sequence "'.$schema->seq_name.'" already exists', null, $xp);
+        if (isset($sequences[$sequence_name])) {
+            //schem.raiseError('sequence "'.$sequence_name.'" already exists', null, $xp);
             return MDB2_SCHEMA_VALIDATE_SEQUENCE_EXISTS;
         }
 
-        if (empty($schema->seq['was'])) {
-            $schema->seq['was'] = $schema->seq_name;
+        if (empty($sequence['was'])) {
+            $sequence['was'] = $sequence_name;
         }
 
-        if (!empty($schema->seq['on'])) {
-            if (empty($schema->seq['on']['table']) || empty($schema->seq['on']['field'])) {
-                /*$schema->raiseError('sequence "'.$schema->seq_name.
+        if (!empty($sequence['on'])) {
+            if (empty($sequence['on']['table']) || empty($sequence['on']['field'])) {
+                /*schem.raiseError('sequence "'.$sequence_name.
                     '" was not properly defined', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_INVALID_SEQUENCE;
             }
         }
-        $schema->database_definition['sequences'][$schema->seq_name] = $schema->seq;
+        $sequences[$sequence_name] = $sequence;
         return true;
     }
 
-    function validateDatabase(&$database, $fail_on_invalid_names = array(), $xp)
+    function validateDatabase(&$database, $error, $fail_on_invalid_names = array(), $xp)
     {
-        if (!isset($schema->database_definition['name']) || !$schema->database_definition['name']) {
-            //$schema->raiseError('a database has to have a name', null, $xp);
+        if (!isset($database['name']) || !$database['name']) {
+            //schem.raiseError('a database has to have a name', null, $xp);
             return MDB2_SCHEMA_VALIDATE_NO_DATABASE_NAME;
-        } elseif ($schema->fail_on_invalid_names) {
-            $name = strtoupper($schema->database_definition['name']);
-            foreach ($schema->fail_on_invalid_names as $rdbms) {
+        } elseif ($fail_on_invalid_names) {
+            $name = strtoupper($database['name']);
+            foreach ($fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    //return $schema->raiseError('database name "'.$schema->database_definition['name'].'" is a reserved word in: '.$rdbms, null, $xp);
+                    //return schem.raiseError('database name "'.$database['name'].'" is a reserved word in: '.$rdbms, null, $xp);
                     return MDB2_SCHEMA_VALIDATE_INVALID_DATABASE_NAME;
                 }
             }
         }
 
-        if (isset($schema->database_definition['create'])
-            && !$this->isBoolean($schema->database_definition['create'])
+        if (isset($database['create'])
+            && !$this->isBoolean($database['create'])
         ) {
-            //$schema->raiseError('field "create" has to be a boolean value', null, $xp);
+            //schem.raiseError('field "create" has to be a boolean value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_CREATE;
         }
-        if (isset($schema->database_definition['overwrite'])
-            && !$this->isBoolean($schema->database_definition['overwrite'])
+        if (isset($database['overwrite'])
+            && !$this->isBoolean($database['overwrite'])
         ) {
-            //$schema->raiseError('field "overwrite" has to be a boolean value', null, $xp);
+            //schem.raiseError('field "overwrite" has to be a boolean value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_INVALID_OVERWRITE;
         }
 
-        if (isset($schema->database_definition['sequences'])) {
-            foreach ($schema->database_definition['sequences'] as $seq_name => $seq) {
+        if (isset($database['sequences'])) {
+            foreach ($database['sequences'] as $seq_name => $seq) {
                 if (!empty($seq['on'])
-                    && empty($schema->database_definition['tables'][$seq['on']['table']]['fields'][$seq['on']['field']])
+                    && empty($database['tables'][$seq['on']['table']]['fields'][$seq['on']['field']])
                 ) {
-                    /*$schema->raiseError('sequence "'.$seq_name.
+                    /*schem.raiseError('sequence "'.$seq_name.
                         '" was assigned on unexisting field/table', null, $xp);*/
                     return MDB2_SCHEMA_VALIDATE_BROKEN_SEQUENCE;
                 }
             }
         }
-        if (PEAR::isError($schema->error)) {
-            $schema->database_definition = $schema->error;
+        if (PEAR::isError($error)) {
+            $database = $error;
         }
         return true;
     }
 
     /* Data Manipulation */
-    function validateInsertField(&$instruction, &$table, $field_name, $value, $xp)
+    function validateInsertField(&$table_fields, &$instruction, $field_name, $value, $xp)
     {
-        if (!$schema->init_name) {
-            //$schema->raiseError('field-name has to be specified', null, $xp);
+        if (!$field_name) {
+            //schem.raiseError('field-name has to be specified', null, $xp);
             return MDB2_SCHEMA_VALIDATE_DML_NO_FIELD_NAME;
         }
-        if (isset($schema->init['fields'][$schema->init_name])) {
-            //$schema->raiseError('field "'.$schema->init_name.'" already filled', null, $xp);
+        if (isset($instruction['fields'][$field_name])) {
+            //schem.raiseError('field "'.$field_name.'" already filled', null, $xp);
             return MDB2_SCHEMA_VALIDATE_DML_FIELD_EXISTS;
         }
-        if (!isset($schema->table['fields'][$schema->init_name])) {
-            //$schema->raiseError('unknown field "'.$schema->init_name.'"', null, $xp);
+        if (!isset($table_fields[$field_name])) {
+            //schem.raiseError('unknown field "'.$field_name.'"', null, $xp);
             return MDB2_SCHEMA_VALIDATE_DML_FIELD_NOT_FOUND;
         }
-        if ($schema->init_value !== ''
-            && !$this->validateFieldValue($schema, $schema->init_name, $schema->init_value, $xp)
+        if ($value !== ''
+            && !$this->validateFieldValue($table_fields, $field_name, $value, $xp)
         ) {
-            //$schema->raiseError('field "'.$schema->init_name.'" has wrong value', null, $xp);
+            //schem.raiseError('field "'.$field_name.'" has wrong value', null, $xp);
             return MDB2_SCHEMA_VALIDATE_DML_INVALID_FIELD_VALUE;
         }
-        $schema->init['fields'][$schema->init_name] = $schema->init_value;
+        $instruction['fields'][$field_name] = $value;
         return true;
     }
 
     function validateDML(&$table, &$instruction, $xp)
     {
-        $schema->table['initialization'][] = $schema->init;
+        $table['initialization'][] = $instruction;
         return true;
     }
 
-    function validateFieldValue($table, $field_name, &$field_value, $xp)
+    function validateFieldValue($fields, $field_name, &$field_value, $xp)
     {
-        if (!isset($schema->table['fields'][$field_name])) {
-            //return $schema->raiseError('"'.$field_name.'" is not defined', null, $xp);
+        if (!isset($fields[$field_name])) {
+            //return schem.raiseError('"'.$field_name.'" is not defined', null, $xp);
             return MDB2_SCHEMA_VALIDATE_DML_FIELD_NOT_FOUND;
         }
-        $field_def = $schema->table['fields'][$field_name];
+        $field_def = $fields[$field_name];
         switch ($field_def['type']) {
         case 'text':
         case 'clob':
             if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
-                /*return $schema->raiseError('"'.$field_value.'" is larger than "'.
+                /*return schem.raiseError('"'.$field_value.'" is larger than "'.
                     $field_def['length'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_VALUE_TOO_BIG;
             }
@@ -498,32 +498,32 @@ class MDB2_Schema_Validate
         case 'blob':
             /*
             if (!preg_match('/^([0-9a-f]{2})*$/i', $field_value)) {
-                return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                return schem.raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);
             }
             */
             $field_value = pack('H*', $field_value);
             if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
-                /*return $schema->raiseError('"'.$field_value.'" is larger than "'.
+                /*return schem.raiseError('"'.$field_value.'" is larger than "'.
                     $field_def['type'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_VALUE_TOO_BIG;
             }
             break;
         case 'integer':
             if ($field_value != ((int)$field_value)) {
-                /*return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                /*return schem.raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_INVALID_VALUE_TYPE;
             }
             $field_value = (int) $field_value;
             if (!empty($field_def['unsigned']) && $field_def['unsigned'] && $field_value < 0) {
-                //return $schema->raiseError('"'.$field_value.'" signed instead of unsigned', null, $xp);
+                //return schem.raiseError('"'.$field_value.'" signed instead of unsigned', null, $xp);
                 return MDB2_SCHEMA_VALIDATE_DML_NEGATIVE_VALUE_FOR_SIGNED_FIELD;
             }
             break;
         case 'boolean':
             if (!$this->isBoolean($field_value)) {
-                /*return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                /*return schem.raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_INVALID_VALUE_TYPE;
             }
@@ -532,7 +532,7 @@ class MDB2_Schema_Validate
             if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/', $field_value)
                 && $field_value !== 'CURRENT_DATE'
             ) {
-                /*return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                /*return schem.raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_INVALID_VALUE_TYPE;
             }
@@ -541,7 +541,7 @@ class MDB2_Schema_Validate
             if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})/', $field_value)
                 && $field_value !== 'CURRENT_TIMESTAMP'
             ) {
-                /*return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                /*return schem.raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_INVALID_VALUE_TYPE;
             }
@@ -550,7 +550,7 @@ class MDB2_Schema_Validate
             if (!preg_match("/([0-9]{2}):([0-9]{2}):([0-9]{2})/", $field_value)
                 && $field_value !== 'CURRENT_TIME'
             ) {
-                /*return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                /*return schem.raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_INVALID_VALUE_TYPE;
             }
@@ -558,7 +558,7 @@ class MDB2_Schema_Validate
         case 'float':
         case 'double':
             if ($field_value != (double)$field_value) {
-                /*return $schema->raiseError('"'.$field_value.'" is not of type "'.
+                /*return schem.raiseError('"'.$field_value.'" is not of type "'.
                     $field_def['type'].'"', null, $xp);*/
                 return MDB2_SCHEMA_VALIDATE_DML_INVALID_VALUE_TYPE;
             }
