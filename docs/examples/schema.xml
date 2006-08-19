@@ -93,17 +93,9 @@
    <delete>
     <where>
      <expression>
-      <function>
-       <name>functionA</name>
-       <value>1</value>
-       <value>2</value>
-      </function>
-      <operator>PLUS</operator>
-      <function>
-       <name>functionB</name>
-       <value>3</value>
-       <value>4</value>
-      </function>
+      <column>foo</column>
+      <operator>EQUAL</operator>
+      <value>3</value>
      </expression>
     </where>
    </delete>
