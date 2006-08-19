@@ -80,10 +80,7 @@ class MDB2_Schema_Parser extends XML_Parser
     var $seq = array();
     var $seq_name = '';
     var $error;
-    var $fail_on_invalid_names = true;
     var $structure = false;
-    var $valid_types = array();
-    var $force_defaults = true;
     var $val;
 
     function __construct($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
@@ -92,18 +89,8 @@ class MDB2_Schema_Parser extends XML_Parser
         // todo: this probably needs to be investigated some more andcleaned up
         parent::XML_Parser('ISO-8859-1');
         $this->variables = $variables;
-        if (is_array($fail_on_invalid_names)) {
-            $this->fail_on_invalid_names
-                = array_intersect($fail_on_invalid_names, array_keys($GLOBALS['_MDB2_Schema_Reserved']));
-        } elseif ($this->fail_on_invalid_names === true) {
-            $this->fail_on_invalid_names = array_keys($GLOBALS['_MDB2_Schema_Reserved']);
-        } else {
-            $this->fail_on_invalid_names = false;
-        }
         $this->structure = $structure;
-        $this->valid_types = $valid_types;
-        $this->force_defaults = $force_defaults;
-        $this->val = new MDB2_Schema_Validate;
+        $this->val =& new MDB2_Schema_Validate($fail_on_invalid_names, $valid_types, $force_defaults);
     }
 
     function MDB2_Schema_Parser($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
@@ -228,7 +215,11 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-field':
             /* field are now accepting functions and expressions
             we can't determine the return type of them
-            $result = $this->val->validateInsertField($this, $xp); */
+            $result = $this->val->validateInsertField($this);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
+            */
             break;
         case 'database-table-initialization-insert-field-function':
         case 'database-table-initialization-update-field-function':
@@ -250,7 +241,10 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-insert':
         case 'database-table-initialization-delete':
         case 'database-table-initialization-update':
-            $result = $this->val->validateDML($this->table, $this->init, $xp);
+            $result = $this->val->validateDML($this->table, $this->init);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
             break;
 
         /* One level simulation of expression-function recursion */
@@ -271,33 +265,53 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* Table definition */
         case 'database-table':
-            $result = $this->val->validateTable($this->database_definition['tables'], $this->table, $this->table_name, $this->fail_on_invalid_names, $xp);
+            $result = $this->val->validateTable($this->database_definition['tables'], $this->table, $this->table_name);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
             break;
         case 'database-table-name':
-            $result = $this->val->validateTableName($this->table, $this->table_name, $this->structure['tables'], $xp);
+            if (isset($this->structure_tables[$this->table_name])) {
+                $this->table = $this->structure_tables[$this->table_name];
+            }
             break;
 
         /* Field declaration */
         case 'database-table-declaration-field':
-            $result = $this->val->validateField($this->table['fields'], $this->field, $this->field_name, $this->force_defaults, $this->valid_types, $this->fail_on_invalid_names, $xp);
+            $result = $this->val->validateField($this->table['fields'], $this->field, $this->field_name);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
             break;
 
         /* Index declaration */
         case 'database-table-declaration-index':
-            $result = $this->val->validateIndex($this->table['indexes'], $this->index, $this->index_name, $xp);
+            $result = $this->val->validateIndex($this->table['indexes'], $this->index, $this->index_name);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
             break;
         case 'database-table-declaration-index-field':
-            $result = $this->val->validateIndexField($this->index['fields'], $this->field, $this->field_name, $xp);
+            $result = $this->val->validateIndexField($this->index['fields'], $this->field, $this->field_name);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
             break;
 
         /* Sequence declaration */
         case 'database-sequence':
-            $result = $this->val->validateSequence($this->database_definition['sequences'], $this->sequence, $this->sequence_name, $this->fail_on_invalid_names, $xp);
+            $result = $this->val->validateSequence($this->database_definition['sequences'], $this->sequence, $this->sequence_name);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
             break;
 
         /* End of File */
         case 'database':
-            $result = $this->val->validateDatabase($this->database_definition, $this->error, $this->fail_on_invalid_names, $xp);
+            $result = $this->val->validateDatabase($this->database_definition);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            }
             break;
         }
 
@@ -305,7 +319,7 @@ class MDB2_Schema_Parser extends XML_Parser
         $this->element = implode('-', $this->elements);
     }
 
-    function &raiseError($msg = null, $ecode = 0, $xp = null)
+    function &raiseError($msg = null, $xmlecode = 0, $xp = null, $ecode = MDB2_SCHEMA_ERROR_PARSE)
     {
         if (is_null($this->error)) {
             $error = '';
@@ -318,7 +332,7 @@ class MDB2_Schema_Parser extends XML_Parser
                     $xp = $this->parser;
                 }
             }
-            if ($error_string = xml_error_string($ecode)) {
+            if ($error_string = xml_error_string($xmlecode)) {
                 $error.= ' - '.$error_string;
             }
             if (is_resource($xp)) {
@@ -328,7 +342,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 $error.= " - Byte: $byte; Line: $line; Col: $column";
             }
             $error.= "\n";
-            $this->error =& MDB2::raiseError(MDB2_SCHEMA_ERROR_PARSE, null, null, $error);
+            $this->error =& MDB2_Schema::raiseError($ecode, null, null, $error);
         }
         return $this->error;
     }
