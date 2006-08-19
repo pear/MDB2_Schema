@@ -250,7 +250,7 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-insert':
         case 'database-table-initialization-delete':
         case 'database-table-initialization-update':
-            $result = $this->val->validateDML($this, $xp);
+            $result = $this->val->validateDML($this->table, $this->init, $xp);
             break;
 
         /* One level simulation of expression-function recursion */
@@ -271,33 +271,33 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* Table definition */
         case 'database-table':
-            $result = $this->val->validateTable($this, $xp);
+            $result = $this->val->validateTable($this->database_definition['tables'], $this->table, $this->table_name, $this->fail_on_invalid_names, $xp);
             break;
         case 'database-table-name':
-            $result = $this->val->validateTableName($this, $xp);
+            $result = $this->val->validateTableName($this->table, $this->table_name, $this->structure['tables'], $xp);
             break;
 
         /* Field declaration */
         case 'database-table-declaration-field':
-            $result = $this->val->validateField($this, $xp);
+            $result = $this->val->validateField($this->table['fields'], $this->field, $this->field_name, $this->force_defaults, $this->valid_types, $this->fail_on_invalid_names, $xp);
             break;
 
         /* Index declaration */
         case 'database-table-declaration-index':
-            $result = $this->val->validateIndex($this, $xp);
+            $result = $this->val->validateIndex($this->table['indexes'], $this->index, $this->index_name, $xp);
             break;
         case 'database-table-declaration-index-field':
-            $result = $this->val->validateIndexField($this, $xp);
+            $result = $this->val->validateIndexField($this->index['fields'], $this->field, $this->field_name, $xp);
             break;
 
         /* Sequence declaration */
         case 'database-sequence':
-            $result = $this->val->validateSequence($this, $xp);
+            $result = $this->val->validateSequence($this->database_definition['sequences'], $this->sequence, $this->sequence_name, $this->fail_on_invalid_names, $xp);
             break;
 
         /* End of File */
         case 'database':
-            $result = $this->val->validateDatabase($this, $xp);
+            $result = $this->val->validateDatabase($this->database_definition, $this->error, $this->fail_on_invalid_names, $xp);
             break;
         }
 
