@@ -52,19 +52,59 @@ define('MDB2_SCHEMA_DUMP_STRUCTURE',    1);
 define('MDB2_SCHEMA_DUMP_CONTENT',      2);
 
 /**
- * The method mapErrorCode in each MDB2_Schema_dbtype implementation maps
- * native error codes to one of these.
- *
  * If you add an error code here, make sure you also add a textual
  * version of it in MDB2_Schema::errorMessage().
  */
 
-define('MDB2_SCHEMA_ERROR',              -1);
-define('MDB2_SCHEMA_ERROR_PARSE',        -2);
-define('MDB2_SCHEMA_ERROR_NOT_CAPABLE',  -3);
-define('MDB2_SCHEMA_ERROR_UNSUPPORTED',  -4);    // Driver does not support this function
-define('MDB2_SCHEMA_ERROR_INVALID',      -5);    // Invalid attribute value
-define('MDB2_SCHEMA_ERROR_NODBSELECTED', -6);
+define('MDB2_SCHEMA_ERROR',                                         -1);
+define('MDB2_SCHEMA_ERROR_PARSE',                                   -2);
+define('MDB2_SCHEMA_ERROR_NOT_CAPABLE',                             -3);
+define('MDB2_SCHEMA_ERROR_UNSUPPORTED',                             -4);    // Driver does not support this function
+define('MDB2_SCHEMA_ERROR_INVALID',                                 -5);    // Invalid attribute value
+define('MDB2_SCHEMA_ERROR_NODBSELECTED',                            -6);
+define('MDB2_SCHEMA_ERROR_VALIDATE_AUTOINC_INVALID_DEFAULT',              -7);
+define('MDB2_SCHEMA_ERROR_VALIDATE_AUTOINC_NULL',                         -8);
+define('MDB2_SCHEMA_ERROR_VALIDATE_BROKEN_INDEX',                         -9);
+define('MDB2_SCHEMA_ERROR_VALIDATE_BROKEN_SEQUENCE',                      -10);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DEFAULT_NOT_ALLOWED',                  -11);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DML_FIELD_EXISTS',                     -12);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DML_FIELD_NOT_FOUND',                  -13);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_FIELD_VALUE',              -14);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE',               -15);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DML_NEGATIVE_VALUE_FOR_SIGNED_FIELD',  -16);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DML_NO_FIELD_NAME',                    -17);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DML_VALUE_TOO_BIG',                    -18);
+define('MDB2_SCHEMA_ERROR_VALIDATE_DUP_AUTOINC',                          -19);
+define('MDB2_SCHEMA_ERROR_VALIDATE_FIELD_EXISTS',                         -20);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INDEX_EXISTS',                         -21);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_CREATE',                       -22);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_DATABASE_NAME',                -23);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_DEFAULT',                      -24);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_FIELD_NAME',                   -25);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_FIELD_TYPE',                   -26);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_FIXED',                        -27);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_LENGTH',                       -28);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_NOTNULL',                      -29);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_OVERWRITE',                    -30);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_PRIMARY',                      -31);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_SEQUENCE',                     -32);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_SEQUENCE_NAME',                -33);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_SORT',                         -34);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_TABLE_NAME',                   -35);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_UNIQUE',                       -36);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INVALID_UNSIGNED',                     -37);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_DATABASE_NAME',                     -38);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_FIELD_NAME',                        -39);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_FIELD_TYPE',                        -40);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_FIELDS',                            -41);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_INDEX_FIELD_NAME',                  -42);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_INDEX_NAME',                        -43);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_SEQUENCE_NAME',                     -44);
+define('MDB2_SCHEMA_ERROR_VALIDATE_NO_TABLE_NAME',                        -45);
+define('MDB2_SCHEMA_ERROR_VALIDATE_PRIMARY_EXISTS',                       -46);
+define('MDB2_SCHEMA_ERROR_VALIDATE_PRIMARY_NULL',                         -47);
+define('MDB2_SCHEMA_ERROR_VALIDATE_SEQUENCE_EXISTS',                      -48);
+define('MDB2_SCHEMA_ERROR_VALIDATE_TABLE_EXISTS',                         -49);
 
 /**
  * The database manager is a class that provides a set of database
@@ -763,7 +803,10 @@ class MDB2_Schema extends PEAR
      *
      * @param array  multi dimensional array that represents the parsed field
      *                of an initialization instruction.
+     * @param array  multi dimensional array that contains the definition
+     *                of the fields of the table.
      * @param string  type of column
+     *
      *
      * @return string
      *
@@ -771,7 +814,7 @@ class MDB2_Schema extends PEAR
      * @static
      * @see MDB2_Schema::getInstructionFields(), MDB2_Schema::getInstructionWhere()
      */
-    function getExpression($element, $type = null)
+    function getExpression($element, $fields_definition = array(), $type = null)
     {
         $str = '';
         switch ($element['type']) {
@@ -787,7 +830,7 @@ class MDB2_Schema extends PEAR
                     && is_array($element['data']['arguments'])
                 ) {
                     foreach ($element['data']['arguments'] as $v) {
-                        $arguments[] = $this->getExpression($v, null);
+                        $arguments[] = $this->getExpression($v, $fields_definition);
                     }
                 }
                 if (method_exists($this->db->function, $element['data']['name'])) {
@@ -802,10 +845,21 @@ class MDB2_Schema extends PEAR
                 }
             break;
             case 'expression':
+                $type0 = $type1 = null;
+                if ($element['data']['operants'][0]['type'] == 'column'
+                    && array_key_exists($element['data']['operants'][0]['data'], $fields_definition)
+                ) {
+                    $type0 = $fields_definition[$element['data']['operants'][0]['data']]['type'];
+                }
+                if ($element['data']['operants'][1]['type'] == 'column'
+                    && array_key_exists($element['data']['operants'][1]['data'], $fields_definition)
+                ) {
+                    $type1 = $fields_definition[$element['data']['operants'][1]['data']]['type'];
+                }
                 $str.= '(';
-                $str.= $this->getExpression($element['data']['operants'][0], null);
+                $str.= $this->getExpression($element['data']['operants'][0], $fields_definition, $type1);
                 $str.= $this->getOperator($element['data']['operator']);
-                $str.= $this->getExpression($element['data']['operants'][1], null);
+                $str.= $this->getExpression($element['data']['operants'][1], $fields_definition, $type0);
                 $str.= ')';
             break;
         }
@@ -875,7 +929,7 @@ class MDB2_Schema extends PEAR
         $fields = array();
         if (!empty($instruction['data']['field']) && is_array($instruction['data']['field'])) {
             foreach ($instruction['data']['field'] as $field) {
-                $fields[$field['name']] = $this->getExpression($field['group'], $fields_definition[$field['name']]['type']);
+                $fields[$field['name']] = $this->getExpression($field['group'], $fields_definition);
             }
         }
         return $fields;
@@ -904,7 +958,7 @@ class MDB2_Schema extends PEAR
     {
         $where = '';
         if (!empty($instruction['data']['where'])) {
-            $where = 'WHERE '.$this->getExpression($instruction['data']['where'], $fields_definition[$field['name']]['type']);
+            $where = 'WHERE '.$this->getExpression($instruction['data']['where'], $fields_definition);
         }
         return $where;
     }
