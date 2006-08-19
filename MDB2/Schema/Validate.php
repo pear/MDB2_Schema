@@ -119,7 +119,7 @@ class MDB2_Schema_Validate
         if (!$table_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_TABLE_NAME,
                 'a table has to have a name');
-        } elseif ($this->fail_on_invalid_names) {
+        } elseif (is_array($this->fail_on_invalid_names) && !empty($this->fail_on_invalid_names)) {
             $name = strtoupper($table_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
@@ -216,7 +216,7 @@ class MDB2_Schema_Validate
                 'field "'.$field_name.'" already exists');
         }
 
-        if ($this->fail_on_invalid_names) {
+        if (is_array($this->fail_on_invalid_names) && !empty($this->fail_on_invalid_names))
             $name = strtoupper($field_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
@@ -340,7 +340,7 @@ class MDB2_Schema_Validate
         if (!$sequence_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_SEQUENCE_NAME,
                 'a sequence has to have a name');
-        } elseif ($this->fail_on_invalid_names) {
+        } elseif (is_array($this->fail_on_invalid_names) && !empty($this->fail_on_invalid_names))
             $name = strtoupper($sequence_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
@@ -374,7 +374,7 @@ class MDB2_Schema_Validate
         if (!isset($database['name']) || !$database['name']) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_DATABASE_NAME,
                 'a database has to have a name');
-        } elseif ($this->fail_on_invalid_names) {
+        } elseif (is_array($this->fail_on_invalid_names) && !empty($this->fail_on_invalid_names))
             $name = strtoupper($database['name']);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
