@@ -176,7 +176,7 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Definition */
         case 'database-table':
             $this->table_name = '';
-            $this->table = array();
+            $this->table = array('fields' => array(), 'indexes' => array());
             break;
         case 'database-table-declaration-field':
             $this->field_name = '';
@@ -187,7 +187,7 @@ class MDB2_Schema_Parser extends XML_Parser
             break;
         case 'database-table-declaration-index':
             $this->index_name = '';
-            $this->index = array();
+            $this->index = array('fields' => array());
             break;
         case 'database-sequence':
             $this->seq_name = '';
@@ -295,6 +295,8 @@ class MDB2_Schema_Parser extends XML_Parser
             $result = $this->val->validateIndexField($this->index['fields'], $this->field, $this->field_name);
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            } else {
+                $this->index['fields'][$this->field_name] = $this->field;
             }
             break;
 

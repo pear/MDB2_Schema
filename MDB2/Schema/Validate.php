@@ -406,18 +406,22 @@ class MDB2_Schema_Validate
      */
     function validateIndexField(&$index_fields, &$field, $field_name)
     {
+        if (isset($index_fields[$field_name])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INDEX_FIELD_EXISTS,
+                'index field "'.$field_name.'" already exists');
+        }
         if (!$field_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_INDEX_FIELD_NAME,
                 'the index-field-name is required');
         }
         if (!empty($field['sorting'])
-            && $field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending') {
+            && $field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending'
+        ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_SORT,
                 'sorting type unknown');
         } else {
             $field['sorting'] = 'ascending';
         }
-        $index['fields'][$field_name] = $field;
         return true;
     }
 
