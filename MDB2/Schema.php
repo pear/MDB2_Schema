@@ -786,7 +786,6 @@ class MDB2_Schema extends PEAR
      * @return void
      *
      * @access public
-     * @static
      * @see MDB2_Schema::initializeTable()
      */
     function buildFieldValue(&$element, $key)
@@ -811,7 +810,6 @@ class MDB2_Schema extends PEAR
      * @return string
      *
      * @access public
-     * @static
      * @see MDB2_Schema::getInstructionFields(), MDB2_Schema::getInstructionWhere()
      */
     function getExpression($element, $fields_definition = array(), $type = null)
