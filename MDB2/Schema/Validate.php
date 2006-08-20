@@ -413,15 +413,6 @@ class MDB2_Schema_Validate
     }
 
     // }}}
-    // {{{ validateTableName()
-
-    function validateTableName(&$table, $table_name, $structure_tables)
-    {
-
-        return true;
-    }
-
-    // }}}
     // {{{ validateSequence()
 
     function validateSequence(&$sequences, &$sequence, $sequence_name)
