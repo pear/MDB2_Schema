@@ -80,6 +80,20 @@ class MDB2_Schema_Validate
         return $error;
     }
 
+    // {{{ isBoolean()
+
+    /**
+     * Verifies if a given value can be considered boolean. If yes, set value
+     * to true or false according to its actual contents and return true. If
+     * not, keep its contents untouched and return false.
+     *
+     * @param mixed  value to be checked
+     *
+     * @return bool
+     *
+     * @access public
+     * @static
+     */
     function isBoolean(&$value)
     {
         if (is_bool($value)) {
@@ -113,7 +127,24 @@ class MDB2_Schema_Validate
         return true;
     }
 
+    // }}}
+    // {{{ validateTable()
+
     /* Definition */
+    /**
+     * Checks whether the definition of a parsed table is valid. Modify table
+     * definition when necessary. If table is Ok push it onto array of tables.
+     *
+     * @param array  multi dimensional array that contains the
+     *                tables of current database.
+     * @param array  multi dimensional array that contains the
+     *                structure and optional data of the table.
+     * @param string  name of the parsed table
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
     function validateTable(&$tables, &$table, $table_name)
     {
         if (!$table_name) {
@@ -206,6 +237,23 @@ class MDB2_Schema_Validate
         return true;
     }
 
+    // }}}
+    // {{{ validateField()
+
+    /**
+     * Checks whether the definition of a parsed field is valid. Modify field
+     * definition when necessary. If field is Ok push it onto array of fields.
+     *
+     * @param array  multi dimensional array that contains the
+     *                fields of current table.
+     * @param array  multi dimensional array that contains the
+     *                structure of the parsed field.
+     * @param string  name of the parsed field
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
     function validateField(&$fields, &$field, $field_name)
     {
         if (!$field_name) {
@@ -286,6 +334,23 @@ class MDB2_Schema_Validate
         return true;
     }
 
+    // }}}
+    // {{{ validateIndex()
+
+    /**
+     * Checks whether a parsed index is valid. Modify index definition when
+     * necessary. If index is Ok push it onto array of indexes.
+     *
+     * @param array  multi dimensional array that contains the
+     *                indexes of current table.
+     * @param array  multi dimensional array that contains the
+     *                structure of the parsed index.
+     * @param string  name of the parsed index
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
     function validateIndex(&$table_indexes, &$index, $index_name)
     {
         if (!$index_name) {
@@ -312,6 +377,24 @@ class MDB2_Schema_Validate
         return true;
     }
 
+    // }}}
+    // {{{ validateIndexField()
+
+    /**
+     * Checks whether a parsed index-field is valid. Modify its definition when
+     * necessary. If index-field is Ok push it onto array of fields of the
+     * current index.
+     *
+     * @param array  multi dimensional array that contains the
+     *                fields of current index.
+     * @param array  multi dimensional array that contains the
+     *                structure of the parsed index-field.
+     * @param string  name of the parsed index-field
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
     function validateIndexField(&$index_fields, &$field, $field_name)
     {
         if (!$field_name) {
@@ -329,11 +412,17 @@ class MDB2_Schema_Validate
         return true;
     }
 
+    // }}}
+    // {{{ validateTableName()
+
     function validateTableName(&$table, $table_name, $structure_tables)
     {
 
         return true;
     }
+
+    // }}}
+    // {{{ validateSequence()
 
     function validateSequence(&$sequences, &$sequence, $sequence_name)
     {
@@ -369,6 +458,20 @@ class MDB2_Schema_Validate
         return true;
     }
 
+    // }}}
+    // {{{ validateDatabase()
+
+    /**
+     * Checks whether a parsed database is valid. Modify its structure and
+     * data when necessary.
+     *
+     * @param array  multi dimensional array that contains the
+     *                structure and optional data of the database.
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
     function validateDatabase(&$database)
     {
         if (!isset($database['name']) || !$database['name']) {
@@ -410,14 +513,34 @@ class MDB2_Schema_Validate
         return true;
     }
 
+    // }}}
+    // {{{ validateDataField()
+
     /* Data Manipulation */
-    function validateInsertField(&$table_fields, &$instruction, $field_name, $value)
+    /**
+     * Checks whether a parsed DML-field is valid. Modify its structure when
+     * necessary. If DML-field is Ok push it onto fields array of the
+     * current DML instruction. This is called when validating INSERT and
+     * UPDATE.
+     *
+     * @param array  multi dimensional array that contains the
+     *                definition for current table's fields.
+     * @param array  multi dimensional array that contains the
+     *                parsed fields of the current DML instruction.
+     * @param string  name of the parsed insert-field
+     * @param string  value to fill the parsed insert-field
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
+    function validateDataField(&$table_fields, &$instruction_fields, $field_name, $value)
     {
         if (!$field_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_NO_FIELD_NAME,
                 'field-name has to be specified');
         }
-        if (isset($instruction['fields'][$field_name])) {
+        if (isset($instruction_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_FIELD_EXISTS,
                 'field "'.$field_name.'" already filled');
         }
@@ -426,22 +549,55 @@ class MDB2_Schema_Validate
                 'unknown field "'.$field_name.'"');
         }
         if ($value !== ''
-            && !$this->validateFieldValue($table_fields, $field_name, $value)
+            && !$this->validateDataFieldValue($table_fields, $field_name, $value)
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_FIELD_VALUE,
                 'field "'.$field_name.'" has wrong value');
         }
-        $instruction['fields'][$field_name] = $value;
+        $instruction_fields[$field_name] = $value;
         return true;
     }
 
+    // }}}
+    // {{{ validateDML()
+
+    /**
+     * Pushes the parsed DML instruction to the initialization array of current
+     * table.
+     *
+     * @param array  multi dimensional array that contains the
+     *                structure and optional data of table.
+     * @param array  multi dimensional array that contains the
+     *                data of the current DML instruction.
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
     function validateDML(&$table, &$instruction)
     {
         $table['initialization'][] = $instruction;
         return true;
     }
 
-    function validateFieldValue($fields, $field_name, &$field_value)
+    // }}}
+    // {{{ validateDataFieldValue()
+
+    /**
+     * Checks whether a given value is compatible with a table field. This is
+     * done when parsing a field for a INSERT or UPDATE instruction.
+     *
+     * @param array  multi dimensional array that contains the
+     *                definition for current table's fields.
+     * @param string  name of the parsed field
+     * @param string  value to fill the parsed field
+     *
+     * @return bool|error object
+     *
+     * @access public
+     * @see MDB2_Schema_Validate::validateInsertField()
+     */
+    function validateDataFieldValue($fields, $field_name, &$field_value)
     {
         if (!isset($fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_FIELD_NOT_FOUND,
