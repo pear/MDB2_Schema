@@ -56,9 +56,14 @@
  */
 class MDB2_Schema_Validate
 {
+    // {{{ properties
+
     var $fail_on_invalid_names = true;
     var $valid_types = array();
     var $force_defaults = true;
+
+    // }}}
+    // {{{ constructor
 
     function __construct($fail_on_invalid_names = true, $valid_types = array(), $force_defaults = true)
     {
@@ -74,12 +79,16 @@ class MDB2_Schema_Validate
         $this->force_defaults = $force_defaults;
     }
 
+    // }}}
+    // {{{ raiseError()
+
     function &raiseError($ecode, $msg = null)
     {
         $error =& MDB2_Schema::raiseError($ecode, null, null, $msg);
         return $error;
     }
 
+    // }}}
     // {{{ isBoolean()
 
     /**
@@ -415,6 +424,21 @@ class MDB2_Schema_Validate
     // }}}
     // {{{ validateSequence()
 
+    /**
+     * Checks whether the definition of a parsed sequence is valid. Modify
+     * sequence definition when necessary. If sequence is Ok push it onto array
+     * of sequences of current database.
+     *
+     * @param array  multi dimensional array that contains the
+     *                sequences of current database.
+     * @param array  multi dimensional array that contains the
+     *                structure of the parsed sequence.
+     * @param string  name of the parsed sequence
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
     function validateSequence(&$sequences, &$sequence, $sequence_name)
     {
         if (!$sequence_name) {
