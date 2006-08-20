@@ -146,8 +146,11 @@ class MDB2_Schema extends PEAR
         return '0.4.3';
     }
 
+    // }}}
+    // {{{ arrayMergeClobber()
+
     /**
-     * Clobbers two arrays together.
+     * Clobbers two arrays together
      *
      * @param  array        array that should be clobbered
      * @param  array        array that should be clobbered
@@ -188,7 +191,7 @@ class MDB2_Schema extends PEAR
     // {{{ getWarnings()
 
     /**
-     * Get all warnings in reverse order.
+     * Get all warnings in reverse order
      *
      * This means that the last warning is the first element in the array
      *
@@ -205,7 +208,7 @@ class MDB2_Schema extends PEAR
     // {{{ setOption()
 
     /**
-     * set the option for the db class
+     * Sets the option for the db class
      *
      * @param string option name
      * @param mixed value for the option
@@ -775,10 +778,14 @@ class MDB2_Schema extends PEAR
         return $result;
     }
 
+    // }}}
+    // {{{ buildFieldValue()
+
     /**
-     * Appends the contents of second argument + '=' to the beginning of first argument
+     * Appends the contents of second argument + '=' to the beginning of first
+     * argument.
      *
-     * Used with array_walk() in initializeTable() for the UPDATE query.
+     * Used with array_walk() in initializeTable() for UPDATEs.
      *
      * @param string  value of array's element
      * @param string  key of array's element
@@ -797,15 +804,14 @@ class MDB2_Schema extends PEAR
     // {{{ getExpression()
 
     /**
-     * Generates a string that represents a value that should be associated
-     * with a column in a SQL query.
+     * Generates a string that represents a value that would be associated
+     * with a column in a DML instruction.
      *
      * @param array  multi dimensional array that represents the parsed field
-     *                of an initialization instruction.
-     * @param array  multi dimensional array that contains the definition
-     *                of the fields of the table.
-     * @param string  type of column
-     *
+     *                of an DML instruction.
+     * @param array  multi dimensional array that contains the
+     *                definition for current table's fields.
+     * @param string  type of given field
      *
      * @return string
      *
@@ -872,7 +878,7 @@ class MDB2_Schema extends PEAR
      *
      * @param string parsed descriptive operator
      *
-     * @return string
+     * @return string matching SQL operator
      *
      * @access public
      * @static
@@ -908,13 +914,13 @@ class MDB2_Schema extends PEAR
     // {{{ getInstructionFields()
 
     /**
-     * Walks the parsed initialization instruction array, field by field,
-     * storing them and their processed values inside an array.
+     * Walks the parsed DML instruction array, field by field,
+     * storing them and their processed values inside a new array.
      *
      * @param array  multi dimensional array that contains the parsed
-     *                initialization instruction to be processed.
-     * @param array  multi dimensional array that contains the definition
-     *                of the fields of the table.
+     *                DML instruction to be processed.
+     * @param array  multi dimensional array that contains the
+     *                definition for current table's fields.
      *
      * @return array  array of strings in the form 'field_name' => 'value'
      *
@@ -937,16 +943,15 @@ class MDB2_Schema extends PEAR
     // {{{ getInstructionWhere()
 
     /**
-     * Walks the parsed WHERE statement of the initialization instruction
-     * array, field by field, storing them and their processed values
-     * inside an array.
+     * Translates the parsed WHERE expression of a DML instruction
+     * (array structure) to a SQL WHERE clause (string).
      *
-     * @param array  multi dimensional array that contains the parsed
-     *                initialization instruction to be processed.
-     * @param array  multi dimensional array that contains the definition
-     *                of the fields of the table.
+     * @param array  multi dimensional array that contains the
+     *                structure of the current DML instruction.
+     * @param array  multi dimensional array that contains the
+     *                definition for current table's fields.
      *
-     * @return array  array of strings in the form 'field_name' => 'value'
+     * @return string SQL WHERE clause
      *
      * @access public
      * @static
