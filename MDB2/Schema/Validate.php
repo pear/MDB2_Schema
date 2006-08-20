@@ -335,7 +335,7 @@ class MDB2_Schema_Validate
         $fields[$field_name] = $field;
 
         if (isset($field['default'])
-            && !$this->validateFieldValue($fields, $field_name, $fields[$field_name]['default'])
+            && !$this->validateDataFieldValue($fields, $field_name, $fields[$field_name]['default'])
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_DEFAULT,
                 'default value of "'.$field_name.'" is of wrong type');
