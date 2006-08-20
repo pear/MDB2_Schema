@@ -105,6 +105,7 @@ define('MDB2_SCHEMA_ERROR_VALIDATE_PRIMARY_EXISTS',                       -46);
 define('MDB2_SCHEMA_ERROR_VALIDATE_PRIMARY_NULL',                         -47);
 define('MDB2_SCHEMA_ERROR_VALIDATE_SEQUENCE_EXISTS',                      -48);
 define('MDB2_SCHEMA_ERROR_VALIDATE_TABLE_EXISTS',                         -49);
+define('MDB2_SCHEMA_ERROR_VALIDATE_INDEX_FIELD_EXISTS',                   -50);
 
 /**
  * The database manager is a class that provides a set of database
