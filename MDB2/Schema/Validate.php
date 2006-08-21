@@ -142,7 +142,7 @@ class MDB2_Schema_Validate
     /* Definition */
     /**
      * Checks whether the definition of a parsed table is valid. Modify table
-     * definition when necessary. If table is Ok push it onto array of tables.
+     * definition when necessary.
      *
      * @param array  multi dimensional array that contains the
      *                tables of current database.
@@ -242,7 +242,6 @@ class MDB2_Schema_Validate
                 }
             }
         }
-        $tables[$table_name] = $table;
         return true;
     }
 
@@ -251,7 +250,7 @@ class MDB2_Schema_Validate
 
     /**
      * Checks whether the definition of a parsed field is valid. Modify field
-     * definition when necessary. If field is Ok push it onto array of fields.
+     * definition when necessary.
      *
      * @param array  multi dimensional array that contains the
      *                fields of current table.
@@ -332,8 +331,6 @@ class MDB2_Schema_Validate
             }
         }
 
-        $fields[$field_name] = $field;
-
         if (isset($field['default'])
             && !$this->validateDataFieldValue($fields, $field_name, $fields[$field_name]['default'])
         ) {
@@ -348,7 +345,7 @@ class MDB2_Schema_Validate
 
     /**
      * Checks whether a parsed index is valid. Modify index definition when
-     * necessary. If index is Ok push it onto array of indexes.
+     * necessary.
      *
      * @param array  multi dimensional array that contains the
      *                indexes of current table.
@@ -382,7 +379,6 @@ class MDB2_Schema_Validate
         if (empty($index['was'])) {
             $index['was'] = $index_name;
         }
-        $table_indexes[$index_name] = $index;
         return true;
     }
 
@@ -391,8 +387,7 @@ class MDB2_Schema_Validate
 
     /**
      * Checks whether a parsed index-field is valid. Modify its definition when
-     * necessary. If index-field is Ok push it onto array of fields of the
-     * current index.
+     * necessary.
      *
      * @param array  multi dimensional array that contains the
      *                fields of current index.
@@ -430,8 +425,7 @@ class MDB2_Schema_Validate
 
     /**
      * Checks whether the definition of a parsed sequence is valid. Modify
-     * sequence definition when necessary. If sequence is Ok push it onto array
-     * of sequences of current database.
+     * sequence definition when necessary.
      *
      * @param array  multi dimensional array that contains the
      *                sequences of current database.
@@ -473,7 +467,6 @@ class MDB2_Schema_Validate
                     'sequence "'.$sequence_name.'" was not properly defined');
             }
         }
-        $sequences[$sequence_name] = $sequence;
         return true;
     }
 
@@ -538,8 +531,7 @@ class MDB2_Schema_Validate
     /* Data Manipulation */
     /**
      * Checks whether a parsed DML-field is valid. Modify its structure when
-     * necessary. If DML-field is Ok push it onto fields array of the
-     * current DML instruction. This is called when validating INSERT and
+     * necessary. This is called when validating INSERT and
      * UPDATE.
      *
      * @param array  multi dimensional array that contains the
@@ -573,29 +565,6 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_FIELD_VALUE,
                 'field "'.$field_name.'" has wrong value');
         }
-        $instruction_fields[$field_name] = $value;
-        return true;
-    }
-
-    // }}}
-    // {{{ validateDML()
-
-    /**
-     * Pushes the parsed DML instruction to the initialization array of current
-     * table.
-     *
-     * @param array  multi dimensional array that contains the
-     *                structure and optional data of table.
-     * @param array  multi dimensional array that contains the
-     *                data of the current DML instruction.
-     *
-     * @return bool|error object
-     *
-     * @access public
-     */
-    function validateDML(&$table, &$instruction)
-    {
-        $table['initialization'][] = $instruction;
         return true;
     }
 

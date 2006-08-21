@@ -241,10 +241,7 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-insert':
         case 'database-table-initialization-delete':
         case 'database-table-initialization-update':
-            $result = $this->val->validateDML($this->table, $this->init);
-            if (PEAR::isError($result)) {
-                $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
-            }
+            $this->table['initialization'][] = $this->init;
             break;
 
         /* One level simulation of expression-function recursion */
@@ -268,6 +265,8 @@ class MDB2_Schema_Parser extends XML_Parser
             $result = $this->val->validateTable($this->database_definition['tables'], $this->table, $this->table_name);
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            } else {
+                $this->database_definition['tables'][$this->table_name] = $this->table;
             }
             break;
         case 'database-table-name':
@@ -281,6 +280,8 @@ class MDB2_Schema_Parser extends XML_Parser
             $result = $this->val->validateField($this->table['fields'], $this->field, $this->field_name);
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            } else {
+       	        $this->table['fields'][$this->field_name] = $this->field;
             }
             break;
 
@@ -289,6 +290,8 @@ class MDB2_Schema_Parser extends XML_Parser
             $result = $this->val->validateIndex($this->table['indexes'], $this->index, $this->index_name);
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            } else {
+                $this->table['indexes'][$this->index_name] = $this->index;
             }
             break;
         case 'database-table-declaration-index-field':
@@ -305,6 +308,8 @@ class MDB2_Schema_Parser extends XML_Parser
             $result = $this->val->validateSequence($this->database_definition['sequences'], $this->sequence, $this->sequence_name);
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
+            } else {
+		        $this->database_definition['sequences'][$this->sequence_name] = $this->sequence;
             }
             break;
 
