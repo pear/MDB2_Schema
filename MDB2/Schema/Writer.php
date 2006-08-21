@@ -55,7 +55,12 @@
  */
 class MDB2_Schema_Writer
 {
+    // {{{ properties
+
     var $valid_types = array();
+
+    // }}}
+    // {{{ constructor
 
     function __construct($valid_types = array())
     {
@@ -348,11 +353,43 @@ class MDB2_Schema_Writer
                             switch ($instruction['type']) {
                             case 'insert':
                                 $buffer.= "$eol   <insert>$eol";
-                                foreach ($instruction['fields'] as $field_name => $field) {
-                                    $buffer.= "$eol    <field>$eol     <name>$field_name</name>$eol     <value>";
-                                    $buffer.= $this->_escapeSpecialChars($field)."</value>$eol   </field>$eol";
+                                foreach ($instruction['data']['field'] as $field) {
+                                    $field_name = $field['name'];
+                                    $buffer.= "$eol    <field>$eol     <name>$field_name</name>$eol";
+                                    $buffer.= $this->writeExpression($field['group'], 5, $arguments);
+                                    $buffer.= "    </field>$eol";
                                 }
                                 $buffer.= "$eol   </insert>$eol";
+                                break;
+                            case 'update':
+                                $buffer.= "$eol   <update>$eol";
+                                foreach ($instruction['data']['field'] as $field) {
+                                    $field_name = $field['name'];
+                                    $buffer.= "$eol    <field>$eol     <name>$field_name</name>$eol";
+                                    $buffer.= $this->writeExpression($field['group'], 5, $arguments);
+                                    $buffer.= "    </field>$eol";
+                                }
+
+                                if (!empty($instruction['data']['where'])
+                                    && is_array($instruction['data']['where'])
+                                ) {
+                                    $buffer.= "    <where>$eol";
+                                    $buffer.= $this->writeExpression($instruction['data']['where'], 5, $arguments);
+                                    $buffer.= "    </where>$eol";
+                                }
+
+                                $buffer.= "$eol   </update>$eol";
+                                break;
+                            case 'delete':
+                                $buffer.= "$eol   <delete>$eol$eol";
+                                if (!empty($instruction['data']['where'])
+                                    && is_array($instruction['data']['where'])
+                                ) {
+                                    $buffer.= "    <where>$eol";
+                                    $buffer.= $this->writeExpression($instruction['data']['where'], 5, $arguments);
+                                    $buffer.= "    </where>$eol";
+                                }
+                                $buffer.= "$eol   </delete>$eol";
                                 break;
                             }
                         }
@@ -414,5 +451,63 @@ class MDB2_Schema_Writer
 
         return MDB2_OK;
     }
+
+    // }}}
+    // {{{ writeExpression()
+
+    /**
+     * Dumps the structure of an element. Elements can be value, column,
+     * function or expression.
+     *
+     * @param array  multi dimensional array that represents the parsed element
+     *                of a DML instruction.
+     * @param integer  base indentation width
+     * @param array  associative array that takes pairs of tag
+     *                names and values that define dump options.
+     *
+     * @return string
+     *
+     * @access public
+     * @see MDB2_Schema_Writer::dumpDatabase()
+     */
+    function writeExpression($element, $offset = 0, $arguments = null)
+    {
+        $eol = isset($arguments['end_of_line']) ? $arguments['end_of_line'] : "\n";
+        $str = '';
+        $indent = str_repeat(' ', $offset);
+        $noffset = $offset + 1;
+
+        switch ($element['type']) {
+            case 'value':
+                $str.= "$indent<value>".$this->_escapeSpecialChars($element['data'])."</value>$eol";
+            break;
+            case 'column':
+                $str.= "$indent<column>".$this->_escapeSpecialChars($element['data'])."</column>$eol";
+            break;
+            case 'function':
+                $str.= "$indent<function>$eol$indent <name>".$this->_escapeSpecialChars($element['data']['name'])."</name>$eol";
+
+                if (!empty($element['data']['arguments'])
+                    && is_array($element['data']['arguments'])
+                ) {
+                    foreach ($element['data']['arguments'] as $v) {
+                        $str.= $this->writeExpression($v, $noffset, $arguments);
+                    }
+                }
+
+                $str.= "$indent</function>$eol";
+            break;
+            case 'expression':
+                $str.= "$indent<expression>$eol";
+                $str.= $this->writeExpression($element['data']['operants'][0], $noffset, $arguments);
+                $str.= "$indent <operator>".$element['data']['operator']."</operator>$eol";
+                $str.= $this->writeExpression($element['data']['operants'][1], $noffset, $arguments);
+                $str.= "$indent</expression>$eol";
+            break;
+        }
+        return $str;
+    }
+
+    // }}}
 }
 ?>
