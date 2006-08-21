@@ -252,7 +252,7 @@ $GLOBALS['_MDB2_Schema_Reserved']['mssql'] = array(
     'GRANT',
     'OPENDATASOURCE',
     'SELECT',
-	);
+);
 //}}}
 
 ?>

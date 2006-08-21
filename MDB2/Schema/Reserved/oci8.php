@@ -165,7 +165,7 @@ $GLOBALS['_MDB2_Schema_Reserved']['oci8'] = array(
     'MODE',
     'ROWS',
     'WITH',
-	);
+);
 // }}}
 
 ?>

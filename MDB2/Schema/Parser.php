@@ -281,7 +281,7 @@ class MDB2_Schema_Parser extends XML_Parser
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
             } else {
-       	        $this->table['fields'][$this->field_name] = $this->field;
+                $this->table['fields'][$this->field_name] = $this->field;
             }
             break;
 
@@ -309,7 +309,7 @@ class MDB2_Schema_Parser extends XML_Parser
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getMessage(), 0, $xp, $result->getCode());
             } else {
-		        $this->database_definition['sequences'][$this->sequence_name] = $this->sequence;
+                $this->database_definition['sequences'][$this->sequence_name] = $this->sequence;
             }
             break;
 
