@@ -162,20 +162,20 @@ class MDB2_Schema_Validate
     function validateTable(&$tables, &$table, $table_name)
     {
         if (!$table_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_TABLE_NAME,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a table has to have a name');
         } elseif (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($table_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_TABLE_NAME,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                         'table name "'.$table_name.'" is a reserved word in: '.$rdbms);
                 }
             }
         }
 
         if (isset($tables[$table_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_TABLE_EXISTS,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'table "'.$table_name.'" already exists');
         }
 
@@ -185,28 +185,16 @@ class MDB2_Schema_Validate
 
         $autoinc = $primary = false;
         if (empty($table['fields']) || !is_array($table['fields'])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_FIELDS,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'tables need one or more fields');
         } else {
             foreach ($table['fields'] as $field_name => $field) {
                 if (!empty($field['autoincrement'])) {
                     if ($primary) {
-                        return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DUP_AUTOINC,
+                        return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                             'there was already an autoincrement field in "'.$table_name.'" before "'.$field_name.'"');
                     } else {
                         $autoinc = $primary = true;
-                    }
-
-                    if (!$table['fields'][$field_name]['notnull']) {
-                        return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_AUTOINC_NULL,
-                            'all autoincrement fields must be defined notnull in "'.$table_name.'"');
-                    }
-
-                    if (empty($field['default'])) {
-                        $table['fields'][$field_name]['default'] = '0';
-                    } elseif ($field['default'] !== '0' && $field['default'] !== 0) {
-                        return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_AUTOINC_INVALID_DEFAULT,
-                            'all autoincrement fields must be defined default "0" in "'.$table_name.'"');
                     }
                 }
             }
@@ -223,7 +211,7 @@ class MDB2_Schema_Validate
                     if ($autoinc && count($index['fields']) == '1') {
                         $skip_index = true;
                     } elseif ($primary) {
-                        return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_PRIMARY_EXISTS,
+                        return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                             'there was already an primary index or autoincrement field in "'.$table_name.'" before "'.$name.'"');
                     } else {
                         $primary = true;
@@ -233,12 +221,12 @@ class MDB2_Schema_Validate
                 if (!$skip_index && is_array($index['fields'])) {
                     foreach ($index['fields'] as $field_name => $field) {
                         if (!isset($table['fields'][$field_name])) {
-                            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_BROKEN_INDEX,
+                            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                                 'index field "'.$field_name.'" does not exist');
                         } elseif (!empty($index['primary'])
                             && !$table['fields'][$field_name]['notnull']
                         ) {
-                            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_PRIMARY_NULL,
+                            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                                 'all primary key fields must be defined notnull in "'.$table_name.'"');
                         }
                     }
@@ -270,10 +258,10 @@ class MDB2_Schema_Validate
     function validateField(&$fields, &$field, $field_name)
     {
         if (!$field_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_FIELD_NAME,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field name missing');
         } elseif (isset($fields[$field_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_FIELD_EXISTS,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field_name.'" already exists');
         }
 
@@ -281,30 +269,30 @@ class MDB2_Schema_Validate
             $name = strtoupper($field_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_FIELD_NAME,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                         'field name "'.$field_name.'" is a reserved word in: '.$rdbms);
                 }
             }
         }
         /* Type check */
         if (empty($field['type'])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_FIELD_TYPE,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'no field type specified');
         }
         if (!empty($this->valid_types) && !array_key_exists($field['type'], $this->valid_types)) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_FIELD_TYPE,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'no valid field type ("'.$field['type'].'") specified');
         }
         if (array_key_exists('unsigned', $field) && !$this->isBoolean($field['unsigned'])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_UNSIGNED,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'unsigned has to be a boolean value');
         }
         if (array_key_exists('fixed', $field) && !$this->isBoolean($field['fixed'])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_FIXED,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'fixed has to be a boolean value');
         }
         if (array_key_exists('length', $field) && $field['length'] <= 0) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_LENGTH,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'length has to be an integer greater 0');
         }
         if (empty($field['was'])) {
@@ -314,7 +302,7 @@ class MDB2_Schema_Validate
             $field['notnull'] = false;
         }
         if (!$this->isBoolean($field['notnull'])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_NOTNULL,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "notnull" has to be a boolean value');
         }
         if ($this->force_defaults
@@ -326,7 +314,7 @@ class MDB2_Schema_Validate
 
         if (array_key_exists('default', $field)) {
             if ($field['type'] == 'clob' || $field['type'] == 'blob') {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DEFAULT_NOT_ALLOWED,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field['type'].'"-fields are not allowed to have a default value');
             }
             if ($field['default'] === '') {
@@ -339,8 +327,22 @@ class MDB2_Schema_Validate
         if (isset($field['default'])
             && !$this->validateDataFieldValue($fields, $field_name, $fields[$field_name]['default'])
         ) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_DEFAULT,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'default value of "'.$field_name.'" is of wrong type');
+        }
+
+        if (!empty($field['autoincrement'])) {
+            if (!$field['notnull']) {
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                    'all autoincrement fields must be defined notnull');
+            }
+
+            if (empty($field['default'])) {
+                $field['default'] = '0';
+            } elseif ($field['default'] !== '0' && $field['default'] !== 0) {
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                    'all autoincrement fields must be defined default "0"');
+            }
         }
         return true;
     }
@@ -365,19 +367,19 @@ class MDB2_Schema_Validate
     function validateIndex(&$table_indexes, &$index, $index_name)
     {
         if (!$index_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_INDEX_NAME,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'an index has to have a name');
         }
         if (isset($table_indexes[$index_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INDEX_EXISTS,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'index "'.$index_name.'" already exists');
         }
         if (array_key_exists('unique', $index) && !$this->isBoolean($index['unique'])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_UNIQUE,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "unique" has to be a boolean value');
         }
         if (array_key_exists('primary', $index) && !$this->isBoolean($index['primary'])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_PRIMARY,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "primary" has to be a boolean value');
         }
 
@@ -407,17 +409,17 @@ class MDB2_Schema_Validate
     function validateIndexField(&$index_fields, &$field, $field_name)
     {
         if (isset($index_fields[$field_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INDEX_FIELD_EXISTS,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'index field "'.$field_name.'" already exists');
         }
         if (!$field_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_INDEX_FIELD_NAME,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'the index-field-name is required');
         }
         if (!empty($field['sorting'])
             && $field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending'
         ) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_SORT,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'sorting type unknown');
         } else {
             $field['sorting'] = 'ascending';
@@ -445,20 +447,20 @@ class MDB2_Schema_Validate
     function validateSequence(&$sequences, &$sequence, $sequence_name)
     {
         if (!$sequence_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_SEQUENCE_NAME,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a sequence has to have a name');
         } elseif (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($sequence_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_SEQUENCE_NAME,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                         'sequence name "'.$sequence_name.'" is a reserved word in: '.$rdbms);
                 }
             }
         }
 
         if (isset($sequences[$sequence_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_SEQUENCE_EXISTS,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'sequence "'.$sequence_name.'" already exists');
         }
 
@@ -468,7 +470,7 @@ class MDB2_Schema_Validate
 
         if (!empty($sequence['on'])) {
             if (empty($sequence['on']['table']) || empty($sequence['on']['field'])) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_SEQUENCE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     'sequence "'.$sequence_name.'" was not properly defined');
             }
         }
@@ -492,13 +494,13 @@ class MDB2_Schema_Validate
     function validateDatabase(&$database)
     {
         if (!isset($database['name']) || !$database['name']) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_NO_DATABASE_NAME,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a database has to have a name');
         } elseif (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($database['name']);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_DATABASE_NAME,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                         'database name "'.$database['name'].'" is a reserved word in: '.$rdbms);
                 }
             }
@@ -507,13 +509,13 @@ class MDB2_Schema_Validate
         if (isset($database['create'])
             && !$this->isBoolean($database['create'])
         ) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_CREATE,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "create" has to be a boolean value');
         }
         if (isset($database['overwrite'])
             && !$this->isBoolean($database['overwrite'])
         ) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_INVALID_OVERWRITE,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "overwrite" has to be a boolean value');
         }
 
@@ -522,7 +524,7 @@ class MDB2_Schema_Validate
                 if (!empty($seq['on'])
                     && empty($database['tables'][$seq['on']['table']]['fields'][$seq['on']['field']])
                 ) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_BROKEN_SEQUENCE,
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                         'sequence "'.$seq_name.'" was assigned on unexisting field/table');
                 }
             }
@@ -553,21 +555,21 @@ class MDB2_Schema_Validate
     function validateDataField(&$table_fields, &$instruction_fields, $field_name, $value)
     {
         if (!$field_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_NO_FIELD_NAME,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field-name has to be specified');
         }
         if (isset($instruction_fields[$field_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_FIELD_EXISTS,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field_name.'" already filled');
         }
         if (!isset($table_fields[$field_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_FIELD_NOT_FOUND,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'unknown field "'.$field_name.'"');
         }
         if ($value !== ''
             && !$this->validateDataFieldValue($table_fields, $field_name, $value)
         ) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_FIELD_VALUE,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field_name.'" has wrong value');
         }
         return true;
@@ -593,7 +595,7 @@ class MDB2_Schema_Validate
     function validateDataFieldValue($fields, $field_name, &$field_value)
     {
         if (!isset($fields[$field_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_FIELD_NOT_FOUND,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 '"'.$field_name.'" is not defined');
         }
         $field_def = $fields[$field_name];
@@ -601,37 +603,37 @@ class MDB2_Schema_Validate
         case 'text':
         case 'clob':
             if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_VALUE_TOO_BIG,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is larger than "'.$field_def['length'].'"');
             }
             break;
         case 'blob':
             /*
             if (!preg_match('/^([0-9a-f]{2})*$/i', $field_value)) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
             */
             $field_value = pack('H*', $field_value);
             if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_VALUE_TOO_BIG,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is larger than "'.$field_def['type'].'"');
             }
             break;
         case 'integer':
             if ($field_value != ((int)$field_value)) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
             $field_value = (int) $field_value;
             if (!empty($field_def['unsigned']) && $field_def['unsigned'] && $field_value < 0) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_NEGATIVE_VALUE_FOR_SIGNED_FIELD,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" signed instead of unsigned');
             }
             break;
         case 'boolean':
             if (!$this->isBoolean($field_value)) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
             break;
@@ -639,7 +641,7 @@ class MDB2_Schema_Validate
             if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2})/', $field_value)
                 && $field_value !== 'CURRENT_DATE'
             ) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
             break;
@@ -647,7 +649,7 @@ class MDB2_Schema_Validate
             if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})/', $field_value)
                 && $field_value !== 'CURRENT_TIMESTAMP'
             ) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
             break;
@@ -655,14 +657,14 @@ class MDB2_Schema_Validate
             if (!preg_match("/([0-9]{2}):([0-9]{2}):([0-9]{2})/", $field_value)
                 && $field_value !== 'CURRENT_TIME'
             ) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
             break;
         case 'float':
         case 'double':
             if ($field_value != (double)$field_value) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE_DML_INVALID_VALUE_TYPE,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
             $field_value = (double) $field_value;
