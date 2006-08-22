@@ -764,7 +764,7 @@ class MDB2_Schema extends PEAR
      * with a column in a DML instruction.
      *
      * @param array  multi dimensional array that represents the parsed field
-     *                of an DML instruction.
+     *                of a DML instruction.
      * @param array  multi dimensional array that contains the
      *                definition for current table's fields.
      * @param string  type of given field
@@ -2061,7 +2061,7 @@ class MDB2_Schema extends PEAR
                     $fields[$field_name] = $field['type'];
                 }
                 $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM ';
-                $query.= $this->db->quoteIdentifer($table_name, true);
+                $query.= $this->db->quoteIdentifier($table_name, true);
                 $data = $this->db->queryAll($query, $fields, MDB2_FETCHMODE_ASSOC);
                 if (PEAR::isError($data)) {
                     return $data;
