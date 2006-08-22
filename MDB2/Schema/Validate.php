@@ -164,7 +164,9 @@ class MDB2_Schema_Validate
         if (!$table_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a table has to have a name');
-        } elseif (is_array($this->fail_on_invalid_names)) {
+        }
+
+        if (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($table_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
@@ -187,25 +189,24 @@ class MDB2_Schema_Validate
         if (empty($table['fields']) || !is_array($table['fields'])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'tables need one or more fields');
-        } else {
-            foreach ($table['fields'] as $field_name => $field) {
-                if (!empty($field['autoincrement'])) {
-                    if ($primary) {
-                        return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                            'there was already an autoincrement field in "'.$table_name.'" before "'.$field_name.'"');
-                    } else {
-                        $autoinc = $primary = true;
-                    }
+        }
+        foreach ($table['fields'] as $field_name => $field) {
+            if (!empty($field['autoincrement'])) {
+                if ($primary) {
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                        'there was already an autoincrement field in "'.$table_name.'" before "'.$field_name.'"');
                 }
+                $autoinc = $primary = true;
             }
         }
+
         if (!empty($table['indexes']) && is_array($table['indexes'])) {
             foreach ($table['indexes'] as $name => $index) {
                 $skip_index = false;
                 if (!empty($index['primary'])) {
                     /*
                         * Lets see if we should skip this index since there is
-                        * already a auto increment on this field this implying
+                        * already an auto increment on this field this implying
                         * a primary key index.
                         */
                     if ($autoinc && count($index['fields']) == '1') {
@@ -223,7 +224,8 @@ class MDB2_Schema_Validate
                         if (!isset($table['fields'][$field_name])) {
                             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                                 'index field "'.$field_name.'" does not exist');
-                        } elseif (!empty($index['primary'])
+                        }
+                        if (!empty($index['primary'])
                             && !$table['fields'][$field_name]['notnull']
                         ) {
                             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
@@ -260,7 +262,8 @@ class MDB2_Schema_Validate
         if (!$field_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field name missing');
-        } elseif (isset($fields[$field_name])) {
+        }
+        if (isset($fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field_name.'" already exists');
         }
@@ -317,10 +320,8 @@ class MDB2_Schema_Validate
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field['type'].'"-fields are not allowed to have a default value');
             }
-            if ($field['default'] === '') {
-                if (!$field['notnull']) {
-                    $field['default'] = null;
-                }
+            if ($field['default'] === '' && !$field['notnull']) {
+                $field['default'] = null;
             }
         }
 
@@ -416,13 +417,11 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'the index-field-name is required');
         }
-        if (!empty($field['sorting'])
-            && $field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending'
-        ) {
+        if (empty($field['sorting'])) {
+            $field['sorting'] = 'ascending';
+        } elseif($field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending') {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'sorting type unknown');
-        } else {
-            $field['sorting'] = 'ascending';
         }
         return true;
     }
@@ -449,7 +448,8 @@ class MDB2_Schema_Validate
         if (!$sequence_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a sequence has to have a name');
-        } elseif (is_array($this->fail_on_invalid_names)) {
+        }
+        if (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($sequence_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
@@ -468,11 +468,11 @@ class MDB2_Schema_Validate
             $sequence['was'] = $sequence_name;
         }
 
-        if (!empty($sequence['on'])) {
-            if (empty($sequence['on']['table']) || empty($sequence['on']['field'])) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                    'sequence "'.$sequence_name.'" was not properly defined');
-            }
+        if (!empty($sequence['on'])
+            && (empty($sequence['on']['table']) || empty($sequence['on']['field']))
+        ) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'sequence "'.$sequence_name.'" on a table was not properly defined');
         }
         return true;
     }
@@ -496,7 +496,8 @@ class MDB2_Schema_Validate
         if (!isset($database['name']) || !$database['name']) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a database has to have a name');
-        } elseif (is_array($this->fail_on_invalid_names)) {
+        }
+        if (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($database['name']);
             foreach ($this->fail_on_invalid_names as $rdbms) {
                 if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
