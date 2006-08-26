@@ -20,6 +20,8 @@ open todo items:
   if it meets certain criterias based on that version number (or some other
   variable). this would enable people to add DML statements that are only
   executed when updating from a specific version.
+- add support for recursive tag parsing
+- add specific error codes for validate class
 EOT;
 
 $description =<<<EOT
