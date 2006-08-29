@@ -167,6 +167,12 @@ class MDB2_Schema_Validate
                 'a table has to have a name');
         }
 
+        /* Table name duplicated? */
+        if (isset($tables[$table_name])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'table "'.$table_name.'" already exists');
+        }
+
         /* Table name reserved? */
         if (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($table_name);
@@ -176,12 +182,6 @@ class MDB2_Schema_Validate
                         'table name "'.$table_name.'" is a reserved word in: '.$rdbms);
                 }
             }
-        }
-
-        /* Table name duplicated? */
-        if (isset($tables[$table_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'table "'.$table_name.'" already exists');
         }
 
         /* Was */
@@ -478,6 +478,12 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a sequence has to have a name');
         }
+
+        if (isset($sequences[$sequence_name])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'sequence "'.$sequence_name.'" already exists');
+        }
+
         if (is_array($this->fail_on_invalid_names)) {
             $name = strtoupper($sequence_name);
             foreach ($this->fail_on_invalid_names as $rdbms) {
@@ -486,11 +492,6 @@ class MDB2_Schema_Validate
                         'sequence name "'.$sequence_name.'" is a reserved word in: '.$rdbms);
                 }
             }
-        }
-
-        if (isset($sequences[$sequence_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'sequence "'.$sequence_name.'" already exists');
         }
 
         if (empty($sequence['was'])) {
@@ -556,10 +557,8 @@ class MDB2_Schema_Validate
         }
 
         /*
-         * Checking Sequences
-         * this have to be done here as we can't
-         * guarantee that all tables were already
-         * defined in the moment we are parssing indexes
+         * This have to be done here as we can't guarantee that all tables
+         * were already defined in the moment we are parsing indexes
          */
         if (isset($database['sequences'])) {
             foreach ($database['sequences'] as $seq_name => $seq) {
@@ -656,7 +655,7 @@ class MDB2_Schema_Validate
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
-            $field_value = (int) $field_value;
+            $field_value = (int)$field_value;
             if (!empty($field_def['unsigned']) && $field_def['unsigned'] && $field_value < 0) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" signed instead of unsigned');
@@ -698,7 +697,7 @@ class MDB2_Schema_Validate
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
-            $field_value = (double) $field_value;
+            $field_value = (double)$field_value;
             break;
         }
         return true;
