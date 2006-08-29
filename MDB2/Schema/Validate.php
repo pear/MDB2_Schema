@@ -354,7 +354,7 @@ class MDB2_Schema_Validate
             }
         }
         if (isset($field['default'])
-            && PEAR::isError($result = $this->validateDataFieldValue($field, $field_name, $field['default']))
+            && PEAR::isError($result = $this->validateDataFieldValue($field, $field['default'], $field_name))
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'default value of "'.$field_name.'" is incorrect: '.$result->getUserinfo());
@@ -606,14 +606,10 @@ class MDB2_Schema_Validate
         }
         if (!isset($table_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'unknown field "'.$field_name.'"');
-        }
-        if (!isset($table_fields[$field_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 '"'.$field_name.'" is not defined');
         }
         if ($value !== ''
-            && PEAR::isError($result = $this->validateDataFieldValue($table_fields[$field_name], $field_name, $value))
+            && PEAR::isError($result = $this->validateDataFieldValue($table_fields[$field_name], $value, $field_name))
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'value of "'.$field_name.'" is incorrect: '.$result->getUserinfo());
@@ -630,15 +626,15 @@ class MDB2_Schema_Validate
      *
      * @param array  multi dimensional array that contains the
      *                definition for current table's fields.
-     * @param string  name of the parsed field
      * @param string  value to fill the parsed field
+     * @param string  name of the parsed field
      *
      * @return bool|error object
      *
      * @access public
      * @see MDB2_Schema_Validate::validateInsertField()
      */
-    function validateDataFieldValue($field_def, $field_name, &$field_value)
+    function validateDataFieldValue($field_def, &$field_value, $field_name)
     {
         switch ($field_def['type']) {
         case 'text':
@@ -649,12 +645,6 @@ class MDB2_Schema_Validate
             }
             break;
         case 'blob':
-            /*
-            if (!preg_match('/^([0-9a-f]{2})*$/i', $field_value)) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                    '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
-            }
-            */
             $field_value = pack('H*', $field_value);
             if (!empty($field_def['length']) && strlen($field_value) > $field_def['length']) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
