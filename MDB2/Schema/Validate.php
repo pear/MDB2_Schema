@@ -354,10 +354,10 @@ class MDB2_Schema_Validate
             }
         }
         if (isset($field['default'])
-            && !$this->validateDataFieldValue($fields, $field_name, $fields[$field_name]['default'])
+            && PEAR::isError($result = $this->validateDataFieldValue($field, $field_name, $field['default']))
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'default value of "'.$field_name.'" is of wrong type');
+                'default value of "'.$field_name.'" is incorrect: '.$result->getUserinfo());
         }
 
         /* Autoincrement */
@@ -608,11 +608,15 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'unknown field "'.$field_name.'"');
         }
+        if (!isset($table_fields[$field_name])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                '"'.$field_name.'" is not defined');
+        }
         if ($value !== ''
-            && !$this->validateDataFieldValue($table_fields, $field_name, $value)
+            && PEAR::isError($result = $this->validateDataFieldValue($table_fields[$field_name], $field_name, $value))
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'field "'.$field_name.'" has wrong value');
+                'value of "'.$field_name.'" is incorrect: '.$result->getUserinfo());
         }
         return true;
     }
@@ -634,13 +638,8 @@ class MDB2_Schema_Validate
      * @access public
      * @see MDB2_Schema_Validate::validateInsertField()
      */
-    function validateDataFieldValue($fields, $field_name, &$field_value)
+    function validateDataFieldValue($field_def, $field_name, &$field_value)
     {
-        if (!isset($fields[$field_name])) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                '"'.$field_name.'" is not defined');
-        }
-        $field_def = $fields[$field_name];
         switch ($field_def['type']) {
         case 'text':
         case 'clob':
