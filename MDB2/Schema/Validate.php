@@ -159,7 +159,7 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateTable(&$tables, &$table, $table_name)
+    function validateTable($tables, &$table, $table_name)
     {
         /* Have we got a name? */
         if (!$table_name) {
@@ -168,7 +168,7 @@ class MDB2_Schema_Validate
         }
 
         /* Table name duplicated? */
-        if (isset($tables[$table_name])) {
+        if (is_array($tables) && isset($tables[$table_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'table "'.$table_name.'" already exists');
         }
@@ -270,7 +270,7 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateField(&$fields, &$field, $field_name)
+    function validateField($fields, &$field, $field_name)
     {
         /* Have we got a name? */
         if (!$field_name) {
@@ -279,7 +279,7 @@ class MDB2_Schema_Validate
         }
 
         /* Field name duplicated? */
-        if (isset($fields[$field_name])) {
+        if (is_array($fields) && isset($fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field_name.'" already exists');
         }
@@ -394,13 +394,13 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateIndex(&$table_indexes, &$index, $index_name)
+    function validateIndex($table_indexes, &$index, $index_name)
     {
         if (!$index_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'an index has to have a name');
         }
-        if (isset($table_indexes[$index_name])) {
+        if (is_array($table_indexes) && isset($table_indexes[$index_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'index "'.$index_name.'" already exists');
         }
@@ -436,9 +436,9 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateIndexField(&$index_fields, &$field, $field_name)
+    function validateIndexField($index_fields, &$field, $field_name)
     {
-        if (isset($index_fields[$field_name])) {
+        if (is_array($index_fields) && isset($index_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'index field "'.$field_name.'" already exists');
         }
@@ -472,14 +472,14 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateSequence(&$sequences, &$sequence, $sequence_name)
+    function validateSequence($sequences, &$sequence, $sequence_name)
     {
         if (!$sequence_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a sequence has to have a name');
         }
 
-        if (isset($sequences[$sequence_name])) {
+        if (is_array($sequences) && isset($sequences[$sequence_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'sequence "'.$sequence_name.'" already exists');
         }
@@ -524,7 +524,7 @@ class MDB2_Schema_Validate
     function validateDatabase(&$database)
     {
         /* Have we got a name? */
-        if (!isset($database['name']) || !$database['name']) {
+        if (!is_array($database) || !isset($database['name']) || !$database['name']) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'a database has to have a name');
         }
@@ -593,17 +593,17 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateDataField(&$table_fields, &$instruction_fields, $field_name, $value)
+    function validateDataField($table_fields, $instruction_fields, $field_name, $value)
     {
         if (!$field_name) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field-name has to be specified');
         }
-        if (isset($instruction_fields[$field_name])) {
+        if (is_array($instruction_fields) && isset($instruction_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field_name.'" already filled');
         }
-        if (!isset($table_fields[$field_name])) {
+        if (is_array($table_fields) && !isset($table_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 '"'.$field_name.'" is not defined');
         }

@@ -62,7 +62,7 @@ if (empty($GLOBALS['_MDB2_Schema_Reserved'])) {
  */
 class MDB2_Schema_Parser extends XML_Parser
 {
-    var $database_definition = array();
+    var $database_definition = array('tables' => array(), 'sequences' => array());
     var $elements = array();
     var $element = '';
     var $count = 0;
