@@ -1,104 +1,308 @@
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <database>
- <name>DataBase</name>
+
+ <name>MDB2Example</name>
+ <create>true</create>
+ <overwrite>true</overwrite>
 
  <table>
-  <name>Example</name>
+
+  <name>Table1</name>
 
   <declaration>
+
    <field>
     <name>foo</name>
     <type>integer</type>
     <unsigned>true</unsigned>
+    <length>4</length>
+    <notnull>true</notnull>
+    <default>0</default>
+    <autoincrement>1</autoincrement>
    </field>
+
    <field>
     <name>bar</name>
     <type>text</type>
-    <length>10</length>
+    <length>128</length>
+    <notnull>false</notnull>
     <default></default>
    </field>
+
    <field>
     <name>foolish</name>
     <type>integer</type>
     <unsigned>true</unsigned>
+    <length>4</length>
+    <notnull>false</notnull>
+    <default>7</default>
    </field>
+
    <field>
-    <name>birthday</name>
+    <name>creation</name>
     <type>timestamp</type>
+    <notnull>false</notnull>
+    <default></default>
    </field>
+
+   <index>
+    <name>PRIMARY</name>
+    <primary>true</primary>
+    <field>
+     <name>foo</name>
+     <sorting>ascending</sorting>
+    </field>
+   </index>
+
   </declaration>
 
   <initialization>
+
    <insert>
     <field>
      <name>foo</name>
-     <value>2</value>
+     <value>7</value>
     </field>
     <field>
-     <name>birthday</name>
+     <name>bar</name>
+     <value>Tux</value>
+    </field>
+    <field>
+     <name>foolish</name>
+     <expression>
+      <column>foo</column>
+      <operator>PLUS</operator>
+      <value>70</value>
+     </expression>
+    </field>
+    <field>
+     <name>creation</name>
      <function>
-      <name>myfunc</name>
-      <expression>
-       <value>1</value>
-       <operator>PLUS</operator>
-       <value>2</value>
-      </expression>
+      <name>now</name>
      </function>
     </field>
-    <field>
-     <name>foolish</name>
-     <expression>
-      <value>3</value>
-      <operator>PLUS</operator>
-      <function>
-       <name>functionA</name>
-       <value>1</value>
-       <value>2</value>
-      </function>
-     </expression>
-    </field>
    </insert>
-   <update>
+
+   <insert>
     <field>
      <name>foo</name>
-     <value>10</value>
+     <value>77</value>
+    </field>
+    <field>
+     <name>bar</name>
+     <value>Rocks</value>
     </field>
     <field>
      <name>foolish</name>
      <expression>
-      <function>
-       <name>functionA</name>
-       <value>1</value>
-       <value>2</value>
-      </function>
+      <column>foo</column>
       <operator>PLUS</operator>
-      <function>
-       <name>functionB</name>
-       <value>3</value>
-       <value>4</value>
-      </function>
+      <value>700</value>
      </expression>
     </field>
-    <where>
+    <field>
+     <name>creation</name>
+     <function>
+      <name>now</name>
+     </function>
+    </field>
+   </insert>
+
+   <insert>
+    <field>
+     <name>foo</name>
+     <value>777</value>
+    </field>
+    <field>
+     <name>bar</name>
+     <value>!</value>
+    </field>
+    <field>
+     <name>foolish</name>
      <expression>
-      <column>bar</column>
-      <operator>EQUAL</operator>
-      <function>
-       <name>lower</name>
-       <value>somestring</value>
-      </function>
+      <column>foo</column>
+      <operator>MINUS</operator>
+      <value>700</value>
      </expression>
-    </where>
-   </update>
+    </field>
+    <field>
+     <name>creation</name>
+     <function>
+      <name>now</name>
+     </function>
+    </field>
+   </insert>
+
+   <insert>
+    <field>
+     <name>foo</name>
+     <value>888</value>
+    </field>
+    <field>
+     <name>bar</name>
+     <value>cassino</value>
+    </field>
+   </insert>
+
    <delete>
     <where>
      <expression>
       <column>foo</column>
-      <operator>EQUAL</operator>
-      <value>3</value>
+      <operator>GREATER THAN</operator>
+      <value>777</value>
      </expression>
     </where>
    </delete>
+
+  </initialization>
+
+ </table>
+
+ <table>
+
+  <name>Table2</name>
+
+  <declaration>
+
+   <field>
+    <name>id</name>
+    <type>integer</type>
+    <unsigned>true</unsigned>
+    <length>4</length>
+    <notnull>true</notnull>
+    <default>0</default>
+    <autoincrement>1</autoincrement>
+   </field>
+
+   <field>
+    <name>name</name>
+    <type>text</type>
+    <length>128</length>
+    <notnull>true</notnull>
+    <default></default>
+   </field>
+
+   <field>
+    <name>description</name>
+    <type>blob</type>
+    <notnull>true</notnull>
+   </field>
+
+   <field>
+    <name>creation</name>
+    <type>timestamp</type>
+    <notnull>false</notnull>
+    <default></default>
+   </field>
+
+   <index>
+    <name>PRIMARY</name>
+    <primary>true</primary>
+    <field>
+     <name>id</name>
+     <sorting>ascending</sorting>
+    </field>
+   </index>
+
+  </declaration>
+
+  <initialization>
+
+   <insert>
+    <field>
+     <name>id</name>
+     <value>11</value>
+    </field>
+    <field>
+     <name>name</name>
+     <value>PHP</value>
+    </field>
+    <field>
+     <name>description</name>
+     <value>Hypertext Preprocessor</value>
+    </field>
+    <field>
+     <name>creation</name>
+     <function>
+      <name>now</name>
+     </function>
+    </field>
+   </insert>
+
+   <insert>
+    <field>
+     <name>id</name>
+     <value>12</value>
+    </field>
+    <field>
+     <name>name</name>
+     <value>PEAR</value>
+    </field>
+    <field>
+     <name>description</name>
+     <value>PHP Extension and Application Repository</value>
+    </field>
+    <field>
+     <name>creation</name>
+     <function>
+      <name>now</name>
+     </function>
+    </field>
+   </insert>
+
+   <insert>
+    <field>
+     <name>id</name>
+     <value>13</value>
+    </field>
+    <field>
+     <name>name</name>
+     <value>MDB2</value>
+    </field>
+    <field>
+     <name>description</name>
+     <value>Database Abstraction Layer</value>
+    </field>
+    <field>
+     <name>creation</name>
+     <function>
+      <name>now</name>
+     </function>
+    </field>
+   </insert>
+
+   <insert>
+    <field>
+     <name>id</name>
+     <value>14</value>
+    </field>
+    <field>
+     <name>name</name>
+     <value>MDB2_Schema</value>
+    </field>
+    <field>
+     <name>description</name>
+     <value>XML Based Database Schema Manager</value>
+    </field>
+    <field>
+     <name>creation</name>
+     <function>
+      <name>now</name>
+     </function>
+    </field>
+   </insert>
+
+   <update>
+    <field>
+     <name>id</name>
+     <expression>
+      <column>id</column>
+      <operator>MINUS</operator>
+      <value>10</value>
+     </expression>
+    </field>
+   </update>
+
   </initialization>
 
  </table>
