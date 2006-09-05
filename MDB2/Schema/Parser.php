@@ -77,8 +77,8 @@ class MDB2_Schema_Parser extends XML_Parser
     var $index_name = '';
     var $var_mode = false;
     var $variables = array();
-    var $seq = array();
-    var $seq_name = '';
+    var $sequence = array();
+    var $sequence_name = '';
     var $error;
     var $structure = false;
     var $val;
@@ -190,8 +190,8 @@ class MDB2_Schema_Parser extends XML_Parser
             $this->index = array('fields' => array());
             break;
         case 'database-sequence':
-            $this->seq_name = '';
-            $this->seq = array();
+            $this->sequence_name = '';
+            $this->sequence = array();
             break;
         case 'database-table-declaration-index-field':
             $this->field_name = '';
@@ -615,38 +615,38 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* Sequence declaration */
         case 'database-sequence-name':
-            if (isset($this->seq_name)) {
-                $this->seq_name.= $data;
+            if (isset($this->sequence_name)) {
+                $this->sequence_name.= $data;
             } else {
-                $this->seq_name = $data;
+                $this->sequence_name = $data;
             }
             break;
         case 'database-sequence-was':
-            if (isset($this->seq['was'])) {
-                $this->seq['was'].= $data;
+            if (isset($this->sequence['was'])) {
+                $this->sequence['was'].= $data;
             } else {
-                $this->seq['was'] = $data;
+                $this->sequence['was'] = $data;
             }
             break;
         case 'database-sequence-start':
-            if (isset($this->seq['start'])) {
-                $this->seq['start'].= $data;
+            if (isset($this->sequence['start'])) {
+                $this->sequence['start'].= $data;
             } else {
-                $this->seq['start'] = $data;
+                $this->sequence['start'] = $data;
             }
             break;
         case 'database-sequence-on-table':
-            if (isset($this->seq['on']['table'])) {
-                $this->seq['on']['table'].= $data;
+            if (isset($this->sequence['on']['table'])) {
+                $this->sequence['on']['table'].= $data;
             } else {
-                $this->seq['on']['table'] = $data;
+                $this->sequence['on']['table'] = $data;
             }
             break;
         case 'database-sequence-on-field':
-            if (isset($this->seq['on']['field'])) {
-                $this->seq['on']['field'].= $data;
+            if (isset($this->sequence['on']['field'])) {
+                $this->sequence['on']['field'].= $data;
             } else {
-                $this->seq['on']['field'] = $data;
+                $this->sequence['on']['field'] = $data;
             }
             break;
         }
