@@ -22,6 +22,7 @@ open todo items:
   executed when updating from a specific version.
 - add support for recursive tag parsing
 - add specific error codes for validate class
+- add support for ORDER clauses on UPDATEs (to resolve the duplicate key problem)
 EOT;
 
 $description =<<<EOT
