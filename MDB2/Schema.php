@@ -2070,6 +2070,7 @@ class MDB2_Schema extends PEAR
                     $initialization = array();
                     $lob_buffer_length = $this->db->getOption('lob_buffer_length');
                     foreach ($data as $row) {
+                        $rows = array();
                         foreach($row as $key => $lob) {
                             if (is_resource($lob)) {
                                 $value = '';
@@ -2078,8 +2079,9 @@ class MDB2_Schema extends PEAR
                                 }
                                 $row[$key] = $value;
                             }
+                            $rows[] = array('name' => $key, 'group' => array('type' => 'value', 'data' => $row[$key]));
                         }
-                        $initialization[] = array('type' => 'insert', 'fields' => $row);
+                        $initialization[] = array('type' => 'insert', 'data' => array('field' => $rows));
                     }
                     $database_definition['tables'][$table_name]['initialization'] = $initialization;
                 }
