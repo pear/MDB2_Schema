@@ -143,7 +143,6 @@
 		<xsd:element ref="description"/>
 		<xsd:element ref="comments"/>
 		<xsd:element ref="length"/>
-		<xsd:element ref="sorting"/>
 	</xsd:sequence>
 </xsd:complexType>
 
