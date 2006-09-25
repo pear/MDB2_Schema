@@ -24,6 +24,13 @@
         <li><a href="#3.4.0">variable</a></li>
         </ul>
     </li>
+    <li><a href="#4.0.0">Schema overview data structure</a>
+        <ul>
+        <li><a href="#4.1.0">Main structure</a></li>
+        <li><a href="#4.2.0">Common elements</a></li>
+        <li><a href="#4.3.0">Legend</a></li>
+        </ul>
+    </li>
 </ul>
 
 
@@ -108,7 +115,7 @@
 
 </ul>
 
-<p>Example:</p>
+<h4>Example</h4>
 <ul>
 <p><tt>&lt;table&gt;</tt></p>
 <ul>
@@ -208,7 +215,7 @@
     <p><b>Default:</b> none</p>
 </ul>
 
-<p>Example:</p>
+<h5>Example</h5>
 <ul>
 <p><tt>&lt;field&gt;</tt></p>
 <ul>
@@ -259,7 +266,7 @@
     <p><b>Default:</b> none</p>
 </ul>
 
-<p>Example:</p>
+<h5>Example</h5>
 <ul>
 <p><tt>&lt;index&gt;</tt></p>
 <ul>
@@ -350,7 +357,8 @@
 <h4>sequence <tt>on</tt></h4>
 <p>The sequence <tt>on</tt> <tt>table</tt> <tt>field</tt> section specifies a table field on which the sequence value should be synchronized.</p>
 <p>This information is meant to be used only by the database manager class when it is added a sequence later after the database has been installed for the first time.  If the sequence <tt>on</tt> is specified, the database manager class will override the sequence <tt>start</tt> value with a value that is higher than the highest value in the specified field table.  Therefore, the specified field table type must be integer.</p>
-<p>Example:</p>
+
+<h4>Example</h4>
 <ul>
 <p><tt>&lt;sequence&gt;</tt></p>
 <ul>
@@ -372,6 +380,164 @@
 <p>The <tt>variable</tt> tag is not meant to define any database schema object but rather a means to replace property values with variables defined at parsing time.</p>
 <p>For instance, if you have several tables that store user names in text fields with the same length limit, instead of hard coding the length value in all field definitions, you may use a variable reference.  The parser will replace variable references found in property definitions by the text values of the respective values passed to the parser.</p>
 <p>The parser will issue an error if it find a reference for a variable that is not defined.</p>
+
+<!-- SECTION 4 -->
+<h2><a name="4.0.0">Schema overview data structure</a></h2>
+<h3><a name="4.1.0">Main structure</a></h3>
+<ul><p><tt>&lt;database&gt;</tt></p>
+<ul><p>
+ <tt>&lt;name/&gt;</tt><br/>
+ <tt>&lt;create/&gt;?</tt><br/>
+ <tt>&lt;overwrite/&gt;?</tt><br/>
+ <tt>&lt;description/&gt;?</tt><br/>
+ <tt>&lt;comments/&gt;?</tt><br/>
+ <br/>
+ <tt>&lt;table&gt;</tt><br/>
+ <ul><p>
+  <tt>&lt;name/&gt;</tt><br/>
+  <tt>&lt;was/&gt;</tt><br/>
+  <tt>&lt;description/&gt;</tt><br/>
+  <tt>&lt;comments/&gt;</tt><br/>
+  <br/>
+  <tt>&lt;declaration&gt;</tt><br/>
+  <ul><p>
+   <tt>&lt;field&gt;</tt><br/>
+   <ul><p>
+    <tt>&lt;name/&gt;</tt><br/>
+    <tt>&lt;was/&gt;</tt><br/>
+    <tt>&lt;type/&gt;</tt><br/>
+    <tt>&lt;default/&gt;</tt><br/>
+    <tt>&lt;notnull/&gt;</tt><br/>
+    <tt>&lt;autoincrement/&gt;</tt><br/>
+    <tt>&lt;unsigned/&gt;</tt><br/>
+    <tt>&lt;description/&gt;</tt><br/>
+    <tt>&lt;comments/&gt;</tt><br/>
+    <tt>&lt;length/&gt;</tt><br/>
+   </ul></p>
+   <tt>&lt;/field&gt;+</tt><br/>
+   <tt>&lt;index&gt;</tt><br/>
+   <ul><p>
+    <tt>&lt;name/&gt;</tt><br/>
+    <tt>&lt;was/&gt;?</tt><br/>
+    <tt>&lt;unique/&gt;?</tt><br/>
+    <tt>&lt;primary/&gt;?</tt><br/>
+    <tt>&lt;field&gt;</tt><br/>
+    <ul><p>
+     <tt>&lt;name/&gt;</tt><br/>
+     <tt>&lt;sorting/&gt;</tt><br/>
+    </ul></p>
+    <tt>&lt;/field&gt;+</tt><br/>
+   </ul></p>
+   <tt>&lt;/index&gt;*</tt><br/>
+  </ul></p>
+  <tt>&lt;/declaration&gt;</tt><br/>
+
+  <tt>&lt;initialization&gt;</tt><br/>
+  <ul><p>
+   <tt>&lt;insert&gt;</tt>
+   <ul><p>
+    <tt>{field}+</tt>
+   </ul></p>
+   <tt>&lt;/insert&gt;*</tt><br/>
+
+   <tt>&lt;update&gt;</tt><br/>
+   <ul><p>
+    <tt>{field}+</tt><br/>
+    <tt>&lt;where&gt;</tt><br/>
+    <ul><p>
+     <tt>{expression}</tt><br/>
+    </ul></p>
+    <tt>&lt;/where&gt;?</tt><br/>
+   </ul></p>
+   <tt>&lt;/update&gt;*</tt><br/>
+
+   <tt>&lt;delete&gt;</tt><br/>
+   <ul><p>
+    <tt>&lt;where&gt;</tt><br/>
+    <ul><p>
+     <tt>{expression}?</tt><br/>
+    </ul></p>
+    <tt>&lt;/where&gt;</tt><br/>
+   </ul></p>
+   <tt>&lt;/delete&gt;*</tt><br/>
+  </ul></p>
+  <tt>&lt;/initialization&gt;</tt><br/>
+ </p></ul>
+ <tt>&lt;/table&gt;+</tt><br/>
+
+
+ <tt>&lt;sequence&gt;</tt><br/>
+ <ul><p>
+  <tt>&lt;name/&gt;</tt><br/>
+  <tt>&lt;was/&gt;?</tt><br/>
+  <tt>&lt;start/&gt;?</tt><br/>
+
+  <tt>&lt;on&gt;</tt><br/>
+  <ul><p>
+   <tt>&lt;table/&gt;</tt><br/>
+   <tt>&lt;field/&gt;+</tt><br/>
+  </ul></p>
+  <tt>&lt;/on&gt;</tt><br/>
+
+  <tt>&lt;description/&gt;?</tt><br/>
+  <tt>&lt;comments/&gt;?</tt><br/>
+ </ul></p>
+ <tt>&lt;/sequence&gt;?</tt><br/>
+
+</p></ul>
+<p><tt>&lt;/database&gt;</tt><br/></p>
+</ul>
+
+<h3><a name="4.2.0">Common Elements</a></h3>
+<ul>
+ <li>{field}</li>
+ <ul>
+ <p><tt>&lt;field&gt;</tt></p>
+  <ul>
+  <p><tt>&lt;name/&gt;<br/>
+  &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
+  </ul>
+ <p><tt>&lt;/field&gt;</tt></p>
+ </ul>
+
+ <li>{function}</li>
+ <ul>
+ <p><tt>&lt;function&gt;</tt></p>
+  <ul>
+  <p><tt>&lt;name/&gt;<br/>
+  (&nbsp;&lt;value/&gt; or &lt;column/&gt; or {function} or {expression}&nbsp;)+</tt></t>
+  </ul>
+ <p><tt>&lt;/function&gt;</tt></p>
+ </ul>
+
+ <li>{expression}</li>
+ <p>
+ <ul>Some Operators example:
+  <li>NOT, AND, OR, XOR</li>
+  <li>EQUAL, LIKE, LESS THAN, GREATER THAN</li>
+  <li>IS NULL, BETWEEN</li>
+  <li>etc.</li>
+ </ul>
+ </p>
+ <ul>
+ <p><tt>&lt;expression&gt;</tt></p>
+  <ul>
+  <p><tt>&lt;value/&gt; or &lt;column/&gt; or {function} or {expression}<br/>
+  &lt;operator&gt;OPERATOR&lt;/operator&gt;<br/>
+  &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
+  </ul>
+ <p><tt>&lt;/expression&gt;</tt></p>
+ </ul>
+ </ul>
+
+<h3><a name="4.3.0">Legend</a></h3>
+<ul>
+ <li>{tag} common element</li>
+ <li>&lt;tag/&gt; stands for &lt;tag&gt;STRING&lt;/tag&gt;</li>
+ <li>? Zero or one</li>
+ <li>* Zero or more</li>
+ <li>+ More than one</li>
+</ul>
 
 </body>
 </html>
