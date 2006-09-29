@@ -1359,7 +1359,7 @@ class MDB2_Schema extends PEAR
      * @param string name of the table
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
-     * @param array 
+     * @param array table names in the schema
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
@@ -1451,7 +1451,7 @@ class MDB2_Schema extends PEAR
      * @param string name of the sequence
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
-     * @param array 
+     * @param array sequence names in the schema
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
