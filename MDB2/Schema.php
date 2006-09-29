@@ -1200,14 +1200,13 @@ class MDB2_Schema extends PEAR
      * @param string name of the table
      * @param array multi dimensional array that contains the current definition
      * @param array multi dimensional array that contains the previous definition
-     * @param array 
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
     function compareTableFieldsDefinitions($table_name, $current_definition,
-        $previous_definition, &$defined_fields)
+        $previous_definition)
     {
-        $changes = array();
+        $changes = $defined_fields = array();
 
         if (is_array($current_definition)) {
             foreach ($current_definition as $field_name => $field) {
@@ -1225,7 +1224,7 @@ class MDB2_Schema extends PEAR
                     if (!empty($defined_fields[$was_field_name])) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                             'the field "'.$was_field_name.
-                            '" was specified as base of more than one field of table');
+                            '" was specified for more than one field of table');
                     }
                     $defined_fields[$was_field_name] = true;
                     $change = $this->db->compareDefinition($field, $previous_definition[$was_field_name]);
@@ -1265,15 +1264,13 @@ class MDB2_Schema extends PEAR
      *
      * @param string name of the table
      * @param array multi dimensional array that contains the current definition
-     * @param array multi dimensional array that contains the previous definition
-     * @param array 
      * @return array|MDB2_Error array of changes on success, or a error object
      * @access public
      */
     function compareTableIndexesDefinitions($table_name, $current_definition,
-        $previous_definition, &$defined_indexes)
+        $previous_definition)
     {
-        $changes = array();
+        $changes = $defined_indexes = array();
 
         if (is_array($current_definition)) {
             foreach ($current_definition as $index_name => $index) {
@@ -1291,7 +1288,7 @@ class MDB2_Schema extends PEAR
                     }
                     if (!empty($defined_indexes[$was_index_name])) {
                         return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
-                            'the index "'.$was_index_name.'" was specified as base of'.
+                            'the index "'.$was_index_name.'" was specified for'.
                             ' more than one index of table "'.$table_name.'"');
                     }
                     $defined_indexes[$was_index_name] = true;
@@ -1384,7 +1381,7 @@ class MDB2_Schema extends PEAR
                 if (!empty($defined_tables[$was_table_name])) {
                     return $this->raiseError(MDB2_SCHEMA_ERROR_INVALID, null, null,
                         'the table "'.$was_table_name.
-                        '" was specified as base of more than of table of the database');
+                        '" was specified for more than one table of the database');
                 }
                 $defined_tables[$was_table_name] = true;
                 if (!empty($current_definition['fields']) && is_array($current_definition['fields'])) {
@@ -1394,12 +1391,10 @@ class MDB2_Schema extends PEAR
                     ) {
                         $previous_fields = $previous_definition[$was_table_name]['fields'];
                     }
-                    $defined_fields = array();
                     $change = $this->compareTableFieldsDefinitions(
                         $table_name,
                         $current_definition['fields'],
-                        $previous_fields,
-                        $defined_fields
+                        $previous_fields
                     );
                     if (PEAR::isError($change)) {
                         return $change;
@@ -1416,12 +1411,10 @@ class MDB2_Schema extends PEAR
                     ) {
                         $previous_indexes = $previous_definition[$was_table_name]['indexes'];
                     }
-                    $defined_indexes = array();
                     $change = $this->compareTableIndexesDefinitions(
                         $table_name,
                         $current_definition['indexes'],
-                        $previous_indexes,
-                        $defined_indexes
+                        $previous_indexes
                     );
                     if (PEAR::isError($change)) {
                         return $change;
