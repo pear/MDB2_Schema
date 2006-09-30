@@ -284,46 +284,195 @@
 
 <!-- INITIALIZATION -->
 <h3><a name="3.2.2"><tt>initialization</tt></a></h3>
-<p><tt>initialization</tt> is another section that is part of the table definition.  This section is optional and may contain the definition of actions that should be executed when installing the database for the first time. <tt>update</tt> and <tt>delete</tt> was added in version 0.7.0.</p>
+<p><tt>initialization</tt> is another section that is part of the table definition.  This section is optional and may contain the definition of actions that should be executed when installing the database for the first time. <tt>update</tt> and <tt>delete</tt> was added in Schema version 0.7.0.</p>
 <p>The available actions, in the execution order, are: </p>
 
 <!-- INSERT -->
 <h4><tt>insert</tt></h4>
 <p><tt>insert</tt> is a table initialization command that specifies the values of the fields of rows that should be inserted in the respective table after the database is created for the first time.</p>
+<p>The <tt>insert</tt> initialization object do not have any property.</p>
 
 <h5>insert <tt>field</tt></h5>
 <p><tt>field</tt> is a section that is part of the table insert initialization.  It should be used once per each field which should be filled with data.</p>
 <p>It may have only the property <tt>name</tt>.</p>
-<p>One of the following objects should be used to specify the initial data:</p>
-
+<p>One, and only one, of the following objects should be used to specify the initial data:</p>
 <ul>
     <p><li><tt>value</tt></li></p>
     <p>Plain text data.</p>
-    <p><b>Default:</b> none</p>
 
     <p><li><tt>column</tt></li></p>
     <p>Take data from the specified column of the respective table.</p>
-    <p><b>Default:</b> none</p>
 
     <p><li><tt>function</tt></li></p>
     <p>Take the output of the specified <i>DBMS</i> function.</p>
-    <p><b>Default:</b> none</p>
 
     <p><li><tt>expression</tt></li></p>
     <p>Recursive structure capable of mixing all of the above objects.</p>
-    <p><b>Default:</b> none</p>
 </ul>
 
-<p>Missing fields are implicitly initialized by the <i>DBMS</i> with the respective default values.</p>
+<p>When doing an <tt>insert</tt> missing fields are implicitly initialized by the <i>DBMS</i> with the respective default values.</p>
+
+<h5>Example</h5>
+<ul>
+ <p><tt>&lt;insert&gt;</tt></p>
+  <ul>
+  <p><tt>&lt;field&gt;</tt></p>
+  <ul>
+   <p><tt>&lt;name&gt;foo&lt;/name&gt;</tt></p>
+   <p><tt>&lt;value&gt;1601&lt;/value&gt;</tt></p>
+  </ul>
+  <p><tt>&lt;/field&gt;</tt></p>
+  <p><tt>&lt;field&gt;</tt></p>
+  <ul>
+   <p><tt>&lt;name&gt;creation&lt;/name&gt;</tt></p>
+   <p><tt>&lt;function&gt;</tt></p>
+   <ul>
+    <p><tt>&lt;name&gt;NOW&lt;/name&gt;</tt></p>
+   </ul>
+   <p><tt>&lt;/function&gt;</tt></p>
+  </ul>
+  <p><tt>&lt;/field&gt;</tt></p>
+  </ul>
+ <p><tt>&lt;/insert&gt;</tt></p>
+</ul>
 
 <!-- UPDATE -->
 <h4><tt>update</tt></h4>
 <p><tt>update</tt> is a table initialization command that replaces the values of the fields of rows, matched by a condition, in the respective table after the database is created for the first time.</p>
+<p>The <tt>update</tt> initialization object do not have any property.</p>
+
+<h5>update <tt>field</tt></h5>
+<p>The update <tt>field</tt> object is defined exactly the same way as insert <tt>field</tt></p>
+
+<h5>update <tt>where</tt></h5>
+<p>The update <tt>where</tt> object, that is not required, must contain only one <tt>expression</tt> object.</p>
+<p>In that case the <tt>expression</tt> object usually links operants by logical operators like AND, OR and others.</p>
+
+<h5>Example</h5>
+<ul>
+ <p><tt>&lt;update&gt;</tt></p>
+  <ul>
+  <p><tt>&lt;field&gt;</tt></p>
+  <ul>
+   <p><tt>&lt;name&gt;id&lt;/name&gt;</tt><br/>
+   <tt>&lt;expression&gt;</tt></p>
+   <ul>
+    <p><tt>&lt;column&gt;id&lt;/column&gt;</tt><br/>
+    <tt>&lt;operator&gt;MINUS&lt;/operator&gt;</tt><br/>
+    <tt>&lt;value&gt;10&lt;/value&gt;</tt></p>
+   </ul>
+   <p><tt>&lt;/expression&gt;</tt></p>
+  </ul>
+  <p><tt>&lt;/field&gt;</tt></p>
+  </ul>
+ <p><tt>&lt;/update&gt;</tt></p>
+</ul>
 
 <!-- DELETE -->
 <h4><tt>delete</tt></h4>
 <p><tt>delete</tt> is a table initialization command that removes rows, matched by a condition, in the respective table after the database is created for the first time.</p>
-<p>The <tt>delete</tt> command definition only contains one more <tt>where</tt> section with <tt>expression</tt> that selects the rows to be deleted.</p>
+<p>The <tt>delete</tt> command definition only contains one more <tt>where</tt> section used to select the rows to be deleted.</p>
+<p>The <tt>delete</tt> initialization object do not have any property.</p>
+
+<h5>delete <tt>where</tt></h5>
+<p>The delete <tt>where</tt> object must contain only one <tt>expression</tt> object.</p>
+<p>In that case the <tt>expression</tt> object usually links operants by logical operators like AND, OR and others.</p>
+
+<h5>Example</h5>
+<ul>
+ <p><tt>&lt;delete&gt;</tt></p>
+  <ul>
+  <p><tt>&lt;where&gt;</tt></p>
+  <ul>
+   <p><tt>&lt;expression&gt;</tt></p>
+   <ul>
+    <p><tt>&lt;expression&gt;</tt></p>
+    <ul>
+     <ul>
+      <p><tt>&lt;column&gt;id&lt;/column&gt;</tt><br/>
+      <tt>&lt;operator&gt;GREATER THAN&lt;/operator&gt;</tt><br/>
+      <tt>&lt;value&gt;10&lt;/value&gt;</tt></p>
+     </ul>
+    </ul>
+    <p><tt>&lt;/expression&gt;</tt><br/>
+    <tt>&lt;operator&gt;AND&lt;/operator&gt;</tt><br/>
+    <tt>&lt;expression&gt;</tt></p>
+    <ul>
+     <ul>
+      <p><tt>&lt;column&gt;id&lt;/column&gt;</tt><br/>
+      <tt>&lt;operator&gt;NOT EQUAL&lt;/operator&gt;</tt><br/>
+      <tt>&lt;value&gt;15&lt;/value&gt;</tt></p>
+     </ul>
+    </ul>
+    <p><tt>&lt;/expression&gt;</tt></p>
+   </ul>
+   <p><tt>&lt;/expression&gt;</tt></p>
+  </ul>
+  <p><tt>&lt;/where&gt;</tt></p>
+  </ul>
+ <p><tt>&lt;/delete&gt;</tt></p>
+</ul>
+
+<!-- INITIALIZATION OBJECTS -->
+<h4>Complex initialization objects</h4>
+
+<h5><tt>function</tt></h5>
+<p>The <tt>function</tt> object will bind to a <i>DBMS</i> function, that can be called with any number of arguments.
+<p>It may have only the property <tt>name</tt>.</p>
+<p>Any of the following objects should be used, how many times it is necessary, to provide the arguments:</p>
+<ul>
+    <p><li><tt>value</tt></li></p>
+    <p>Plain text data.</p>
+
+    <p><li><tt>column</tt></li></p>
+    <p>Take data from the specified column of the respective table.</p>
+
+    <p><li><tt>function</tt></li></p>
+    <p>Take the output of the specified <i>DBMS</i> function.</p>
+
+    <p><li><tt>expression</tt></li></p>
+    <p>Recursive structure capable of mixing all of the above objects.</p>
+</ul>
+
+<h5><tt>expression</tt></h5>
+<p>The <tt>expression</tt> object is a recursive structure used to relate pairs of <tt>value</tt>, <tt>column</tt>, <tt>function</tt> and <tt>expression</tt> objects.
+<p>The <tt>expression</tt> object do not have any property and has the exact form <tt>operant</tt> <tt>operator</tt> <tt>operant</tt>.</p>
+
+<h6>expression <tt>operant</tt></h6>
+<p>The expression <tt>operant</tt> isn't a object itself but may be represented by one of the following objects:
+<ul>
+    <p><li><tt>value</tt></li></p>
+    <p>Plain text data.</p>
+
+    <p><li><tt>column</tt></li></p>
+    <p>Take data from the specified column of the respective table.</p>
+
+    <p><li><tt>function</tt></li></p>
+    <p>You can pass a new function as an argument.</p>
+
+    <p><li><tt>expression</tt></li></p>
+    <p>Expressions are recursive.</p>
+</ul>
+
+<h6>expression <tt>operator</tt></h6>
+<p>Operators aren't implemented in a portable way yet. Currently the following descriptive operators are always binded to the same operators:
+<table>
+ <tr>
+  <td>Operator</td><td>Binding</td>
+ </tr>
+ <tr><td>PLUS</td><td>+</td></tr>
+ <tr><td>MINUS</td><td>-</td></tr>
+ <tr><td>TIMES</td><td>*</td></tr>
+ <tr><td>DIVIDED</td><td>/</td></tr>
+ <tr><td>EQUAL</td><td>=</td></tr>
+ <tr><td>NOT EQUAL</td><td>!=</td></tr>
+ <tr><td>LESS THAN</td><td>&lt;</td></tr>
+ <tr><td>GREATER THAN</td><td>&gt;</td></tr>
+ <tr><td>LESS THAN OR EQUAL</td><td>&lt;=</td></tr>
+ <tr><td>GREATER THAN OR EQUAL</td><td>&gt;=</td></tr>
+</table>
+<p>Any other value given to <tt>operator</tt> will be parsed with no translation.</p>
+<p>Future versions of Schema may provide a common set of descriptive operators that are translated to the respective operator for your <i>DBMS</i></p>
 
 <!-- SEQUENCE -->
 <h3><a name="3.3.0"><tt>sequence</tt></a></h3>
@@ -511,19 +660,11 @@
  </ul>
 
  <li>{expression}</li>
- <p>
- <ul>Some Operators example:
-  <li>NOT, AND, OR, XOR</li>
-  <li>EQUAL, LIKE, LESS THAN, GREATER THAN</li>
-  <li>IS NULL, BETWEEN</li>
-  <li>etc.</li>
- </ul>
- </p>
  <ul>
  <p><tt>&lt;expression&gt;</tt></p>
   <ul>
   <p><tt>&lt;value/&gt; or &lt;column/&gt; or {function} or {expression}<br/>
-  &lt;operator&gt;OPERATOR&lt;/operator&gt;<br/>
+  &lt;operator/&gt;<br/>
   &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
   </ul>
  <p><tt>&lt;/expression&gt;</tt></p>
