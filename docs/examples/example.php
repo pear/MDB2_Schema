@@ -93,10 +93,16 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
     $options = array(
         'debug' => true,
         'log_line_break' => '<br>',
-#        'idxname_format' => '%s',
-#        'quote_identifier' => true,
-#        'force_defaults' => false,
+        'idxname_format' => '%s',
+        'quote_identifier' => true,
+        'force_defaults' => false,
     );
+
+    foreach ($options as $k => $v) {
+        if ((isset($_REQUEST[$k])) && (!empty($_REQUEST[$k])))
+            $options[$k] = $_REQUEST[$k];
+    }
+
     $schema =& MDB2_Schema::factory($dsn, $options);
     if (PEAR::isError($schema)) {
         $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
@@ -224,12 +230,37 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
         <td><input type="radio" name="action" id="create" value="create" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'create') { echo 'checked="checked"';} ?> /></td>
     </tr>
     <tr>
-        <td><label for="file">Dump SQL:</label></td>
+        <td><label for="dumpsql">Dump SQL:</label></td>
         <td><input type="checkbox" name="dumpsql" id="dumpsql" value="1" /></td>
     </tr>
     </table>
-    <p><input type="submit" name="submit" value="ok" /></p>
     </fieldset>
+    <fieldset>
+    <legend>Options</legend>
+    <table>
+    <tr>
+        <td><label for="log_line_break">Log line break:</label></td>
+        <td><input type="text" name="log_line_break" id="log_line_break" value="<br>" /></td>
+    </tr>
+    <tr>
+        <td><label for="idxname_format">Index Name Format:</label></td>
+        <td><input type="text" name="idxname_format" id="idxname_format" value="%s" /></td>
+    </tr>
+    <tr>
+        <td><label for="debug">Debug:</label></td>
+        <td><input type="checkbox" name="debug" id="debug" value="1" checked /></td>
+    </tr>
+    <tr>
+        <td><label for="quote_identifier">Quote Identifier:</label></td>
+        <td><input type="checkbox" name="quote_identifier" id="quote_identifier" value="1" checked /></td>
+    </tr>
+    <tr>
+        <td><label for="force_defaults">Force Defaults:</label></td>
+        <td><input type="checkbox" name="force_defaults" id="force_defaults" value="1" checked /></td>
+    </tr>
+    </table>
+    </fieldset>
+    <p><input type="submit" name="submit" value="ok" /></p>
 <?php } ?>
 </form>
 </body>
