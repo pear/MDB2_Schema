@@ -843,26 +843,28 @@ class MDB2_Schema extends PEAR
     function getOperator($op)
     {
         switch ($op) {
-        case 'NOT':
-            return ' NOT ';
-        case 'AND':
-            return ' AND ';
-        case 'OR':
-            return ' OR ';
         case 'PLUS':
             return ' + ';
         case 'MINUS':
             return ' - ';
+        case 'TIMES':
+            return ' * ';
+        case 'DIVIDED':
+            return ' / ';
         case 'EQUAL':
             return ' = ';
-        case 'LIKE':
-            return ' LIKE ';
         case 'NOT EQUAL':
             return ' != ';
         case 'LESS THAN':
             return ' < ';
         case 'GREATER THAN':
             return ' > ';
+        case 'LESS THAN OR EQUAL':
+            return ' <= ';
+        case 'GREATER THAN OR EQUAL':
+            return ' >= ';
+        default:
+            return ' '.$op.' ';
         }
     }
 
