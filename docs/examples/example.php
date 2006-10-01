@@ -84,30 +84,38 @@ $databases = array(
     'mysql'  => 'MySQL',
     'mysqli' => 'MySQLi',
     'pgsql'  => 'PostGreSQL',
-    'sqlite' => 'SQLite',
+    'sqlite' => 'SQLite'
+);
+
+$options = array(
+    'log_line_break' => '<br>',
+    'idxname_format' => '%s',
+    'debug' => true,
+    'quote_identifier' => true,
+    'force_defaults' => false,
+    'portability' => false
 );
 
 if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
     require_once 'MDB2/Schema.php';
-    $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
-    $options = array(
-        'debug' => true,
-        'log_line_break' => '<br>',
-        'idxname_format' => '%s',
-        'quote_identifier' => true,
-        'force_defaults' => false,
-    );
 
     foreach ($options as $k => $v) {
-        if ((isset($_REQUEST[$k])) && (!empty($_REQUEST[$k])))
+        if ((isset($_REQUEST[$k])) && (!empty($_REQUEST[$k]))) {
             $options[$k] = $_REQUEST[$k];
+        } elseif ($v) {
+            $options[$k] = false;
+        }
     }
+
+    $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
 
     $schema =& MDB2_Schema::factory($dsn, $options);
     if (PEAR::isError($schema)) {
         $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
     } elseif (array_key_exists('action', $_REQUEST)) {
         set_time_limit(0);
+
+        /* DUMP DATABASE */
         if ($_REQUEST['action'] == 'dump' && array_key_exists('dumptype', $_REQUEST)) {
             switch ($_REQUEST['dumptype']) {
             case 'structure':
@@ -125,9 +133,15 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
                 'output' => $_REQUEST['file']
             );
             $definition = $schema->getDefinitionFromDatabase();
-            $operation = $schema->dumpDatabase($definition, $dump_config, $dump_what);
-            call_user_func($var_dump, $operation);
-        } elseif ($_REQUEST['action'] == 'create') {
+            if (PEAR::isError($definition)) {
+                $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
+            } else {
+                $operation = $schema->dumpDatabase($definition, $dump_config, $dump_what);
+                call_user_func($var_dump, $operation);
+            }
+
+        /* UPDATE DATABASE */
+        } elseif ($_REQUEST['action'] == 'update') {
             $disable_query = false;
             if (isset($_REQUEST['dumpsql']) && $_REQUEST['dumpsql']) {
                 $debug_tmp = $schema->db->getOption('debug');
@@ -136,6 +150,19 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
                 $schema->db->setOption('debug_handler', 'printQueries');
                 $disable_query = true;
             }
+
+            $dump_config = array(
+                'output_mode' => 'file',
+                'output' => $_REQUEST['file'].'.old'
+            );
+            $definition = $schema->getDefinitionFromDatabase();
+            if (PEAR::isError($definition)) {
+                $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
+            } else {
+                $operation = $schema->dumpDatabase($definition, $dump_config, MDB2_SCHEMA_DUMP_ALL);
+                call_user_func($var_dump, $operation);
+            }
+
             $operation = $schema->updateDatabase($_REQUEST['file']
                 , $_REQUEST['file'].'.old', array(), $disable_query
             );
@@ -145,10 +172,26 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
             }
             if (PEAR::isError($operation)) {
                 echo $operation->getMessage() . ' ' . $operation->getUserInfo();
-                call_user_func($var_dump, $operation);
             } else {
                 call_user_func($var_dump, $operation);
             }
+
+        /* CREATE DATABASE */
+        } elseif ($_REQUEST['action'] == 'create') {
+            $disable_query = false;
+
+            $definition = $schema->parseDatabaseDefinition(
+                $_REQUEST['file'], false, array(), $schema->options['fail_on_invalid_names']
+            );
+            $operation = $schema->createDatabase($definition);
+
+            if (PEAR::isError($operation)) {
+                echo $operation->getMessage() . ' ' . $operation->getUserInfo();
+            } else {
+                call_user_func($var_dump, $operation);
+            }
+
+        /* NO ACTION */
         } else {
             $error = 'no action selected';
         }
@@ -183,21 +226,21 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
     <td><label for="type">Database Type:</label></td>
         <td>
         <select name="type" id="type">
-        <?php
-            foreach ($databases as $key => $name) {
-                echo '<option value="' . $key . '"';
-                if (isset($_REQUEST['type']) && $_REQUEST['type'] == $key) {
-                    echo ' selected="selected"';
-                }
-                echo '>' . $name . '</option>' . "\n";
-            }
-            ?>
+<?php
+    foreach ($databases as $key => $name) {
+        echo str_repeat(' ', 8).'<option value="' . $key . '"';
+        if (isset($_REQUEST['type']) && $_REQUEST['type'] == $key) {
+            echo ' selected="selected"';
+        }
+        echo '>' . $name . '</option>' . "\n";
+    }
+    ?>
         </select>
         </td>
     </tr>
     <tr>
         <td><label for="user">Username:</label></td>
-        <td><input type="text" name="user" id="user" value="<?php echo (isset($_REQUEST['user']) ? $_REQUEST['user'] : '') ?>" /></td>
+        <td><input type="text" name="user" id="user" value="<?php echo (isset($_REQUEST['user']) ? $_REQUEST['user'] : 'root') ?>" /></td>
     </tr>
     <tr>
         <td><label for="pass">Password:</label></td>
@@ -205,15 +248,15 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
     </tr>
     <tr>
         <td><label for="host">Host:</label></td>
-        <td><input type="text" name="host" id="host" value="<?php echo (isset($_REQUEST['host']) ? $_REQUEST['host'] : '') ?>" /></td>
+        <td><input type="text" name="host" id="host" value="<?php echo (isset($_REQUEST['host']) ? $_REQUEST['host'] : 'localhost') ?>" /></td>
     </tr>
     <tr>
         <td><label for="name">Databasename:</label></td>
-        <td><input type="text" name="name" id="name" value="<?php echo (isset($_REQUEST['name']) ? $_REQUEST['name'] : '') ?>" /></td>
+        <td><input type="text" name="name" id="name" value="<?php echo (isset($_REQUEST['name']) ? $_REQUEST['name'] : 'MDB2Example') ?>" /></td>
     </tr>
     <tr>
         <td><label for="file">Filename:</label></td>
-        <td><input type="text" name="file" id="file" value="<?php echo (isset($_REQUEST['file']) ? $_REQUEST['file'] : '') ?>" /></td>
+        <td><input type="text" name="file" id="file" value="<?php echo (isset($_REQUEST['file']) ? $_REQUEST['file'] : 'schema.xml') ?>" /></td>
     </tr>
     <tr>
         <td><label for="dump">Dump:</label></td>
@@ -230,11 +273,16 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
         <td><input type="radio" name="action" id="create" value="create" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'create') { echo 'checked="checked"';} ?> /></td>
     </tr>
     <tr>
-        <td><label for="dumpsql">Dump SQL:</label></td>
+        <td><label for="update">Update:</label></td>
+        <td><input type="radio" name="action" id="update" value="update" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'update') { echo 'checked="checked"';} ?> /></td>
+    </tr>
+    <tr>
+        <td><label for="dumpsql">Only Dump SQL:</label></td>
         <td><input type="checkbox" name="dumpsql" id="dumpsql" value="1" /></td>
     </tr>
     </table>
     </fieldset>
+
     <fieldset>
     <legend>Options</legend>
     <table>
@@ -248,20 +296,25 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
     </tr>
     <tr>
         <td><label for="debug">Debug:</label></td>
-        <td><input type="checkbox" name="debug" id="debug" value="1" checked /></td>
+        <td><input type="checkbox" name="debug" id="debug" value="1" <?php if ((isset($options['debug'])) && ($options['debug'])) {echo (' checked="checked"');} ?> /></td>
     </tr>
     <tr>
         <td><label for="quote_identifier">Quote Identifier:</label></td>
-        <td><input type="checkbox" name="quote_identifier" id="quote_identifier" value="1" checked /></td>
+        <td><input type="checkbox" name="quote_identifier" id="quote_identifier" value="1" <?php if ((isset($options['quote_identifier'])) && ($options['quote_identifier'])) {echo (' checked="checked"');} ?> /></td>
     </tr>
     <tr>
         <td><label for="force_defaults">Force Defaults:</label></td>
-        <td><input type="checkbox" name="force_defaults" id="force_defaults" value="1" checked /></td>
+        <td><input type="checkbox" name="force_defaults" id="force_defaults" value="1" <?php if ((isset($options['force_defaults'])) && ($options['force_defaults'])) {echo (' checked="checked"');} ?> /></td>
+    </tr>
+    <tr>
+        <td><label for="portability">Portability:</label></td>
+        <td><input type="checkbox" name="portability" id="portability" value="1" <?php if ((isset($options['portability'])) && ($options['portability'])) {echo (' checked="checked"');} ?> /></td>
     </tr>
     </table>
     </fieldset>
+
     <p><input type="submit" name="submit" value="ok" /></p>
 <?php } ?>
-</form>
+    </form>
 </body>
 </html>
