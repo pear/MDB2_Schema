@@ -1031,6 +1031,14 @@ class MDB2_Schema extends PEAR
         if ($create) {
             $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
             $this->db->expectError($errorcodes);
+
+            /**
+             *
+             * We need to clean up database name before any query to prevent
+             * database driver from using a inexistent database
+             *
+             */
+            $this->db->setDatabase("");
             $databases = $this->db->manager->listDatabases();
 
             // Lower / Upper case the db name if the portability deems so.
@@ -2057,7 +2065,7 @@ class MDB2_Schema extends PEAR
                 }
                 $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM ';
                 $query.= $this->db->quoteIdentifier($table_name, true);
-                $data = $this->db->queryAll($query, $fields, MDB2_FETCHMODE_ASSOC);
+                $data = $this->db->queryAll($query, array(), MDB2_FETCHMODE_ASSOC);
                 if (PEAR::isError($data)) {
                     return $data;
                 }
