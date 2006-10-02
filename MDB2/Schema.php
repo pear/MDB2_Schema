@@ -2065,7 +2065,7 @@ class MDB2_Schema extends PEAR
                 }
                 $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM ';
                 $query.= $this->db->quoteIdentifier($table_name, true);
-                $data = $this->db->queryAll($query, array(), MDB2_FETCHMODE_ASSOC);
+                $data = $this->db->queryAll($query, $fields, MDB2_FETCHMODE_ASSOC);
                 if (PEAR::isError($data)) {
                     return $data;
                 }
