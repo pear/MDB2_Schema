@@ -107,6 +107,12 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
         }
     }
 
+    if (isset($_REQUEST['disable_query']) && $_REQUEST['disable_query']) {
+        $disable_query = true;
+    } else {
+        $disable_query = false;
+    }
+    
     $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
 
     $schema =& MDB2_Schema::factory($dsn, $options);
@@ -132,6 +138,7 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
                 'output_mode' => 'file',
                 'output' => $_REQUEST['file']
             );
+
             $definition = $schema->getDefinitionFromDatabase();
             if (PEAR::isError($definition)) {
                 $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
@@ -142,13 +149,11 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
 
         /* UPDATE DATABASE */
         } elseif ($_REQUEST['action'] == 'update') {
-            $disable_query = false;
-            if (isset($_REQUEST['dumpsql']) && $_REQUEST['dumpsql']) {
+            if ($disable_query) {
                 $debug_tmp = $schema->db->getOption('debug');
                 $schema->db->setOption('debug', true);
                 $debug_handler_tmp = $schema->db->getOption('debug_handler');
                 $schema->db->setOption('debug_handler', 'printQueries');
-                $disable_query = true;
             }
 
             $dump_config = array(
@@ -160,13 +165,17 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
                 $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
             } else {
                 $operation = $schema->dumpDatabase($definition, $dump_config, MDB2_SCHEMA_DUMP_ALL);
-                call_user_func($var_dump, $operation);
+                if (PEAR::isError($operation)) {
+                    echo $operation->getMessage() . ' ' . $operation->getUserInfo();
+                } else {
+                    call_user_func($var_dump, $operation);
+                }
             }
 
             $operation = $schema->updateDatabase($_REQUEST['file']
                 , $_REQUEST['file'].'.old', array(), $disable_query
             );
-            if (isset($_REQUEST['dumpsql']) && $_REQUEST['dumpsql']) {
+            if ($disable_query) {
                 $schema->db->setOption('debug', $debug_tmp);
                 $schema->db->setOption('debug_handler', $debug_handler_tmp);
             }
@@ -178,13 +187,25 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
 
         /* CREATE DATABASE */
         } elseif ($_REQUEST['action'] == 'create') {
-            $disable_query = false;
+            if ($disable_query) {
+                $debug_tmp = $schema->db->getOption('debug');
+                $schema->db->setOption('debug', true);
+                $debug_handler_tmp = $schema->db->getOption('debug_handler');
+                $schema->db->setOption('debug_handler', 'printQueries');
+            }
 
             $definition = $schema->parseDatabaseDefinition(
                 $_REQUEST['file'], false, array(), $schema->options['fail_on_invalid_names']
             );
-            $operation = $schema->createDatabase($definition);
 
+            $schema->db->setOption('disable_query', $disable_query);
+            $operation = $schema->createDatabase($definition);
+            $schema->db->setOption('disable_query', false);
+
+            if ($disable_query) {
+                $schema->db->setOption('debug', $debug_tmp);
+                $schema->db->setOption('debug_handler', $debug_handler_tmp);
+            }
             if (PEAR::isError($operation)) {
                 echo $operation->getMessage() . ' ' . $operation->getUserInfo();
             } else {
@@ -277,8 +298,8 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
         <td><input type="radio" name="action" id="update" value="update" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'update') { echo 'checked="checked"';} ?> /></td>
     </tr>
     <tr>
-        <td><label for="dumpsql">Only Dump SQL:</label></td>
-        <td><input type="checkbox" name="dumpsql" id="dumpsql" value="1" /></td>
+        <td><label for="update">Initialize:</label></td>
+        <td><input type="radio" name="action" id="initialize" value="initialize" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'initialize') { echo 'checked="checked"';} ?> /></td>
     </tr>
     </table>
     </fieldset>
@@ -309,6 +330,10 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
     <tr>
         <td><label for="portability">Portability:</label></td>
         <td><input type="checkbox" name="portability" id="portability" value="1" <?php if ((isset($options['portability'])) && ($options['portability'])) {echo (' checked="checked"');} ?> /></td>
+    </tr>
+    <tr>
+        <td><label for="disable_query">Do not modify database:</label></td>
+        <td><input type="checkbox" name="disable_query" id="disable_query" value="1" <?php if ((isset($disable_query)) && ($disable_query)) {echo (' checked="checked"');} ?> /></td>
     </tr>
     </table>
     </fieldset>
