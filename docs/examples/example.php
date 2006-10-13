@@ -144,7 +144,11 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
                 $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
             } else {
                 $operation = $schema->dumpDatabase($definition, $dump_config, $dump_what);
-                call_user_func($var_dump, $operation);
+                if (PEAR::isError($operation)) {
+                    $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
+                } else {
+                    call_user_func($var_dump, $operation);
+                }
             }
 
         /* UPDATE DATABASE */
@@ -166,23 +170,24 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
             } else {
                 $operation = $schema->dumpDatabase($definition, $dump_config, MDB2_SCHEMA_DUMP_ALL);
                 if (PEAR::isError($operation)) {
-                    echo $operation->getMessage() . ' ' . $operation->getUserInfo();
+                    $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
                 } else {
                     call_user_func($var_dump, $operation);
+
+                    $operation = $schema->updateDatabase($_REQUEST['file']
+                        , $_REQUEST['file'].'.old', array(), $disable_query
+                    );
+                    if (PEAR::isError($operation)) {
+                        $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
+                    } else {
+                        call_user_func($var_dump, $operation);
+                    }
                 }
             }
 
-            $operation = $schema->updateDatabase($_REQUEST['file']
-                , $_REQUEST['file'].'.old', array(), $disable_query
-            );
             if ($disable_query) {
                 $schema->db->setOption('debug', $debug_tmp);
                 $schema->db->setOption('debug_handler', $debug_handler_tmp);
-            }
-            if (PEAR::isError($operation)) {
-                echo $operation->getMessage() . ' ' . $operation->getUserInfo();
-            } else {
-                call_user_func($var_dump, $operation);
             }
 
         /* CREATE DATABASE */
@@ -197,38 +202,90 @@ if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
             $definition = $schema->parseDatabaseDefinition(
                 $_REQUEST['file'], false, array(), $schema->options['fail_on_invalid_names']
             );
+            if (PEAR::isError($definition)) {
+                $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
+            } else {
+                $schema->db->setOption('disable_query', $disable_query);
+                $operation = $schema->createDatabase($definition);
+                $schema->db->setOption('disable_query', false);
 
-            $schema->db->setOption('disable_query', $disable_query);
-            $operation = $schema->createDatabase($definition);
-            $schema->db->setOption('disable_query', false);
+                if (PEAR::isError($operation)) {
+                    $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
+                } else {
+                    call_user_func($var_dump, $operation);
+                }
+            }
 
             if ($disable_query) {
                 $schema->db->setOption('debug', $debug_tmp);
                 $schema->db->setOption('debug_handler', $debug_handler_tmp);
             }
-            if (PEAR::isError($operation)) {
-                echo $operation->getMessage() . ' ' . $operation->getUserInfo();
-            } else {
-                call_user_func($var_dump, $operation);
+        }
+
+        /* INITIALIZE DATABASE
+         *
+         * To be used when we split initialization and
+         * definition into two diferent structures
+         *
+         */
+        /*} elseif ($_REQUEST['action'] == 'initialize') {
+            if ($disable_query) {
+                $debug_tmp = $schema->db->getOption('debug');
+                $schema->db->setOption('debug', true);
+                $debug_handler_tmp = $schema->db->getOption('debug_handler');
+                $schema->db->setOption('debug_handler', 'printQueries');
             }
 
-        /* NO ACTION */
-        } else {
-            $error = 'no action selected';
-        }
-        $warnings = $schema->getWarnings();
-        if (count($warnings) > 0) {
-            echo('Warnings<br>');
-            call_user_func($var_dump, $operation);
-        }
-        if ($schema->db->getOption('debug')) {
-            echo('Debug messages<br>');
-            echo($schema->db->getDebugOutput().'<br>');
-        }
-        echo('Database structure<br>');
-        call_user_func($var_dump, $operation);
-        $schema->disconnect();
+            $definition = $schema->parseDatabaseDefinition(
+                $_REQUEST['file'], false, array(), $schema->options['fail_on_invalid_names']
+            );
+            
+            $schema->db->setOption('disable_query', $disable_query);
+            if (isset($definition['tables'])
+                && is_array($definition['tables'])
+            ) {
+                foreach ($definition['tables'] as $table_name => $table) {
+                    $operation = $schema->initializeTable($table_name, $table);
+                    if (PEAR::isError($operation)) {
+                        echo $operation->getMessage() . ' ' . $operation->getUserInfo();
+                    } else {
+                        call_user_func($var_dump, $operation);
+                    }
+                }
+            }
+            $schema->db->setOption('disable_query', false);
+
+            if ($disable_query) {
+                $schema->db->setOption('debug', $debug_tmp);
+                $schema->db->setOption('debug_handler', $debug_handler_tmp);
+            }*/
+
+    /* NO ACTION */
+    } else {
+        $error = 'Script Error: no action selected';
     }
+
+    $warnings = $schema->getWarnings();
+    if (count($warnings) > 0) {
+        echo('<h1>Warnings</h1>');
+        call_user_func($var_dump, $operation);
+    }
+
+    if ($schema->db->getOption('debug')) {
+        echo('<h1>Debug messages</h1>');
+        echo($schema->db->getDebugOutput().'<br>');
+    }
+
+    if (isset($_REQUEST['show_structure'])
+        && $_REQUEST['show_structure']
+        && isset($definition)
+        && is_array($definition)
+    ) {
+        echo('<h1>Database structure</h1>');
+        call_user_func($var_dump, $definition);
+    }
+
+    $schema->disconnect();
 }
 
 if (!isset($_REQUEST['submit']) || isset($error)) {
@@ -297,10 +354,10 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
         <td><label for="update">Update:</label></td>
         <td><input type="radio" name="action" id="update" value="update" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'update') { echo 'checked="checked"';} ?> /></td>
     </tr>
-    <tr>
+<!--    <tr>
         <td><label for="update">Initialize:</label></td>
         <td><input type="radio" name="action" id="initialize" value="initialize" <?php if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'initialize') { echo 'checked="checked"';} ?> /></td>
-    </tr>
+    </tr>-->
     </table>
     </fieldset>
 
@@ -332,13 +389,17 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
         <td><input type="checkbox" name="portability" id="portability" value="1" <?php if ((isset($options['portability'])) && ($options['portability'])) {echo (' checked="checked"');} ?> /></td>
     </tr>
     <tr>
+        <td><label for="show_structure">Show database structure:</label></td>
+        <td><input type="checkbox" name="show_structure" id="show_structure" value="1" <?php if ((isset($show_structure)) && ($show_structure)) {echo (' checked="checked"');} ?> /></td>
+    </tr>
+    <tr>
         <td><label for="disable_query">Do not modify database:</label></td>
         <td><input type="checkbox" name="disable_query" id="disable_query" value="1" <?php if ((isset($disable_query)) && ($disable_query)) {echo (' checked="checked"');} ?> /></td>
     </tr>
     </table>
     </fieldset>
 
-    <p><input type="submit" name="submit" value="ok" /></p>
+    <p><input type="submit" name="submit" value="ok" /><input type="button" value="reset" onClick="JavaScript:window.location.href=''" /></p>
 <?php } ?>
     </form>
 </body>
