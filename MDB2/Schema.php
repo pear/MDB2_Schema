@@ -61,6 +61,7 @@ define('MDB2_SCHEMA_ERROR_PARSE',                                   -2);
 define('MDB2_SCHEMA_ERROR_VALIDATE',                                -3);
 define('MDB2_SCHEMA_ERROR_UNSUPPORTED',                             -4);    // Driver does not support this function
 define('MDB2_SCHEMA_ERROR_INVALID',                                 -5);    // Invalid attribute value
+define('MDB2_SCHEMA_ERROR_WRITER',                                  -6);
 
 /**
  * The database manager is a class that provides a set of database
@@ -2300,6 +2301,7 @@ class MDB2_Schema extends PEAR
                 MDB2_SCHEMA_ERROR_VALIDATE     => 'schema validation error',
                 MDB2_SCHEMA_ERROR_INVALID      => 'invalid',
                 MDB2_SCHEMA_ERROR_UNSUPPORTED  => 'not supported',
+                MDB2_SCHEMA_ERROR_WRITER       => 'schema writer error',
             );
         }
 
