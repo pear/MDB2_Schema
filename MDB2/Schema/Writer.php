@@ -236,15 +236,20 @@ class MDB2_Schema_Writer
         if (!empty($arguments['output'])) {
             if (!empty($arguments['output_mode']) && $arguments['output_mode'] == 'file') {
                 $fp = fopen($arguments['output'], 'w');
+                if ($fp === false) {
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_WRITER, null, null,
+                        'it was not possible to open output file');
+                }
+
                 $output = false;
             } elseif (is_callable($arguments['output'])) {
                 $output = $arguments['output'];
             } else {
-                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                return $this->raiseError(MDB2_SCHEMA_ERROR_WRITER, null, null,
                     'no valid output function specified');
             }
         } else {
-            return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+            return $this->raiseError(MDB2_SCHEMA_ERROR_WRITER, null, null,
                 'no output method specified');
         }
 
@@ -279,7 +284,7 @@ class MDB2_Schema_Writer
                     if (!empty($table['fields']) && is_array($table['fields'])) {
                         foreach ($table['fields'] as $field_name => $field) {
                             if (empty($field['type'])) {
-                                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE, null, null,
                                     'it was not specified the type of the field "'.
                                     $field_name.'" of the table "'.$table_name);
                             }
