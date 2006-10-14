@@ -1850,7 +1850,7 @@ class MDB2_Schema extends PEAR
                     'Could not end transaction ('.
                     $res->getMessage().' ('.$res->getUserinfo().'))');
             }
-        } elseif (PEAR::isError($result) && $created_objects) {
+        } elseif (PEAR::isError($result) && $alterations) {
             $result = $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
                 'the requested database alterations were only partially implemented ('.
                 $result->getMessage().' ('.$result->getUserinfo().'))');
