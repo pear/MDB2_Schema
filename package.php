@@ -37,6 +37,7 @@ open todo items:
 - create unit test to compare the expected array definition with what is parsed
 - bind a parsed empty value to NULL or ''. currently it is generating a query error when creating a table from file
 - HTML entities aren't being parsed correctly
+- add optional support for scale in decimal fields
 EOT;
 
 $description =<<<EOT
