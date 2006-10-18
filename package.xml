@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE package SYSTEM "http://pear.php.net/dtd/package-1.0">
-<package version="1.0" packagerversion="1.4.10">
+<package version="1.0" packagerversion="1.4.11">
  <name>MDB2_Schema</name>
  <summary>XML based database schema manager</summary>
  <description>PEAR::MDB2_Schema enables users to maintain RDBMS independant schema
@@ -20,34 +20,48 @@ PEAR::MDB and Metabase.
    <user>ifeghali</user>
    <name>Igor Feghali</name>
    <email>ifeghali@php.net</email>
-   <role>developer</role>
+   <role>lead</role>
   </maintainer>
   </maintainers>
  <release>
-  <version>0.6.0</version>
-  <date>2006-07-23</date>
+  <version>0.7.0</version>
+  <date>2006-10-18</date>
   <license>BSD License</license>
   <state>beta</state>
-  <notes>- added new XSL and CSS for xml schema file rendering (thx Bertrand)
-- automatically generate &lt;on&gt; tags in &lt;sequence&gt; tags if there is a table with
-  the same name and a single column primary key
-- do not dump default for LOB fields (Bug #7596)
-- added support for &quot;fixed&quot; (needs more testing)
-- phpdoc tweaks (thx Stoyan)
-- fixed primary key emulation and some other minor issues in createTableIndexes() (Bug #7758)
-- implemented skip_unreadable parameter in parseDatabaseDefinition() (Bug #7756)
-- switched most array_key_exists() calls to !empty() to improve readability and performance
-- fixed a few edge cases and potential warnings
-- add method name as scope for call debug() calls
-- use getValidTypes() from MDB2
-- hint if dropping a primary constraint
-- minor code tweak in how initialization data is set in the prepared statement
-- force ISO-8859-1 when parsing XML due to different defaults for PHP4 and PHP5
-- fixed handling for changes in indexes/constaints (Bug #7901)
-- made forcing of defaults optional via the &apos;force_defaults&apos; option (Request #8074)
-- fixed several issues in the DTD (Bug #7890)
-- set length and fixed for user_password in the test suite
-- use nested transactions instead of normal transactions
+  <notes>- various fixes to the DTD
+- added new XSD schema definition
+- xml schema documentation updated
+- added new example parse.php/schema.xml to demo the DML support
+- improved main functionalities demo, example.php
+- added support for DML statements (UPDATE, DELETE, improved INSERT)
+- moved validation code out of the parser into a separate class
+- created an error code for writer
+- returning an error when fopen() fails in the writer
+- fixed warning due to not checking with isset() in the parser
+- ensure all identifiers are passed to quoteIdentifier() (Bug #8429)
+
+open todo items:
+- make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- add ability to define variables inside the schema (like a version number)
+- allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). this would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- add support for recursive tag parsing. Currently only expression-function
+  is supported but not expression-expression or function-function, although
+  recursion is already supported by the initializeTable method
+- parser should be replaced by XML serializer ?
+- modularize writer code or remake it
+- add specific error codes for validate class
+- add support for ORDER clauses on UPDATEs (to resolve the duplicate key problem)
+- update description.schema.xml
+- document how to use the API
+- create unit test for comparedefinitions
+- create unit test for initializetable
+- create unit test to compare the expected array definition with what is parsed
+- bind a parsed empty value to NULL or &apos;&apos;. currently it is generating a query error when creating a table from file
+- HTML entities aren&apos;t being parsed correctly
+- add optional support for scale in decimal fields
   </notes>
   <deps>
    <dep type="php" rel="ge" version="4.2.0" optional="no"/>
@@ -63,11 +77,20 @@ PEAR::MDB and Metabase.
       <file role="doc" name="example.php">
        <replace type="package-info" from="@package_version@" to="version"/>
       </file>
+      <file role="doc" name="parse.php">
+       <replace type="package-info" from="@package_version@" to="version"/>
+      </file>
+      <file role="doc" name="schema.xml">
+       <replace type="package-info" from="@package_version@" to="version"/>
+      </file>
      </dir> <!-- /docs/examples -->
      <file role="doc" name="description.schema.xml">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
      <file role="doc" name="MDB.dtd">
+      <replace type="package-info" from="@package_version@" to="version"/>
+     </file>
+     <file role="doc" name="MDB.xsd">
       <replace type="package-info" from="@package_version@" to="version"/>
      </file>
      <file role="doc" name="MDB.xsl">
@@ -103,6 +126,9 @@ PEAR::MDB and Metabase.
        </file>
       </dir> <!-- /MDB2/Schema/Reserved -->
       <file role="php" name="Parser.php">
+       <replace type="package-info" from="@package_version@" to="version"/>
+      </file>
+      <file role="php" name="Validate.php">
        <replace type="package-info" from="@package_version@" to="version"/>
       </file>
       <file role="php" name="Writer.php">
@@ -155,6 +181,47 @@ PEAR::MDB and Metabase.
   </filelist>
  </release>
  <changelog>
+   <release>
+    <version>0.7.0</version>
+    <date>2006-10-18</date>
+    <license>BSD License</license>
+    <state>beta</state>
+    <notes>- various fixes to the DTD
+- added new XSD schema definition
+- xml schema documentation updated
+- added new example parse.php/schema.xml to demo the DML support
+- improved main functionalities demo, example.php
+- added support for DML statements (UPDATE, DELETE, improved INSERT)
+- moved validation code out of the parser into a separate class
+- created an error code for writer
+- returning an error when fopen() fails in the writer
+- fixed warning due to not checking with isset() in the parser
+- ensure all identifiers are passed to quoteIdentifier() (Bug #8429)
+
+open todo items:
+- make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- add ability to define variables inside the schema (like a version number)
+- allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). this would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- add support for recursive tag parsing. Currently only expression-function
+  is supported but not expression-expression or function-function, although
+  recursion is already supported by the initializeTable method
+- parser should be replaced by XML serializer ?
+- modularize writer code or remake it
+- add specific error codes for validate class
+- add support for ORDER clauses on UPDATEs (to resolve the duplicate key problem)
+- update description.schema.xml
+- document how to use the API
+- create unit test for comparedefinitions
+- create unit test for initializetable
+- create unit test to compare the expected array definition with what is parsed
+- bind a parsed empty value to NULL or &apos;&apos;. currently it is generating a query error when creating a table from file
+- HTML entities aren&apos;t being parsed correctly
+- add optional support for scale in decimal fields
+    </notes>
+   </release>
    <release>
     <version>0.6.0</version>
     <date>2006-07-23</date>
