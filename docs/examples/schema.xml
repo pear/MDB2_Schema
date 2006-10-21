@@ -37,7 +37,7 @@
 
    <field>
     <name>birthdate</name>
-    <type>timestamp</type>
+    <type>date</type>
     <notnull>false</notnull>
     <default></default>
    </field>
