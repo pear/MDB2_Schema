@@ -4,7 +4,8 @@
 </head>
 <body>
 <center><h1>MDB2 XML Schema documentation</h1></center>
-<p><b>Author:</b> Manuel Lemos (<a href="mailto:mlemos@acm.org">mlemos@acm.org</a>)</p>
+<p align="center">Manuel Lemos (<a href="mailto:&#109;&#108;e&#109;&#111;&#115;&#64;&#97;&#99;m&#46;&#111;&#114;&#103;">&#109;&#108;&#101;&#109;&#111;&#115;&#64;&#97;&#99;m&#46;o&#114;g</a>)</p>
+<p align="center">Igor Feghali (<a href="mailto:&#105;&#102;&#101;&#103;&#104;&#97;li&#64;p&#104;&#112;.&#110;&#101;&#116;">&#105;&#102;&#101;&#103;&#104;&#97;&#108;&#105;&#64;p&#104;&#112;&#46;&#110;&#101;&#116;</a>)</p>
 <p><b>Version control:</b> <tt>@(#) $Id$</tt></p>
 <h2>Contents</h2>
 
@@ -297,6 +298,9 @@
 <p>It may have only the property <tt>name</tt>.</p>
 <p>One, and only one, of the following objects should be used to specify the initial data:</p>
 <ul>
+    <p><li><tt>null</tt></li></p>
+    <p>NULL value. Anything inside <tt>null</tt> will be ignored.</p>
+
     <p><li><tt>value</tt></li></p>
     <p>Plain text data.</p>
 
@@ -644,7 +648,7 @@
  <p><tt>&lt;field&gt;</tt></p>
   <ul>
   <p><tt>&lt;name/&gt;<br/>
-  &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
+  &lt;null/&gt; or &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
   </ul>
  <p><tt>&lt;/field&gt;</tt></p>
  </ul>
