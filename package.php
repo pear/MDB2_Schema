@@ -16,7 +16,8 @@ $notes = <<<EOT
 - Improved demo script example.php, which now includes more actions and options
 - Writer is returning an error when fopen() fails
 - Writer has now its own error code
-- $seq became $sequence and $seq_name became $sequence_name in the Parser
+- Variable "seq" became "sequence" and "seq_name" became "sequence_name" in the
+  Parser
 - Moved validation code out of the Parser into a new separate class called
   Validation
 - Fixed index handling in the Parser
