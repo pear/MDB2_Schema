@@ -4,40 +4,64 @@ require_once 'PEAR/PackageFileManager.php';
 
 $version = '0.7.0';
 $notes = <<<EOT
-- various fixes to the DTD
-- added new XSD schema definition
-- xml schema documentation updated
-- added new example parse.php/schema.xml to demo the DML support
-- improved main functionalities demo, example.php
-- added support for DML statements (UPDATE, DELETE, improved INSERT)
-- moved validation code out of the parser into a separate class
-- created an error code for writer
-- returning an error when fopen() fails in the writer
-- fixed warning due to not checking with isset() in the parser
-- ensure all identifiers are passed to quoteIdentifier() (Bug #8429)
+- Improved INSERT support, added UPDATE and DELETE statements
+- XML syntax redesigned to cover DML addictions
+- Creation of an explicit NULL (<null></null>)
+- various fixes to the DTD, including DML addictions
+- XSD schema definition created
+- Tests also output php version
+- New example parse.php lets you check how a XML schema is stored
+- Updated schema.xml to demo the DML support
+- Documentation reformulated, also covering new XML syntax
+- Improved demo script example.php, which now includes more actions and options
+- Writer is returning an error when fopen() fails
+- Writer has now its own error code
+- $seq became $sequence and $seq_name became $sequence_name in the Parser
+- Moved validation code out of the Parser into a new separate class called
+  Validation
+- Fixed index handling in the Parser
+- Refactored error handling in the Parser
+- Removed variable "init_field", that wasn't being used, from the Parser
+- Parser simulates only one level of recurssion, which means no more than 
+  function-expression or vice-versa
+- Fixed warning due to not checking with isset() in the Parser
+- Fixed warning due to not checking with isset() in the Schema
+- Typo fix (related to Bug #9024)
+- Fixed createDatabase() that was trying to use a non-existant database that 
+  was about to be created
+- Simplified API for compareTableFieldsDefinitions() and 
+  compareTableIndexesDefinitions()
+- Rewritten some docblocks
+- Added fold markers where missing
+- Removed @static from non static methods
+- Fixed several PEAR CS issues
+- Added code for field/identifier quoting
+- Ensure all identifiers are passed to quoteIdentifier() (Bug #8429)
 
 open todo items:
-- make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
-- add ability to define variables inside the schema (like a version number)
-- allow simple if statements that mean that anything enclosed is only executed
+- Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- Add ability to define variables inside the schema (like a version number)
+- Allow simple if statements that mean that anything enclosed is only executed
   if it meets certain criterias based on that version number (or some other
-  variable). this would enable people to add DML statements that are only
+  variable). This would enable people to add DML statements that are only
   executed when updating from a specific version.
-- add support for recursive tag parsing. Currently only expression-function
+- Add support for recursive tag parsing. Currently only expression<->function
   is supported but not expression-expression or function-function, although
-  recursion is already supported by the initializeTable method
-- parser should be replaced by XML serializer ?
-- modularize writer code or remake it
-- add specific error codes for validate class
-- add support for ORDER clauses on UPDATEs (to resolve the duplicate key problem)
-- update description.schema.xml
-- document how to use the API
-- create unit test for comparedefinitions
-- create unit test for initializetable
-- create unit test to compare the expected array definition with what is parsed
-- bind a parsed empty value to NULL or ''. currently it is generating a query error when creating a table from file
+  recursion is already supported by the initializeTable() method
+- Parser should be replaced for XML serializer ?
+- Modularize Writer code or remake it
+- Add specific error codes for Validate class
+- Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
+  problem)
+- Update description.schema.xml
+- Document how to use the API
+- Create unit test for comparedefinitions()
+- Create unit test for initializetable()
+- Create unit test to compare the expected array definition with what is parsed
 - HTML entities aren't being parsed correctly
-- add optional support for scale in decimal fields
+- Add optional support for scale in decimal fields
+- Implement "WHERE column IS NULL"
+- Add ability to parse a "contents-only" XML dump
 EOT;
 
 $description =<<<EOT
