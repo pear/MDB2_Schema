@@ -1056,7 +1056,7 @@ class MDB2_Schema extends PEAR
                 if (!MDB2::isError($databases, $errorcodes)) {
                     return $databases;
                 }
-            } elseif (is_array($databases) && in_array($db_name, $databases)) {
+            } elseif (is_array($databases) && isset($db_name) && in_array($db_name, $databases)) {
                 if (!$overwrite) {
                     $this->db->debug('Database already exists: ' . $database_definition['name'], __FUNCTION__);
                     $create = false;
