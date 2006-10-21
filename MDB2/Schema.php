@@ -779,6 +779,9 @@ class MDB2_Schema extends PEAR
     {
         $str = '';
         switch ($element['type']) {
+            case 'null':
+                $str.= 'NULL';
+            break;
             case 'value':
                 $str.= $this->db->quote($element['data'], $type);
             break;

@@ -137,6 +137,15 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-field':
             $this->init['data']['field'][] = array('name' => '', 'group' => array());
             break;
+        case 'database-table-initialization-insert-field-value':
+        case 'database-table-initialization-update-field-value':
+            /* if value tag is empty cdataHandler is not called so we must force value element creation here */
+            $this->setData($this->init['data']['field'], 'group', array('type' => 'value', 'data' => ''));
+            break;
+        case 'database-table-initialization-insert-field-null':
+        case 'database-table-initialization-update-field-null':
+            $this->setData($this->init['data']['field'], 'group', array('type' => 'null'));
+            break;
         case 'database-table-initialization-insert-field-function':
         case 'database-table-initialization-update-field-function':
             $this->init_function = array();
