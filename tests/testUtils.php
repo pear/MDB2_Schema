@@ -59,7 +59,11 @@ function getBacktrace()
         $message.= $trace_item['function'];
 
         if (!empty($trace_item['args']) && is_array($trace_item['args'])) {
-            $message.= '('.@implode(', ', $trace_item['args']).')';
+            $args = array();
+            foreach ($trace_item['args'] as $arg) {
+              $args[] = is_scalar($arg) ? $arg : (is_object($arg) ? get_class($arg) : gettype($arg));
+            }
+            $message.= '('.implode(', ', $args).')';
         } else {
             $message.= '()';
         }
