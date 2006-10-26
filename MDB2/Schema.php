@@ -985,9 +985,9 @@ class MDB2_Schema extends PEAR
 
             if (!PEAR::isError($tables) && is_array($tables) && in_array($table, $tables)) {
                 if ($this->db->supports('summary_functions')) {
-                    $query = "SELECT MAX($field) FROM ".$this->quoteIdentifier($table, true);
+                    $query = "SELECT MAX($field) FROM ".$this->db->quoteIdentifier($table, true);
                 } else {
-                    $query = "SELECT $field FROM ".$this->quoteIdentifier($table, true)." ORDER BY $field DESC";
+                    $query = "SELECT $field FROM ".$this->db->quoteIdentifier($table, true)." ORDER BY $field DESC";
                 }
                 $start = $this->db->queryOne($query, 'integer');
                 if (PEAR::isError($start)) {
