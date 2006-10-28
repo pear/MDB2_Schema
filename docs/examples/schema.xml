@@ -226,7 +226,7 @@
 
    <field>
     <name>creation</name>
-    <type>timestamp</type>
+    <type>date</type>
     <notnull>false</notnull>
     <default></default>
    </field>
