@@ -374,6 +374,13 @@ class MDB2_Schema_Validate
                     'all autoincrement fields must be defined default "0"');
             }
         }
+
+        /* Default Type */
+        if (isset($field['default'])
+            && $field['type'] == 'integer'
+        ) {
+            $field['default'] = (int)$field['default'];
+        }
         return true;
     }
 
