@@ -550,6 +550,7 @@ class MDB2_Schema_Validate
 
         /* Overwrite */
         if (isset($database['overwrite'])
+            && $database['overwrite'] !== ''
             && !$this->isBoolean($database['overwrite'])
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
