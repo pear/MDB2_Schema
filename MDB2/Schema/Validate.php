@@ -593,25 +593,31 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateDataField($table_fields, $instruction_fields, $field_name, $value)
+    function validateDataField($table_fields, $instruction_fields, &$field)
     {
-        if (!$field_name) {
+        if (!$field['name']) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field-name has to be specified');
         }
-        if (is_array($instruction_fields) && isset($instruction_fields[$field_name])) {
+        if (is_array($instruction_fields) && isset($instruction_fields[$field['name']])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'field "'.$field_name.'" already filled');
+                'field "'.$field['name'].'" already initialized');
         }
-        if (is_array($table_fields) && !isset($table_fields[$field_name])) {
+        if (is_array($table_fields) && !isset($table_fields[$field['name']])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                '"'.$field_name.'" is not defined');
+                '"'.$field['name'].'" is not defined');
         }
-        if ($value !== ''
-            && PEAR::isError($result = $this->validateDataFieldValue($table_fields[$field_name], $value, $field_name))
+        if (!isset($field['group']['type'])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                '"'.$field['name'].'" has no initial value');
+        }
+        if (isset($field['group']['data'])
+            && $field['group']['type'] == 'value'
+            && $field['group']['data'] !== ''
+            && PEAR::isError($result = $this->validateDataFieldValue($table_fields[$field['name']], $field['group']['data'], $field['name']))
         ) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'value of "'.$field_name.'" is incorrect: '.$result->getUserinfo());
+                'value of "'.$field['name'].'" is incorrect: '.$result->getUserinfo());
         }
         return true;
     }

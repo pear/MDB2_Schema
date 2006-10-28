@@ -62,7 +62,7 @@ if (empty($GLOBALS['_MDB2_Schema_Reserved'])) {
  */
 class MDB2_Schema_Parser extends XML_Parser
 {
-    var $database_definition = array('tables' => array(), 'sequences' => array());
+    var $database_definition = array('name' => '', 'create' => '', 'overwrite' => '', 'tables' => array(), 'sequences' => array());
     var $elements = array();
     var $element = '';
     var $count = 0;
@@ -73,6 +73,7 @@ class MDB2_Schema_Parser extends XML_Parser
     var $init = array();
     var $init_function = array();
     var $init_expression = array();
+    var $init_field = array();
     var $index = array();
     var $index_name = '';
     var $var_mode = false;
@@ -135,16 +136,16 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Insert and Update */
         case 'database-table-initialization-insert-field':
         case 'database-table-initialization-update-field':
-            $this->init['data']['field'][] = array('name' => '', 'group' => array());
+            $this->init_field = array('name' => '', 'group' => array());
             break;
         case 'database-table-initialization-insert-field-value':
         case 'database-table-initialization-update-field-value':
             /* if value tag is empty cdataHandler is not called so we must force value element creation here */
-            $this->setData($this->init['data']['field'], 'group', array('type' => 'value', 'data' => ''));
+            $this->init_field['group'] = array('type' => 'value', 'data' => '');
             break;
         case 'database-table-initialization-insert-field-null':
         case 'database-table-initialization-update-field-null':
-            $this->setData($this->init['data']['field'], 'group', array('type' => 'null'));
+            $this->init_field['group'] = array('type' => 'null');
             break;
         case 'database-table-initialization-insert-field-function':
         case 'database-table-initialization-update-field-function':
@@ -222,21 +223,20 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Insert and Delete */
         case 'database-table-initialization-insert-field':
         case 'database-table-initialization-update-field':
-            /* field are now accepting functions and expressions
-            we can't determine the return type of them
-            $result = $this->val->validateInsertField($this);
+            $result = $this->val->validateDataField($this->table['fields'], $this->init['data']['field'], $this->init_field);
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
+            } else {
+                $this->init['data']['field'][] = $this->init_field;
             }
-            */
             break;
         case 'database-table-initialization-insert-field-function':
         case 'database-table-initialization-update-field-function':
-            $this->setData($this->init['data']['field'], 'group', array('type' => 'function', 'data' => $this->init_function));
+            $this->init_field['group'] = array('type' => 'function', 'data' => $this->init_function);
             break;
         case 'database-table-initialization-insert-field-expression':
         case 'database-table-initialization-update-field-expression':
-            $this->setData($this->init['data']['field'], 'group', array('type' => 'expression', 'data' => $this->init_expression));
+            $this->init_field['group'] = array('type' => 'expression', 'data' => $this->init_expression);
             break;
         
         /* Delete and Update */
@@ -379,11 +379,11 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Insert and Update */
         case 'database-table-initialization-insert-field-name':
         case 'database-table-initialization-update-field-name':
-            $this->setData($this->init['data']['field'], 'name', $data);
+            $this->init_field['name'] = $data;
             break;
         case 'database-table-initialization-insert-field-value':
         case 'database-table-initialization-update-field-value':
-            $this->setData($this->init['data']['field'], 'group', array('type' => 'value', 'data' => $data));
+            $this->init_field['group'] = array('type' => 'value', 'data' => $data);
             break;
         case 'database-table-initialization-insert-field-function-name':
         case 'database-table-initialization-update-field-function-name':
@@ -400,7 +400,7 @@ class MDB2_Schema_Parser extends XML_Parser
 
         /* Update */
         case 'database-table-initialization-update-field-column':
-            $this->setData($this->init['data']['field'], 'group', array('type' => 'column', 'data' => $data));
+            $this->init_field['group'] = array('type' => 'column', 'data' => $data);
             break;
 
         /* All */
@@ -659,11 +659,6 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         }
-    }
-
-    function setData(&$array, $key, $value)
-    {
-        $array[(count($array)-1)][$key] = $value;
     }
 }
 
