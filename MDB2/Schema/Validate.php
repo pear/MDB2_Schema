@@ -374,13 +374,6 @@ class MDB2_Schema_Validate
                     'all autoincrement fields must be defined default "0"');
             }
         }
-
-        /* Default Type */
-        if (isset($field['default'])
-            && $field['type'] == 'integer'
-        ) {
-            $field['default'] = (int)$field['default'];
-        }
         return true;
     }
 
@@ -662,7 +655,7 @@ class MDB2_Schema_Validate
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
-            $field_value = (int)$field_value;
+            //$field_value = (int)$field_value;
             if (!empty($field_def['unsigned']) && $field_def['unsigned'] && $field_value < 0) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" signed instead of unsigned');
@@ -704,7 +697,7 @@ class MDB2_Schema_Validate
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                     '"'.$field_value.'" is not of type "'.$field_def['type'].'"');
             }
-            $field_value = (double)$field_value;
+            //$field_value = (double)$field_value;
             break;
         }
         return true;

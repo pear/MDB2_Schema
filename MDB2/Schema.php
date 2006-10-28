@@ -434,7 +434,7 @@ class MDB2_Schema extends PEAR
                 }
 
                 if (!empty($definition[0]['autoincrement'])) {
-                    $definition[0]['default'] = 0;
+                    $definition[0]['default'] = '0';
                 }
                 $table_definition['fields'][$field_name] = $definition[0];
                 $field_choices = count($definition);
