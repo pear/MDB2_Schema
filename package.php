@@ -63,6 +63,8 @@ open todo items:
 - Add optional support for scale in decimal fields
 - Implement "WHERE column IS NULL"
 - Add ability to parse a "contents-only" XML dump
+- Improve validateDataFieldValue() to validate <column>
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
 EOT;
 
 $description =<<<EOT
