@@ -1,8 +1,13 @@
 <?php
 
-require_once 'PEAR/PackageFileManager.php';
+require_once 'PEAR/PackageFileManager2.php';
+PEAR::setErrorHandling(PEAR_ERROR_DIE);
 
-$version = '0.7.0';
+$version = '1.0.0';
+$version_api = '0.7.0';
+$version_release = '0.7.0';
+$state = 'beta';
+
 $notes = <<<EOT
 - Improved INSERT support, added UPDATE and DELETE statements
 - XML syntax redesigned to cover DML addictions
@@ -67,7 +72,7 @@ open todo items:
 - Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
 EOT;
 
-$description =<<<EOT
+$description = <<<EOT
 PEAR::MDB2_Schema enables users to maintain RDBMS independant schema
 files in XML that can be used to create, alter and drop database entities
 and insert data into a database. Reverse engineering database schemas from
@@ -75,54 +80,39 @@ existing databases is also supported. The format is compatible with both
 PEAR::MDB and Metabase.
 EOT;
 
-$package = new PEAR_PackageFileManager();
+$packagefile = './package.xml';
 
-$result = $package->setOptions(
-    array(
-        'package'           => 'MDB2_Schema',
-        'summary'           => 'XML based database schema manager',
-        'description'       => $description,
-        'version'           => $version,
-        'state'             => 'beta',
-        'license'           => 'BSD License',
-        'filelistgenerator' => 'cvs',
-        'ignore'            => array('package.php', 'package.xml'),
-        'notes'             => $notes,
-        'changelogoldtonew' => false,
-        'simpleoutput'      => true,
-        'baseinstalldir'    => '/',
-        'packagedirectory'  => './',
-        'dir_roles'         => array(
-            'docs' => 'doc',
-             'examples' => 'doc',
-             'tests' => 'test',
-        ),
-    )
+$options = array(
+    'filelistgenerator' => 'cvs',
+    'changelogoldtonew' => false,
+    'simpleoutput'      => true,
+    'baseinstalldir'    => '/',
+    'packagedirectory'  => './',
+    'packagefile'       => $packagefile,
+    'clearcontents'     => false,
+    'ignore'            => array('package.php', 'package.xml'),
+    'dir_roles'         => array(
+        'docs'      => 'doc',
+         'examples' => 'doc',
+         'tests'    => 'test',
+    ),
 );
 
-if (PEAR::isError($result)) {
-    echo $result->getMessage();
-    die();
-}
+$package = &PEAR_PackageFileManager2::importOptions($packagefile, $options);
+$package->setPackageType('php');
+$package->setExtends('MDB2');
+$package->addRelease();
+$package->generateContents();
+$package->setReleaseVersion($version_release);
+$package->setAPIVersion($version_api);
+$package->setReleaseStability($state);
+$package->setAPIStability($state);
+$package->setNotes($notes);
+$package->setDescription($description);
+$package->addGlobalReplacement('package-info', '@package_version@', 'version');
 
-$package->addMaintainer('lsmith', 'lead', 'Lukas Kahwe Smith', 'smith@pooteeweet.org');
-$package->addMaintainer('ifeghali', 'lead', 'Igor Feghali', 'ifeghali@php.net');
-
-$package->addDependency('php',     '4.2.0', 'ge',  'php', false);
-$package->addDependency('PEAR',    '1.0b1', 'ge',  'pkg', false);
-$package->addDependency('MDB2',    '2.2.0', 'ge',  'pkg', false);
-$package->addDependency('XML_Parser', true, 'has', 'pkg', false);
-$package->addDependency('XML_DTD',    true, 'has', 'pkg', true);
-
-$package->addglobalreplacement('package-info', '@package_version@', 'version');
-
-if (isset($_GET['make']) || (isset($_SERVER['argv'][1]) && $_SERVER['argv'][1] == 'make')) {
-    $result = $package->writePackageFile();
+if (isset($_GET['make']) || (isset($_SERVER['argv']) && @$_SERVER['argv'][1] == 'make')) {
+    $package->writePackageFile();
 } else {
-    $result = $package->debugPackageFile();
-}
-
-if (PEAR::isError($result)) {
-    echo $result->getMessage();
-    die();
+    $package->debugPackageFile();
 }
