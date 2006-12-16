@@ -279,8 +279,8 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-table-name':
-            if (isset($this->structure_tables[$this->table_name])) {
-                $this->table = $this->structure_tables[$this->table_name];
+            if (isset($this->structure['tables'][$this->table_name])) {
+                $this->table = $this->structure['tables'][$this->table_name];
             }
             break;
 
