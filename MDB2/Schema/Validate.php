@@ -113,7 +113,7 @@ class MDB2_Schema_Validate
         if (is_bool($value)) {
             return true;
         }
-        if ($value === 0 || $value === 1) {
+        if ($value === 0 || $value === 1 || $value === '') {
             $value = (bool)$value;
             return true;
         }
