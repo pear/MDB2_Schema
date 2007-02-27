@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.4.11" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.5.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>MDB2_Schema</name>
  <channel>pear.php.net</channel>
  <extends>MDB2</extends>
@@ -21,51 +21,34 @@ PEAR::MDB and Metabase.</description>
   <email>ifeghali@php.net</email>
   <active>yes</active>
  </lead>
- <date>2006-11-07</date>
- <time>19:40:54</time>
+ <date>2007-02-21</date>
+ <time>10:47:21</time>
  <version>
-  <release>0.7.0</release>
-  <api>0.7.0</api>
+  <release>0.7.1</release>
+  <api>0.7.1</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license>BSD License</license>
- <notes>- Improved INSERT support, added UPDATE and DELETE statements
-- XML syntax redesigned to cover DML addictions
-- Creation of an explicit NULL (&lt;null&gt;&lt;/null&gt;)
-- various fixes to the DTD, including DML addictions
-- XSD schema definition created
-- Tests also output php version
-- New example parse.php lets you check how a XML schema is stored
-- Updated schema.xml to demo the DML support
-- Documentation reformulated, also covering new XML syntax
-- Improved demo script example.php, which now includes more actions and options
-- Writer is returning an error when fopen() fails
-- Writer has now its own error code
-- Variable &quot;seq&quot; became &quot;sequence&quot; and &quot;seq_name&quot; became &quot;sequence_name&quot; in the
-  Parser
-- Moved validation code out of the Parser into a new separate class called
-  Validation
-- Fixed index handling in the Parser
-- Refactored error handling in the Parser
-- Removed variable &quot;init_field&quot;, that wasn&apos;t being used, from the Parser
-- Parser simulates only one level of recurssion, which means no more than 
-  function-expression or vice-versa
-- Fixed warning due to not checking with isset() in the Parser
-- Fixed warning due to not checking with isset() in the Schema
-- Typo fix (related to Bug #9024)
-- Fixed createDatabase() that was trying to use a non-existant database that 
-  was about to be created
-- Simplified API for compareTableFieldsDefinitions() and 
-  compareTableIndexesDefinitions()
-- Rewritten some docblocks
-- Added fold markers where missing
-- Removed @static from non static methods
-- Fixed several PEAR CS issues
-- Added code for field/identifier quoting
-- Ensure all identifiers are passed to quoteIdentifier() (Bug #8429)
+ <notes>- Package converted to version 2
+- compareDefinition() was trying to update non-changing id field (Bug #8820)
+- for a moment &lt;default&gt; should be always parsed as string, no matter the field
+  type. this behavior may change in the future.
+- undefined method MDB2_Schema::quoteIdentifier() (Bug #9172)
+- added support for explicit NULL (&lt;null&gt;&lt;/null&gt;)
+- &lt;value&gt;&lt;/value&gt; is now correctly being parsed as an empty string
+- fixed internal bug in Parser that was introduced in revision 1.46 (Bug #9435)
+- MDB2_Schema_Parser::setData() has been removed
+- MDB2_Schema_Validate::validateDataField() is validating field data again
+  (Bug #9181)
+- updated reserved keywords of ibase
+- updated XML Schema documentation
+- updated XML Schema example
+- added a new test case to isBoolean() (empty string)
+- released the very first approach of the new parser that makes usage of
+  XML_Serializer (alternative parser)
 
 open todo items:
 - Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
@@ -74,10 +57,6 @@ open todo items:
   if it meets certain criterias based on that version number (or some other
   variable). This would enable people to add DML statements that are only
   executed when updating from a specific version.
-- Add support for recursive tag parsing. Currently only expression&lt;-&gt;function
-  is supported but not expression-expression or function-function, although
-  recursion is already supported by the initializeTable() method
-- Parser should be replaced for XML serializer ?
 - Modularize Writer code or remake it
 - Add specific error codes for Validate class
 - Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
@@ -89,10 +68,11 @@ open todo items:
 - Create unit test to compare the expected array definition with what is parsed
 - HTML entities aren&apos;t being parsed correctly
 - Add optional support for scale in decimal fields
-- Implement &quot;WHERE column IS NULL&quot;
-- Add ability to parse a &quot;contents-only&quot; XML dump
 - Improve validateDataFieldValue() to validate &lt;column&gt;
-- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)</notes>
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
+- Views support
+- Foreign keys support
+- Fulltext index support</notes>
  <contents>
   <dir baseinstalldir="/" name="/">
    <dir name="docs">
@@ -151,6 +131,7 @@ open todo items:
      <file name="Parser.php" role="php">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
+     <file name="Parser2.php" role="php" />
      <file name="Validate.php" role="php">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
@@ -234,6 +215,59 @@ open todo items:
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.7.1</release>
+    <api>0.7.1</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2007-02-21</date>
+   <license>BSD License</license>
+   <notes>- Package converted to version 2
+- compareDefinition() was trying to update non-changing id field (Bug #8820)
+- for a moment &lt;default&gt; should be always parsed as string, no matter the field
+  type. this behavior may change in the future.
+- undefined method MDB2_Schema::quoteIdentifier() (Bug #9172)
+- added support for explicit NULL (&lt;null&gt;&lt;/null&gt;)
+- &lt;value&gt;&lt;/value&gt; is now correctly being parsed as an empty string
+- fixed internal bug in Parser that was introduced in revision 1.46 (Bug #9435)
+- MDB2_Schema_Parser::setData() has been removed
+- MDB2_Schema_Validate::validateDataField() is validating field data again
+  (Bug #9181)
+- updated reserved keywords of ibase
+- updated XML Schema documentation
+- updated XML Schema example
+- added a new test case to isBoolean() (empty string)
+- released the very first approach of the new parser that makes usage of
+  XML_Serializer (alternative parser)
+
+open todo items:
+- Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- Add ability to define variables inside the schema (like a version number)
+- Allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). This would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- Modularize Writer code or remake it
+- Add specific error codes for Validate class
+- Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
+  problem)
+- Update description.schema.xml
+- Document how to use the API
+- Create unit test for comparedefinitions()
+- Create unit test for initializetable()
+- Create unit test to compare the expected array definition with what is parsed
+- HTML entities aren&apos;t being parsed correctly
+- Add optional support for scale in decimal fields
+- Improve validateDataFieldValue() to validate &lt;column&gt;
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
+- Views support
+- Foreign keys support
+- Fulltext index support</notes>
+  </release>
   <release>
    <version>
     <release>0.7.0</release>
