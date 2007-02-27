@@ -2064,10 +2064,12 @@ class MDB2_Schema extends PEAR
         ) {
             foreach ($database_definition['tables'] as $table_name => $table) {
                 $fields = array();
+                $fieldsq = array();
                 foreach ($table['fields'] as $field_name => $field) {
                     $fields[$field_name] = $field['type'];
+                    $fieldsq[] = $this->db->quoteIdentifier($field_name, true);
                 }
-                $query = 'SELECT '.implode(', ', array_keys($fields)).' FROM ';
+                $query = 'SELECT '.implode(', ', $fieldsq).' FROM ';
                 $query.= $this->db->quoteIdentifier($table_name, true);
                 $data = $this->db->queryAll($query, $fields, MDB2_FETCHMODE_ASSOC);
                 if (PEAR::isError($data)) {
