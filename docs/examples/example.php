@@ -96,7 +96,7 @@ $options = array(
     'portability' => false
 );
 
-if (isset($_REQUEST['submit']) && $_REQUEST['file'] != '') {
+if (isset($_REQUEST['submit'])) {
     require_once 'MDB2/Schema.php';
 
     foreach ($options as $k => $v) {
