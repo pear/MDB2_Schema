@@ -531,12 +531,12 @@ class MDB2_Schema extends PEAR
     // {{{ createTableIndexes()
 
     /**
-     * Create indexes on a table
+     * A method to create indexes for an existing table
      *
-     * @param string  name of the table
-     * @param array   indexes to be created
-     * @param bool  if the table/index should be overwritten if it already exists
-     * @return bool|MDB2_Error MDB2_OK or error object
+     * @param string  Name of the table
+     * @param array   An array of indexes to be created
+     * @param boolean If the table/index should be overwritten if it already exists
+     * @return mixed  MDB2_Error if there is an error creating an index, MDB2_OK otherwise
      * @access public
      */
     function createTableIndexes($table_name, $indexes, $overwrite = false)
@@ -546,9 +546,11 @@ class MDB2_Schema extends PEAR
             return MDB2_OK;
         }
 
-        $supports_primary_key = $this->db->supports('primary_key');
+        $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
         foreach ($indexes as $index_name => $index) {
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
+
+            // Does the index already exist, and if so, should it be overwritten?
+            $create_index = true;
             $this->db->expectError($errorcodes);
             if (!empty($index['primary']) || !empty($index['unique'])) {
                 $current_indexes = $this->db->manager->listTableConstraints($table_name);
@@ -563,28 +565,27 @@ class MDB2_Schema extends PEAR
             } elseif (is_array($current_indexes) && in_array($index_name, $current_indexes)) {
                 if (!$overwrite) {
                     $this->db->debug('Index already exists: '.$index_name, __FUNCTION__);
-                    return MDB2_OK;
-                }
-                if (!empty($index['primary']) || !empty($index['unique'])) {
-                    $result = $this->db->manager->dropConstraint($table_name, $index_name);
+                    $create_index = false;
                 } else {
-                    $result = $this->db->manager->dropIndex($table_name, $index_name);
+                    $this->db->debug('Preparing to overwrite index: '.$index_name, __FUNCTION__);
+
+                    if (!empty($index['primary']) || !empty($index['unique'])) {
+                        $result = $this->db->manager->dropConstraint($table_name, $index_name);
+                    } else {
+                        $result = $this->db->manager->dropIndex($table_name, $index_name);
+                    }
+
+                    if (PEAR::isError($result)) {
+                        return $result;
+                    }
                 }
-                if (PEAR::isError($result)) {
-                    return $result;
-                }
-                $this->db->debug('Overwritting index: '.$index_name, __FUNCTION__);
             }
 
-            // check if primary is being used and if it's supported
-            if (!empty($index['primary']) && !$supports_primary_key) {
-                /**
-                 * Primary not supported so we fallback to UNIQUE
-                 * and making the field NOT NULL
-                 */
-                unset($index['primary']);
-                $index['unique'] = true;
+            // Check if primary is being used and if it's supported
+            if (!empty($index['primary']) && !$this->db->supports('primary_key')) {
 
+                // Primary not supported so we fallback to UNIQUE and making the field NOT NULL
+                $index['unique'] = true;
                 $changes = array();
 
                 foreach ($index['fields'] as $field => $empty) {
@@ -592,7 +593,6 @@ class MDB2_Schema extends PEAR
                     if (PEAR::isError($field_info)) {
                         return $field_info;
                     }
-
                     if (!$field_info[0]['notnull']) {
                         $changes['change'][$field] = $field_info[0];
                         $changes['change'][$field]['notnull'] = true;
@@ -603,13 +603,16 @@ class MDB2_Schema extends PEAR
                 }
             }
 
-            if (!empty($index['primary']) || !empty($index['unique'])) {
-                $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
-            } else {
-                $result = $this->db->manager->createIndex($table_name, $index_name, $index);
-            }
-            if (PEAR::isError($result)) {
-                return $result;
+            // Should the index be created?
+            if ($create_index) {
+                if (!empty($index['primary']) || !empty($index['unique'])) {
+                    $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
+                } else {
+                    $result = $this->db->manager->createIndex($table_name, $index_name, $index);
+                }
+                if (PEAR::isError($result)) {
+                    return $result;
+                }
             }
         }
         return MDB2_OK;
@@ -625,10 +628,12 @@ class MDB2_Schema extends PEAR
      * @param array  multi dimensional array that contains the
      *               structure and optional data of the table
      * @param bool   if the table/index should be overwritten if it already exists
+     * @param array  an array of options to be passed to the database specific driver
+     *               version of MDB2_Driver_Manager_Common::createTable().
      * @return bool|MDB2_Error MDB2_OK or error object
      * @access public
      */
-    function createTable($table_name, $table, $overwrite = false)
+    function createTable($table_name, $table, $overwrite = false, $options = array())
     {
         $create = true;
         $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
@@ -653,7 +658,7 @@ class MDB2_Schema extends PEAR
         }
 
         if ($create) {
-            $result = $this->db->manager->createTable($table_name, $table['fields']);
+            $result = $this->db->manager->createTable($table_name, $table['fields'], $options);
             if (PEAR::isError($result)) {
                 return $result;
             }
