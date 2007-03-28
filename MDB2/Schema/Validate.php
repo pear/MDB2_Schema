@@ -322,6 +322,15 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'length has to be an integer greater 0');
         }
+ 
+        // if it's a DECIMAL datatype, check if a 'scale' value is provided:
+        // <length>8,4</length> should be translated to DECIMAL(8,4)
+        if (is_float($this->valid_types[$field['type']])
+            && !empty($field['length'])
+            && strpos($field['length'], ',') !== false
+        ) {
+            list($field['length'], $field['scale']) = explode(',', $field['length']);
+        }
 
         /* Was */
         if (empty($field['was'])) {
@@ -587,8 +596,7 @@ class MDB2_Schema_Validate
      *                definition for current table's fields.
      * @param array  multi dimensional array that contains the
      *                parsed fields of the current DML instruction.
-     * @param string  name of the parsed insert-field
-     * @param string  value to fill the parsed insert-field
+     * @param string  array that contains the parsed instruction field
      *
      * @return bool|error object
      *
