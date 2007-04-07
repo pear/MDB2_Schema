@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.5.0" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.5.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>MDB2_Schema</name>
  <channel>pear.php.net</channel>
  <extends>MDB2</extends>
@@ -21,34 +21,25 @@ PEAR::MDB and Metabase.</description>
   <email>ifeghali@php.net</email>
   <active>yes</active>
  </lead>
- <date>2007-02-21</date>
- <time>10:47:21</time>
+ <date>2007-04-07</date>
+ <time>10:51:17</time>
  <version>
-  <release>0.7.1</release>
-  <api>0.7.1</api>
+  <release>0.7.2</release>
+  <api>0.7.2</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
  <license>BSD License</license>
- <notes>- Package converted to version 2
-- compareDefinition() was trying to update non-changing id field (Bug #8820)
-- for a moment &lt;default&gt; should be always parsed as string, no matter the field
-  type. this behavior may change in the future.
-- undefined method MDB2_Schema::quoteIdentifier() (Bug #9172)
-- added support for explicit NULL (&lt;null&gt;&lt;/null&gt;)
-- &lt;value&gt;&lt;/value&gt; is now correctly being parsed as an empty string
-- fixed internal bug in Parser that was introduced in revision 1.46 (Bug #9435)
-- MDB2_Schema_Parser::setData() has been removed
-- MDB2_Schema_Validate::validateDataField() is validating field data again
-  (Bug #9181)
-- updated reserved keywords of ibase
-- updated XML Schema documentation
-- updated XML Schema example
-- added a new test case to isBoolean() (empty string)
-- released the very first approach of the new parser that makes usage of
-  XML_Serializer (alternative parser)
+ <notes>- Allow options to be passed in when creating tables (Bug #10278)
+- Existence of a single index results in no further index creation (Bug #10296)
+- MDB2_Schema::createTableIndexes() ignores indexes (Bug #10285)
+- column identifiers quoting problem (Bug #10195)
+- Handle &apos;scale&apos; value in DECIMAL field definition (Bug #10475)
+- fixed phpdoc comment for validateDataField()
+- all primary keys are given an index name of &quot;primary&quot; (Bug #10457)
+- example.php should echo xml when no filename is given (Bug #10226)
 
 open todo items:
 - Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
@@ -67,7 +58,6 @@ open todo items:
 - Create unit test for initializetable()
 - Create unit test to compare the expected array definition with what is parsed
 - HTML entities aren&apos;t being parsed correctly
-- Add optional support for scale in decimal fields
 - Improve validateDataFieldValue() to validate &lt;column&gt;
 - Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
 - Views support
@@ -215,6 +205,49 @@ open todo items:
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.7.2</release>
+    <api>0.7.2</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2007-04-07</date>
+   <license>BSD License</license>
+   <notes>- Allow options to be passed in when creating tables (Bug #10278)
+- Existence of a single index results in no further index creation (Bug #10296)
+- MDB2_Schema::createTableIndexes() ignores indexes (Bug #10285)
+- column identifiers quoting problem (Bug #10195)
+- Handle &apos;scale&apos; value in DECIMAL field definition (Bug #10475)
+- fixed phpdoc comment for validateDataField()
+- all primary keys are given an index name of &quot;primary&quot; (Bug #10457)
+- example.php should echo xml when no filename is given (Bug #10226)
+
+open todo items:
+- Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- Add ability to define variables inside the schema (like a version number)
+- Allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). This would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- Modularize Writer code or remake it
+- Add specific error codes for Validate class
+- Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
+  problem)
+- Update description.schema.xml
+- Document how to use the API
+- Create unit test for comparedefinitions()
+- Create unit test for initializetable()
+- Create unit test to compare the expected array definition with what is parsed
+- HTML entities aren&apos;t being parsed correctly
+- Improve validateDataFieldValue() to validate &lt;column&gt;
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
+- Views support
+- Foreign keys support
+- Fulltext index support</notes>
+  </release>
   <release>
    <version>
     <release>0.7.1</release>

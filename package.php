@@ -4,28 +4,19 @@ require_once 'PEAR/PackageFileManager2.php';
 PEAR::setErrorHandling(PEAR_ERROR_DIE);
 
 $version = '1.0.0';
-$version_api = '0.7.1';
-$version_release = '0.7.1';
+$version_api = '0.7.2';
+$version_release = '0.7.2';
 $state = 'beta';
 
 $notes = <<<EOT
-- Package converted to version 2
-- compareDefinition() was trying to update non-changing id field (Bug #8820)
-- for a moment <default> should be always parsed as string, no matter the field
-  type. this behavior may change in the future.
-- undefined method MDB2_Schema::quoteIdentifier() (Bug #9172)
-- added support for explicit NULL (<null></null>)
-- <value></value> is now correctly being parsed as an empty string
-- fixed internal bug in Parser that was introduced in revision 1.46 (Bug #9435)
-- MDB2_Schema_Parser::setData() has been removed
-- MDB2_Schema_Validate::validateDataField() is validating field data again
-  (Bug #9181)
-- updated reserved keywords of ibase
-- updated XML Schema documentation
-- updated XML Schema example
-- added a new test case to isBoolean() (empty string)
-- released the very first approach of the new parser that makes usage of
-  XML_Serializer (alternative parser)
+- Allow options to be passed in when creating tables (Bug #10278)
+- Existence of a single index results in no further index creation (Bug #10296)
+- MDB2_Schema::createTableIndexes() ignores indexes (Bug #10285)
+- column identifiers quoting problem (Bug #10195)
+- Handle 'scale' value in DECIMAL field definition (Bug #10475)
+- fixed phpdoc comment for validateDataField()
+- all primary keys are given an index name of "primary" (Bug #10457)
+- example.php should echo xml when no filename is given (Bug #10226)
 
 open todo items:
 - Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
@@ -44,7 +35,6 @@ open todo items:
 - Create unit test for initializetable()
 - Create unit test to compare the expected array definition with what is parsed
 - HTML entities aren't being parsed correctly
-- Add optional support for scale in decimal fields
 - Improve validateDataFieldValue() to validate <column>
 - Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
 - Views support
