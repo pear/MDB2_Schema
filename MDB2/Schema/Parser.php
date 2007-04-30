@@ -397,8 +397,7 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-initialization-update-field-function-column':
             $this->init_function['arguments'][] = array('type' => 'column', 'data' => $data);
             break;
-
-        /* Update */
+        case 'database-table-initialization-insert-field-column':
         case 'database-table-initialization-update-field-column':
             $this->init_field['group'] = array('type' => 'column', 'data' => $data);
             break;
