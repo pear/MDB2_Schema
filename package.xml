@@ -21,6 +21,11 @@ PEAR::MDB and Metabase.</description>
   <email>ifeghali@php.net</email>
   <active>yes</active>
  </lead>
+ <lead>
+  <name>David Coallier</name>
+  <user>davidc</name>
+  <email>davidc@php.net</email>
+ </lead>
  <date>2007-04-07</date>
  <time>10:51:17</time>
  <version>
