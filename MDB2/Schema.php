@@ -1694,14 +1694,15 @@ class MDB2_Schema extends PEAR
      */
     function alterDatabaseTables($current_definition, $previous_definition, $changes)
     {
+        /* FIXME: tables marked to be added are initialized by createTable(), others don't */
         $alterations = 0;
         if (empty($changes)) {
             return $alterations;
         }
 
-        if (!empty($changes['remove']) && is_array($changes['remove'])) {
-            foreach ($changes['remove'] as $table_name => $table) {
-                $result = $this->db->manager->dropTable($table_name);
+        if (!empty($changes['add']) && is_array($changes['add'])) {
+            foreach ($changes['add'] as $table_name => $table) {
+                $result = $this->createTable($table_name, $current_definition[$table_name]);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -1709,9 +1710,9 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (!empty($changes['add']) && is_array($changes['add'])) {
-            foreach ($changes['add'] as $table_name => $table) {
-                $result = $this->createTable($table_name, $current_definition[$table_name]);
+        if (!empty($changes['remove']) && is_array($changes['remove'])) {
+            foreach ($changes['remove'] as $table_name => $table) {
+                $result = $this->db->manager->dropTable($table_name);
                 if (PEAR::isError($result)) {
                     return $result;
                 }
@@ -2225,7 +2226,7 @@ class MDB2_Schema extends PEAR
      * @access public
      */
     function updateDatabase($current_schema, $previous_schema = false
-        , $variables = array(), $disable_query = false)
+        , $variables = array(), $disable_query = false, $overwrite_old_schema_file = false)
     {
         $current_definition = $this->parseDatabaseDefinition(
             $current_schema, false, $variables, $this->options['fail_on_invalid_names']
@@ -2289,7 +2290,8 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (!$disable_query
+        if ($overwrite_old_schema_file
+            && !$disable_query
             && is_string($previous_schema) && is_string($current_schema)
             && !copy($current_schema, $previous_schema)
         ) {
