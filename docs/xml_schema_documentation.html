@@ -340,6 +340,17 @@
  <p><tt>&lt;/insert&gt;</tt></p>
 </ul>
 
+<h5>insert <tt>select</tt></h5>
+<p><tt>select</tt> was added in Schema version 0.7.3 to acomplish the INSERT...SELECT syntax. It is optional and, when used, should be the only child of <tt>insert</tt>.</p>
+<p>It may have only the property <tt>table</tt> that designates the table name in the <tt>select</tt> statement.</p>
+
+<h5>insert select <tt>field</tt></h5>
+<p>The insert select <tt>field</tt> object is defined exactly the same way as insert <tt>field</tt>. Here <tt>name</tt> goes to the fields portion of the <tt>insert</tt> statement and the next property goes to the fields portion of the <tt>select</tt> statement</p>
+
+<h5>insert select <tt>where</tt></h5>
+<p>The insert select <tt>where</tt> object, that is not required, must contain only one <tt>expression</tt> object.</p>
+<p>In that case the <tt>expression</tt> object usually links operants by logical operators like AND, OR and others.</p>
+
 <!-- UPDATE -->
 <h4><tt>update</tt></h4>
 <p><tt>update</tt> is a table initialization command that replaces the values of the fields of rows, matched by a condition, in the respective table after the database is created for the first time.</p>
@@ -589,7 +600,7 @@
   <ul><p>
    <tt>&lt;insert&gt;</tt>
    <ul><p>
-    <tt>{field}+</tt>
+    <tt>{field}+ or {select}</tt>
    </ul></p>
    <tt>&lt;/insert&gt;*</tt><br/>
 
@@ -672,6 +683,21 @@
   &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
   </ul>
  <p><tt>&lt;/expression&gt;</tt></p>
+ </ul>
+
+ <li>{select}</li>
+ <ul>
+ <p><tt>&lt;select&gt;</tt></p>
+  <ul>
+  <p><tt>&lt;table/&gt</tt><br/>
+  <tt>{field}+</tt><br/>
+  <tt>&lt;where&gt;</tt><br/>
+   <ul><p>
+    <tt>{expression}</tt><br/>
+   </ul></p>
+  <tt>&lt;/where&gt;?</tt><br/></p>
+  </ul>
+ <p><tt>&lt;/select&gt;</tt></p>
  </ul>
  </ul>
 

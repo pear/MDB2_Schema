@@ -696,6 +696,7 @@ class MDB2_Schema extends PEAR
     function initializeTable($table_name, $table)
     {
         $query_insert = 'INSERT INTO %s (%s) VALUES (%s)';
+        $query_insertselect = 'INSERT INTO %s (%s) (SELECT %s FROM %s %s)';
         $query_update = 'UPDATE %s SET %s %s';
         $query_delete = 'DELETE FROM %s %s';
 
@@ -707,17 +708,29 @@ class MDB2_Schema extends PEAR
             $query = '';
             switch ($instruction['type']) {
             case 'insert':
-                $data = $this->getInstructionFields($instruction, $table['fields']);
-                if (!empty($data)) {
-                    $fields = implode(', ', array_keys($data));
-                    $values = implode(', ', array_values($data));
+                if (!isset($instruction['data']['select'])) {
+                    $data = $this->getInstructionFields($instruction['data'], $table['fields']);
+                    if (!empty($data)) {
+                        $fields = implode(', ', array_keys($data));
+                        $values = implode(', ', array_values($data));
 
-                    $query = sprintf($query_insert, $table_name, $fields, $values);
+                        $query = sprintf($query_insert, $table_name, $fields, $values);
+                    }
+                } else {
+                    $data = $this->getInstructionFields($instruction['data']['select'], $table['fields']);
+                    $where = $this->getInstructionWhere($instruction['data']['select'], $table['fields']);
+                    $select_table_name = $this->db->quoteIdentifier($instruction['data']['select']['table'], true);
+                    if (!empty($data)) {
+                        $fields = implode(', ', array_keys($data));
+                        $values = implode(', ', array_values($data));
+
+                        $query = sprintf($query_insertselect, $table_name, $fields, $values, $select_table_name, $where);
+                    }
                 }
                 break;
             case 'update':
-                $data = $this->getInstructionFields($instruction, $table['fields']);
-                $where = $this->getInstructionWhere($instruction, $table['fields']);
+                $data = $this->getInstructionFields($instruction['data'], $table['fields']);
+                $where = $this->getInstructionWhere($instruction['data'], $table['fields']);
                 if (!empty($data)) {
                     array_walk($data, array($this, 'buildFieldValue'));
                     $fields_values = implode(', ', $data);
@@ -726,7 +739,7 @@ class MDB2_Schema extends PEAR
                 }
                 break;
             case 'delete':
-                $where = $this->getInstructionWhere($instruction, $table['fields']);
+                $where = $this->getInstructionWhere($instruction['data'], $table['fields']);
                 $query = sprintf($query_delete, $table_name, $where);
                 break;
             }
@@ -898,8 +911,8 @@ class MDB2_Schema extends PEAR
     function getInstructionFields($instruction, $fields_definition = array())
     {
         $fields = array();
-        if (!empty($instruction['data']['field']) && is_array($instruction['data']['field'])) {
-            foreach ($instruction['data']['field'] as $field) {
+        if (!empty($instruction['field']) && is_array($instruction['field'])) {
+            foreach ($instruction['field'] as $field) {
                 $fields[$field['name']] = $this->getExpression($field['group'], $fields_definition);
             }
         }
@@ -927,8 +940,8 @@ class MDB2_Schema extends PEAR
     function getInstructionWhere($instruction, $fields_definition = array())
     {
         $where = '';
-        if (!empty($instruction['data']['where'])) {
-            $where = 'WHERE '.$this->getExpression($instruction['data']['where'], $fields_definition);
+        if (!empty($instruction['where'])) {
+            $where = 'WHERE '.$this->getExpression($instruction['where'], $fields_definition);
         }
         return $where;
     }
