@@ -14,14 +14,15 @@
 <!ELEMENT sequence (name | was? | start? | on+ | description? | comments?)*>
 <!ELEMENT on (table, field)+>
 
-<!ELEMENT declaration (field+, index*)>
+<!ELEMENT declaration (field+, index*, foreign*)>
 <!ELEMENT index (name | was? | unique? | primary? | field+)*>
-
+<!ELEMENT foreign (name | field+ | references? | match? | ondelete? | onupdate?)*>
+    
+<!ELEMENT references (table | field+)*>
 <!ELEMENT where (expression)>
 <!ELEMENT expression (expression?, ((value | column | function)?, operator, (value | column | function | expression))?)>
-<!ELEMENT field (#PCDATA | name | was | type | default | notnull | autoincrement | unsigned | description | comments | length | sorting | column | value | function | expression)*>
-<!ELEMENT function (name, parameter*)>
-<!ELEMENT parameter (value | column | function | expression)>
+<!ELEMENT field (#PCDATA | name | was | type | default | notnull | autoincrement | unsigned | description | comments | length | sorting | column | value | function | expression | null)*>
+<!ELEMENT function (name | value* | column* | function* | expression*)*>
 
 <!-- BASIC ELEMENTS -->
 
@@ -44,4 +45,8 @@
 <!ELEMENT column (#PCDATA | variable)*>
 <!ELEMENT operator (#PCDATA | variable)*>
 <!ELEMENT was (#PCDATA | variable)*>
+<!ELEMENT null (#PCDATA | variable)*>
+<!ELEMENT match (#PCDATA | variable)*>
+<!ELEMENT ondelete (#PCDATA | variable)*>
+<!ELEMENT onupdate (#PCDATA | variable)*>
 <!ELEMENT variable (#PCDATA)>
