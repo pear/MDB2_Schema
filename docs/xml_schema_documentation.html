@@ -283,6 +283,69 @@
 </p>
 </ul>
 
+<h4><tt>foreign</tt></h4>
+<p><tt>foreign</tt> was added in Schema version 0.7.3. [description here]</p>
+<p>The <tt>foreign</tt> schema object may have the following properties:</p>
+
+<ul>
+    <p><li><tt>name</tt> (required)</li></p>
+    <p>Name of the foreign key.</p>
+    <p><b>Default:</b> none</p>
+
+    <p><li><tt>match</tt></li></p>
+    <p>Allow the litereal string values: <i>full</i>, <i>partial</i> or <i>simple</i>.</p>
+    <p><b>Default:</b> none</p>
+
+    <p><li><tt>ondelete</tt></li></p>
+    <p>Allow the litereal string values: <i>cascade</i>, <i>setnull</i>, <i>setdefault</i>, <i>restrict</i> or <i>noaction</i>.</p>
+    <p><b>Default:</b> none</p>
+
+    <p><li><tt>onupdate</tt></li></p>
+    <p>Allow the litereal string values: <i>cascade</i>, <i>setnull</i>, <i>setdefault</i>, <i>restrict</i> or <i>noaction</i>.</p>
+    <p><b>Default:</b> none</p>
+</ul>
+
+<h5>foreign <tt>field</tt></h5>
+<p>foreign <tt>field</tt> should be used once per each field on which the foreign key should be created. Allow a string value indicating a field name.</p>
+
+<h5>foreign <tt>references</tt></h5>
+<p><tt>references</tt> is a section that is part of the table foreign key declaration.</p>
+<p>This section is optional. If it is absent, it is assumed that the referenced key is the primary key of referenced table.</p>
+<p>The foreign <tt>references</tt> declaration may have the following properties:</p>
+
+<ul>
+    <p><li><tt>table</tt> (required)</li></p>
+    <p>Name of the table being referenced.</p>
+    <p><b>Default:</b> none</p>
+
+    <p><li><tt>field</tt></li></p>
+    <p>Name of the field being referenced. It should be used once per each field on which the foreign key should reference.</p>
+    <p>The number and types of fields in the referenced key must match those of the foreign key.</p>
+    <p><b>Default:</b> none</p>
+</ul>
+
+<h5>Example</h5>
+<ul>
+<p><tt>&lt;foreign&gt;</tt></p>
+<ul>
+    <p><tt>&lt;name&gt;my_foreign_key&lt;/name&gt;</tt></p>
+    <p><tt>&lt;field&gt;costumer_id&lt;/field&gt;</tt></p>
+    <p><tt>&lt;field&gt;country&lt;/field&gt;</tt></p>
+</ul>
+<ul>
+    <p><tt>&lt;references&gt;</tt></p>
+    <ul>
+       <p><tt>&lt;table&gt;costumers&lt;/table&gt;</tt></p>
+       <p><tt>&lt;field&gt;id&lt;/field&gt;</tt></p>
+       <p><tt>&lt;field&gt;country&lt;/field&gt;</tt></p>
+    </ul>
+    <p><tt>&lt;/references&gt;</tt></p>
+    <p><tt>&lt;ondelete&gt;cascade&lt;/ondelete&gt;</tt></p>
+    <p><tt>&lt;onupdate&gt;cascade&lt;/onupdate&gt;</tt></p>
+</ul>
+<p><tt>&lt;/foreign&gt;</tt></p>
+</ul>
+
 <!-- INITIALIZATION -->
 <h3><a name="3.2.2"><tt>initialization</tt></a></h3>
 <p><tt>initialization</tt> is another section that is part of the table definition.  This section is optional and may contain the definition of actions that should be executed when installing the database for the first time. <tt>update</tt> and <tt>delete</tt> was added in Schema version 0.7.0.</p>
