@@ -20,7 +20,7 @@
     
 <!ELEMENT references (table | field+)*>
 <!ELEMENT where (expression)>
-<!ELEMENT expression (expression?, ((value | column | function)?, operator, (value | column | function | expression))?)>
+<!ELEMENT expression ((value | column | function | expression)?, operator, (value | column | function | expression)?)>
 <!ELEMENT field (#PCDATA | name | was | type | default | notnull | autoincrement | unsigned | description | comments | length | sorting | column | value | function | expression | null)*>
 <!ELEMENT function (name | value* | column* | function* | expression*)*>
 
