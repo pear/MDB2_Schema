@@ -1,371 +1,225 @@
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
 
 <xsd:annotation>
-	<xsd:documentation xml:lang="en">
-		Schema for PEAR MDB2 XML database schemas.
-		This file needs validation.
-	</xsd:documentation>
+ <xsd:documentation xml:lang="en">
+  Schema for PEAR MDB2 XML database schemas.
+  This file needs validation.
+ </xsd:documentation>
 </xsd:annotation>
 
 <!-- ROOT -->
 
-<xsd:complexType name="database">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="create" minOccurs="0"/>
-		<xsd:element ref="overwrite" minOccurs="0"/>
-		<xsd:element ref="description" minOccurs="0"/>
-		<xsd:element ref="comments" minOccurs="0"/>
-		<xsd:element ref="table" maxOccurs="unbounded"/>
-		<xsd:element ref="sequence" minOccurs="0"/>
-	</xsd:sequence>
-</xsd:complexType>
+<xsd:element name="database">
+ <xsd:complexType>
+  <xsd:sequence>
+   <xsd:element ref="name"/>
+   <xsd:element ref="create" minOccurs="0"/>
+   <xsd:element ref="overwrite" minOccurs="0"/>
+   <xsd:element ref="description" minOccurs="0"/>
+   <xsd:element ref="comments" minOccurs="0"/>
+   <xsd:element name="table" type="table" maxOccurs="unbounded"/>
+   <xsd:element name="sequence" type="sequence" minOccurs="0"/>
+  </xsd:sequence>
+ </xsd:complexType>
+</xsd:element>
 
 <!-- ROOT CHILDREN -->
 
 <xsd:complexType name="table">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="was"/>
-		<xsd:element ref="description"/>
-		<xsd:element ref="comments"/>
-		<xsd:element ref="declaration"/>
-		<xsd:element ref="initialization"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:element ref="was"/>
+  <xsd:element ref="description"/>
+  <xsd:element ref="comments"/>
+  <xsd:element name="declaration"/>
+  <xsd:element name="initialization" type="initialization"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="declaration">
-	<xsd:sequence>
-		<xsd:element name="field" type="fieldDef" maxOccurs="unbounded"/>
-		<xsd:element ref="index" minOccurs="0" maxOccurs="unbounded"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element name="field" type="fieldDef" maxOccurs="unbounded"/>
+  <xsd:element name="index" type="index" minOccurs="0" maxOccurs="unbounded"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="initialization">
-	<xsd:sequence>
-		<xsd:element ref="insert" minOccurs="0" maxOccurs="unbounded"/>
-		<xsd:element ref="update" minOccurs="0" maxOccurs="unbounded"/>
-		<xsd:element ref="delete" minOccurs="0" maxOccurs="unbounded"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element name="insert" type="insert" minOccurs="0" maxOccurs="unbounded"/>
+  <xsd:element name="update" type="update" minOccurs="0" maxOccurs="unbounded"/>
+  <xsd:element name="delete" type="delete" minOccurs="0" maxOccurs="unbounded"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="insert">
-	<xsd:element ref="field" maxOccurs="unbounded"/>
+ <xsd:sequence>
+  <xsd:element name="field" type="field" maxOccurs="unbounded"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="update">
-	<xsd:sequence>
-		<xsd:element ref="field" maxOccurs="unbounded"/>
-		<xsd:element ref="where" minOccurs="0"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element name="field" type="field" maxOccurs="unbounded"/>
+  <xsd:element name="where" type="where" minOccurs="0"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="delete">
-	<xsd:element ref="where"/>
+ <xsd:sequence>
+  <xsd:element name="where" type="where"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <!-- INNER ELEMENTS -->
 
 <xsd:complexType name="sequence">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="was" minOccurs="0"/>
-		<xsd:element ref="start" minOccurs="0"/>
-		<xsd:element ref="on" maxOccurs="unbounded"/>
-		<xsd:element ref="description" minOccurs="0"/>
-		<xsd:element ref="comments" minOccurs="0"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:element ref="was" minOccurs="0"/>
+  <xsd:element ref="start" minOccurs="0"/>
+  <xsd:element name="on" type="on" maxOccurs="unbounded"/>
+  <xsd:element ref="description" minOccurs="0"/>
+  <xsd:element ref="comments" minOccurs="0"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="on">
-	<xsd:sequence>
-		<xsd:element name="table" type="xsd:string"/>
-		<xsd:element name="field" type="xsd:string" maxOccurs="unbounded"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element name="table" type="xsd:string"/>
+  <xsd:element name="field" type="xsd:string" maxOccurs="unbounded"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="index">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="was" minOccurs="0"/>
-		<xsd:element ref="unique" minOccurs="0"/>
-		<xsd:element ref="primary" minOccurs="0"/>
-		<xsd:element name="field" type="fieldIndex" maxOccurs="unbounded"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:element ref="was" minOccurs="0"/>
+  <xsd:element ref="unique" minOccurs="0"/>
+  <xsd:element ref="primary" minOccurs="0"/>
+  <xsd:element name="field" type="fieldIndex" maxOccurs="unbounded"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="foreign">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element name="field" type="xsd:string" maxOccurs="unbounded"/>
-		<xsd:element ref="references">
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:element name="field" type="xsd:string" maxOccurs="unbounded"/>
+  <xsd:element name="references" type="references"/>
   <xsd:element ref="match" minOccurs="0"/>
-		<xsd:element ref="ondelete" minOccurs="0"/>
-		<xsd:element ref="onupdate" minOccurs="0"/>
-	</xsd:sequence>
+  <xsd:element ref="ondelete" minOccurs="0"/>
+  <xsd:element ref="onupdate" minOccurs="0"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="references">
-	<xsd:sequence>
-		<xsd:element name="table" type="xsd:string"/>
-		<xsd:element name="field" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element name="table" type="xsd:string"/>
+  <xsd:element name="field" type="xsd:string" minOccurs="0" maxOccurs="unbounded"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="where">
-	<xsd:sequence>
-		<xsd:element ref="expression"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element name="expression" type="expression"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="expression">
-	<xsd:choice>
-		<xsd:group ref="expressionGrp"/>
-		<xsd:element ref="expression" minOccurs="0"/>
-	</xsd:choice>
+ <xsd:sequence>
+  <xsd:group ref="expressionGrp"/>
+ </xsd:sequence>
 </xsd:complexType>
 
-<xsd:group id="expressionGrp">
-	<xsd:sequence>
-		<xsd:group ref="operant"/>
-		<xsd:element ref="operator"/>
-		<xsd:group ref="operant"/>
-	</xsd:sequence>
+<xsd:group name="expressionGrp">
+ <xsd:sequence>
+  <xsd:group ref="operant"/>
+  <xsd:element ref="operator"/>
+  <xsd:group ref="operant"/>
+ </xsd:sequence>
 </xsd:group>
 
-<xsd:group id="operant">
-	<xsd:choice>
-		<xsd:element ref="value"/>
-		<xsd:element ref="column"/>
-		<xsd:element ref="function"/>
-		<xsd:element ref="expression"/>
-		<xsd:element ref="null"/>
-	</xsd:choice>
+<xsd:group name="operant">
+ <xsd:choice>
+  <xsd:element ref="value"/>
+  <xsd:element ref="column"/>
+  <xsd:element name="function" type="function"/>
+  <xsd:element name="expression" type="expression"/>
+  <xsd:element ref="null"/>
+ </xsd:choice>
 </xsd:group>
 
 <xsd:complexType name="field">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:group ref="operant"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:group ref="operant"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="fieldDef">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="was"/>
-		<xsd:element ref="type"/>
-		<xsd:element ref="default"/>
-		<xsd:element ref="notnull"/>
-		<xsd:element ref="autoincrement"/>
-		<xsd:element ref="unsigned"/>
-		<xsd:element ref="description"/>
-		<xsd:element ref="comments"/>
-		<xsd:element ref="length"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:element ref="was"/>
+  <xsd:element ref="type"/>
+  <xsd:element ref="default"/>
+  <xsd:element ref="notnull"/>
+  <xsd:element ref="autoincrement"/>
+  <xsd:element ref="unsigned"/>
+  <xsd:element ref="description"/>
+  <xsd:element ref="comments"/>
+  <xsd:element ref="length"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="fieldIndex">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="sorting"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:element ref="sorting"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <xsd:complexType name="function">
-	<xsd:sequence>
-		<xsd:element ref="name"/>
-		<xsd:element ref="operant" minOccurs="0" maxOccurs="unbounded"/>
-	</xsd:sequence>
+ <xsd:sequence>
+  <xsd:element ref="name"/>
+  <xsd:group ref="operant" minOccurs="0" maxOccurs="unbounded"/>
+ </xsd:sequence>
+</xsd:complexType>
+
+<!-- THE BASIC TYPE -->
+
+<xsd:complexType name="basic" mixed="true">
+ <xsd:sequence>
+  <xsd:element ref="variable" minOccurs="0"/>
+ </xsd:sequence>
 </xsd:complexType>
 
 <!-- BASIC ELEMENTS -->
 
-<xsd:element name="comments">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="create">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="default">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="description">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="length">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="name">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="notnull">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="overwrite">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="sorting">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="start">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="type">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="unique">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="primary">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="autoincrement">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="unsigned">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="value">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="column">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="operator">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="was">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="null">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="match">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="ondelete">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
-<xsd:element name="onupdate">
-	<xsd:complexType mixed="true">
-		<xsd:sequence>
-			<xsd:element ref="variable"/>
-		</xsd:sequence>
-	</xsd:complexType>
-</xsd:element>
-
+<xsd:element name="comments" type="basic"/>
+<xsd:element name="create" type="basic"/>
+<xsd:element name="default" type="basic"/>
+<xsd:element name="description" type="basic"/>
+<xsd:element name="length" type="basic"/>
+<xsd:element name="name" type="basic"/>
+<xsd:element name="notnull" type="basic"/>
+<xsd:element name="overwrite" type="basic"/>
+<xsd:element name="sorting" type="basic"/>
+<xsd:element name="start" type="basic"/>
+<xsd:element name="type" type="basic"/>
+<xsd:element name="unique" type="basic"/>
+<xsd:element name="primary" type="basic"/>
+<xsd:element name="autoincrement" type="basic"/>
+<xsd:element name="unsigned" type="basic"/>
+<xsd:element name="value" type="basic"/>
+<xsd:element name="column" type="basic"/>
+<xsd:element name="operator" type="basic"/>
+<xsd:element name="was" type="basic"/>
+<xsd:element name="null" type="basic"/>
+<xsd:element name="match" type="basic"/>
+<xsd:element name="ondelete" type="basic"/>
+<xsd:element name="onupdate" type="basic"/>
 
 <!-- ATOMIC ELEMENTS -->
 
 <xsd:element name="variable" type="xsd:string"/>
+
+</xsd:schema>
