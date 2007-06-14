@@ -2,27 +2,28 @@
 
 <!-- MAIN ELEMENTS -->
 
-<!ELEMENT database (name | create? | overwrite? | description? | comments? | table+ | sequence?)*>
+<!ELEMENT database (name, create?, overwrite?, description?, comments?, table+, sequence*)>
 <!ELEMENT table (#PCDATA | name | was | description | comments | declaration | initialization)*>
-<!ELEMENT initialization (insert | update | delete)*>
-<!ELEMENT insert (field+)>
+<!ELEMENT initialization (insert | update | delete)+>
+<!ELEMENT insert (field+ | select)>
 <!ELEMENT update (field+, where?)>
 <!ELEMENT delete (where)>
+<!ELEMENT select (table, field+, where?)>
 
 <!-- CHILD ELEMENTS -->
 
-<!ELEMENT sequence (name | was? | start? | on+ | description? | comments?)*>
-<!ELEMENT on (table, field)+>
+<!ELEMENT sequence (name, was?, start?, on, description?, comments?)>
+<!ELEMENT on (table, field)>
 
 <!ELEMENT declaration (field+, index*, foreign*)>
-<!ELEMENT index (name | was? | unique? | primary? | field+)*>
-<!ELEMENT foreign (name | field+ | references? | match? | ondelete? | onupdate?)*>
+<!ELEMENT index (name, was?, unique?, primary?, field+)>
+<!ELEMENT foreign (name, field+, references?, match?, ondelete?, onupdate?)>
     
-<!ELEMENT references (table | field+)*>
+<!ELEMENT references (table, field*)>
 <!ELEMENT where (expression)>
-<!ELEMENT expression ((value | column | function | expression)?, operator, (value | column | function | expression)?)>
+<!ELEMENT expression ((value | column | function | expression | null), operator, (value | column | function | expression | null))>
 <!ELEMENT field (#PCDATA | name | was | type | default | notnull | autoincrement | unsigned | description | comments | length | sorting | column | value | function | expression | null)*>
-<!ELEMENT function (name | value* | column* | function* | expression*)*>
+<!ELEMENT function (name, (value | column | function | expression | null)*)>
 
 <!-- BASIC ELEMENTS -->
 

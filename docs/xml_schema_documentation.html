@@ -264,7 +264,7 @@
     <p><li><tt>sorting</tt></li></p>
     <p>Type of field sorting that should be assumed when the index is created.  On <i>DBMS</i> that support index sorting, queries that search tables on the fields specified by the given index may execute faster if the specified sorting type is chosen adequately.  <i>DBMS</i> that do not support index sorting will ignore this property.</p>
     <p>Valid sorting types are <tt>ascending</tt> and <tt>descending</tt>.</p>
-    <p><b>Default:</b> none</p>
+    <p><b>Default:</b> ascending</p>
 </ul>
 
 <h5>Example</h5>
@@ -622,24 +622,24 @@
  <tt>&lt;table&gt;</tt><br/>
  <ul><p>
   <tt>&lt;name/&gt;</tt><br/>
-  <tt>&lt;was/&gt;</tt><br/>
-  <tt>&lt;description/&gt;</tt><br/>
-  <tt>&lt;comments/&gt;</tt><br/>
+  <tt>&lt;was/&gt;?</tt><br/>
+  <tt>&lt;description/&gt;?</tt><br/>
+  <tt>&lt;comments/&gt;?</tt><br/>
   <br/>
   <tt>&lt;declaration&gt;</tt><br/>
   <ul><p>
    <tt>&lt;field&gt;</tt><br/>
    <ul><p>
     <tt>&lt;name/&gt;</tt><br/>
-    <tt>&lt;was/&gt;</tt><br/>
+    <tt>&lt;was/&gt;?</tt><br/>
     <tt>&lt;type/&gt;</tt><br/>
-    <tt>&lt;default/&gt;</tt><br/>
-    <tt>&lt;notnull/&gt;</tt><br/>
-    <tt>&lt;autoincrement/&gt;</tt><br/>
-    <tt>&lt;unsigned/&gt;</tt><br/>
-    <tt>&lt;description/&gt;</tt><br/>
-    <tt>&lt;comments/&gt;</tt><br/>
-    <tt>&lt;length/&gt;</tt><br/>
+    <tt>&lt;default/&gt;?</tt><br/>
+    <tt>&lt;notnull/&gt;?</tt><br/>
+    <tt>&lt;autoincrement/&gt;?</tt><br/>
+    <tt>&lt;unsigned/&gt;?</tt><br/>
+    <tt>&lt;description/&gt;?</tt><br/>
+    <tt>&lt;comments/&gt;?</tt><br/>
+    <tt>&lt;length/&gt;?</tt><br/>
    </ul></p>
    <tt>&lt;/field&gt;+</tt><br/>
    <tt>&lt;index&gt;</tt><br/>
@@ -651,7 +651,7 @@
     <tt>&lt;field&gt;</tt><br/>
     <ul><p>
      <tt>&lt;name/&gt;</tt><br/>
-     <tt>&lt;sorting/&gt;</tt><br/>
+     <tt>&lt;sorting/&gt;?</tt><br/>
     </ul></p>
     <tt>&lt;/field&gt;+</tt><br/>
    </ul></p>
@@ -703,7 +703,7 @@
    </ul></p>
    <tt>&lt;/delete&gt;*</tt><br/>
   </ul></p>
-  <tt>&lt;/initialization&gt;</tt><br/>
+  <tt>&lt;/initialization&gt;?</tt><br/>
  </p></ul>
  <tt>&lt;/table&gt;+</tt><br/>
 
@@ -717,14 +717,14 @@
   <tt>&lt;on&gt;</tt><br/>
   <ul><p>
    <tt>&lt;table/&gt;</tt><br/>
-   <tt>&lt;field/&gt;+</tt><br/>
+   <tt>&lt;field/&gt;</tt><br/>
   </ul></p>
   <tt>&lt;/on&gt;</tt><br/>
 
   <tt>&lt;description/&gt;?</tt><br/>
   <tt>&lt;comments/&gt;?</tt><br/>
  </ul></p>
- <tt>&lt;/sequence&gt;?</tt><br/>
+ <tt>&lt;/sequence&gt;*</tt><br/>
 
 </p></ul>
 <p><tt>&lt;/database&gt;</tt><br/></p>
@@ -747,7 +747,7 @@
  <p><tt>&lt;function&gt;</tt></p>
   <ul>
   <p><tt>&lt;name/&gt;<br/>
-  (&nbsp;&lt;value/&gt; or &lt;column/&gt; or {function} or {expression}&nbsp;)+</tt></t>
+  (&nbsp;  &lt;null/&gt; or &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}&nbsp;)+</tt></t>
   </ul>
  <p><tt>&lt;/function&gt;</tt></p>
  </ul>
@@ -756,9 +756,9 @@
  <ul>
  <p><tt>&lt;expression&gt;</tt></p>
   <ul>
-  <p><tt>&lt;value/&gt; or &lt;column/&gt; or {function} or {expression}<br/>
+  <p><tt>  &lt;null/&gt; or &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}<br/>
   &lt;operator/&gt;<br/>
-  &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
+  &lt;null/&gt; or &lt;value/&gt; or &lt;column/&gt; or {function} or {expression}</tt></p>
   </ul>
  <p><tt>&lt;/expression&gt;</tt></p>
  </ul>
