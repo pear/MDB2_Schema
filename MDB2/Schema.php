@@ -1244,8 +1244,11 @@ class MDB2_Schema extends PEAR
             foreach ($current_definition as $field_name => $field) {
                 $was_field_name = $field['was'];
                 if (!empty($previous_definition[$field_name])
-                    && isset($previous_definition[$field_name]['was'])
-                    && $previous_definition[$field_name]['was'] == $was_field_name
+                    && (
+                        (isset($previous_definition[$field_name]['was'])
+                         && $previous_definition[$field_name]['was'] == $was_field_name)
+                        || !isset($previous_definition[$was_field_name])
+                       )
                 ) {
                     $was_field_name = $field_name;
                 }
