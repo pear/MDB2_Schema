@@ -1379,7 +1379,7 @@ class MDB2_Schema extends PEAR
         }
         foreach ($previous_definition as $index_previous_name => $index_previous) {
             if (empty($defined_indexes[$index_previous_name])) {
-                $changes['remove'][$index_previous_name] = true;
+                $changes['remove'][$index_previous_name] = $index_previous;
             }
         }
         return $changes;
