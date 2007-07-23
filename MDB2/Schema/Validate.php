@@ -67,10 +67,14 @@ class MDB2_Schema_Validate
 
     function __construct($fail_on_invalid_names = true, $valid_types = array(), $force_defaults = true)
     {
+        if (empty($GLOBALS['_MDB2_Schema_Reserved'])) {
+            $GLOBALS['_MDB2_Schema_Reserved'] = array();
+        }
+
         if (is_array($fail_on_invalid_names)) {
             $this->fail_on_invalid_names
                 = array_intersect($fail_on_invalid_names, array_keys($GLOBALS['_MDB2_Schema_Reserved']));
-        } elseif ($this->fail_on_invalid_names === true) {
+        } elseif ($fail_on_invalid_names === true) {
             $this->fail_on_invalid_names = array_keys($GLOBALS['_MDB2_Schema_Reserved']);
         } else {
             $this->fail_on_invalid_names = array();
@@ -568,7 +572,7 @@ class MDB2_Schema_Validate
 
         /*
          * This have to be done here otherwise we can't guarantee that all
-         * tables were already defined in the moment we are parsing indexes
+         * tables were already defined in the moment we are parsing sequences
          */
         if (isset($database['sequences'])) {
             foreach ($database['sequences'] as $seq_name => $seq) {

@@ -48,10 +48,6 @@
 require_once 'XML/Unserializer.php';
 require_once 'MDB2/Schema/Validate.php';
 
-if (empty($GLOBALS['_MDB2_Schema_Reserved'])) {
-    $GLOBALS['_MDB2_Schema_Reserved'] = array();
-}
-
 /**
  * Parses an XML schema file
  *

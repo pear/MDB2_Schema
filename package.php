@@ -19,6 +19,7 @@ $notes = <<<EOT
 - example.php should echo xml when no filename is given (Bug #10226)
 
 open todo items:
+- Automatically load reserved keywords
 - Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
 - Add ability to define variables inside the schema (like a version number)
 - Allow simple if statements that mean that anything enclosed is only executed
