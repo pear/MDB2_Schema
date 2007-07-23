@@ -209,9 +209,9 @@ class MDB2_Schema_Validate
 
         /*
          * Checking Indexes
-         * this have to be done here as we can't
+         * this have to be done here otherwise we can't
          * guarantee that all table fields were already
-         * defined in the moment we are parssing indexes
+         * defined in the moment we are parsing indexes
          */
         if (!empty($table['indexes']) && is_array($table['indexes'])) {
             foreach ($table['indexes'] as $name => $index) {
@@ -567,8 +567,8 @@ class MDB2_Schema_Validate
         }
 
         /*
-         * This have to be done here as we can't guarantee that all tables
-         * were already defined in the moment we are parsing indexes
+         * This have to be done here otherwise we can't guarantee that all
+         * tables were already defined in the moment we are parsing indexes
          */
         if (isset($database['sequences'])) {
             foreach ($database['sequences'] as $seq_name => $seq) {
