@@ -218,6 +218,12 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         if (!empty($element['where']) && is_array($element['where'])) {
             $this->setExpression($element['where']);
         }
+        if (!empty($element['select']) && is_array($element['select'])) {
+            if (!empty($element['select']['table']) && is_array($element['select']['table'])) {
+                $element['select']['table'] = $element['select']['table'][0];
+            }
+            $this->fixTableInitializationDataKeys($element['select']);
+        }
     }
 
     function setExpression(&$arr)
