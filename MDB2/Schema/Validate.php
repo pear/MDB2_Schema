@@ -254,7 +254,7 @@ class MDB2_Schema_Validate
                 }
             }
         }
-        return true;
+        return MDB2_OK;
     }
 
     // }}}
@@ -387,7 +387,7 @@ class MDB2_Schema_Validate
                     'all autoincrement fields must be defined default "0"');
             }
         }
-        return true;
+        return MDB2_OK;
     }
 
     // }}}
@@ -426,10 +426,16 @@ class MDB2_Schema_Validate
                 'field "primary" has to be a boolean value');
         }
 
+        /* Have we got fields? */
+        if (empty($index['fields']) || !is_array($index['fields'])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'indexes need one or more fields');
+        }
+
         if (empty($index['was'])) {
             $index['was'] = $index_name;
         }
-        return true;
+        return MDB2_OK;
     }
 
     // }}}
@@ -465,7 +471,94 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'sorting type unknown');
         }
-        return true;
+        return MDB2_OK;
+    }
+
+    // }}}
+    // {{{ validateConstraint()
+
+    /**
+     * Checks whether a parsed foreign key is valid. Modify its definition when
+     * necessary.
+     *
+     * @param array  multi dimensional array that contains the
+     *                constraints of current table.
+     * @param array  multi dimensional array that contains the
+     *                structure of the parsed foreign key.
+     * @param string  name of the parsed foreign key
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
+    function validateConstraint($table_constraints, &$constraint, $constraint_name)
+    {
+        if (!$constraint_name) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'a foreign key has to have a name');
+        }
+        if (is_array($table_constraints) && isset($table_constraints[$constraint_name])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'foreign key "'.$constraint_name.'" already exists');
+        }
+
+        /* Have we got fields? */
+        if (empty($constraint['fields']) || !is_array($constraint['fields'])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'foreign keys need one or more fields');
+        }
+
+        if (empty($constraint['was'])) {
+            $constraint['was'] = $constraint_name;
+        }
+        return MDB2_OK;
+    }
+
+    // }}}
+    // {{{ validateConstraintField()
+
+    /**
+     * Checks whether a parsed foreign-field is valid.
+     *
+     * @param array  multi dimensional array that contains the
+     *                fields of current foreign key.
+     * @param string  name of the parsed foreign-field
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
+    function validateConstraintField($constraint_fields, $field_name)
+    {
+        if (!$field_name) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'empty value for foreign-field');
+        }
+        if (is_array($constraint_fields) && in_array($field_name, $constraint_fields)) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'foreign field "'.$field_name.'" already exists');
+        }
+        return MDB2_OK;
+    }
+
+    // }}}
+    // {{{ validateConstraintReferencedField()
+
+    /**
+     * Checks whether a referenced field by of a foreign key exists.
+     *
+     * @param array  multi dimensional array that contains the
+     *                fields of current foreign key.
+     * @param string  name of the parsed foreign-field
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
+    function validateConstraintReferencedField($referenced_fields, $field_name, $tables, $table_name)
+    {
+        // to be implemented yet
+        return MDB2_OK;
     }
 
     // }}}
@@ -517,7 +610,7 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'sequence "'.$sequence_name.'" on a table was not properly defined');
         }
-        return true;
+        return MDB2_OK;
     }
 
     // }}}
@@ -584,7 +677,7 @@ class MDB2_Schema_Validate
                 }
             }
         }
-        return true;
+        return MDB2_OK;
     }
 
     // }}}
@@ -632,7 +725,7 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'value of "'.$field['name'].'" is incorrect: '.$result->getUserinfo());
         }
-        return true;
+        return MDB2_OK;
     }
 
     // }}}
@@ -719,7 +812,7 @@ class MDB2_Schema_Validate
             //$field_value = (double)$field_value;
             break;
         }
-        return true;
+        return MDB2_OK;
     }
 }
 
