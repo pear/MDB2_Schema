@@ -72,6 +72,8 @@ class MDB2_Schema_Parser extends XML_Parser
     var $init_field = array();
     var $index = array();
     var $index_name = '';
+    var $constraint = array();
+    var $constraint_name = '';
     var $var_mode = false;
     var $variables = array();
     var $sequence = array();
@@ -196,11 +198,7 @@ class MDB2_Schema_Parser extends XML_Parser
         /* Definition */
         case 'database-table':
             $this->table_name = '';
-            $this->table = array('fields' => array(), 'indexes' => array());
-            break;
-        case 'database-table-declaration-field':
-            $this->field_name = '';
-            $this->field = array();
+            $this->table = array('fields' => array(), 'indexes' => array(), 'constraints' => array());
             break;
         case 'database-table-declaration-field-default':
             $this->field['default'] = '';
@@ -209,13 +207,23 @@ class MDB2_Schema_Parser extends XML_Parser
             $this->index_name = '';
             $this->index = array('fields' => array());
             break;
+        case 'database-table-declaration-foreign':
+            $this->constraint_name = '';
+            $this->constraint = array('fields' => array());
+            break;
         case 'database-sequence':
             $this->sequence_name = '';
             $this->sequence = array();
             break;
+        case 'database-table-declaration-field':
         case 'database-table-declaration-index-field':
+        case 'database-table-declaration-foreign-field':
+        case 'database-table-declaration-foreign-references-field':
             $this->field_name = '';
             $this->field = array();
+            break;
+        case 'database-table-declaration-foreign-references':
+            $this->constraint['references'] = array('table' => '', 'fields' => array());
             break;
         }
     }
@@ -330,6 +338,32 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
             } else {
                 $this->index['fields'][$this->field_name] = $this->field;
+            }
+            break;
+
+        /* Foreign Key declaration */
+        case 'database-table-declaration-foreign':
+            $result = $this->val->validateConstraint($this->table['constraints'], $this->constraint, $this->constraint_name);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
+            } else {
+                $this->table['constraints'][$this->constraint_name] = $this->constraint;
+            }
+            break;
+        case 'database-table-declaration-foreign-field':
+            $result = $this->val->validateConstraintField($this->constraint['fields'], $this->field_name);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
+            } else {
+                $this->constraint['fields'][] = $this->field_name;
+            }
+            break;
+        case 'database-table-declaration-foreign-references-field':
+            $result = $this->val->validateConstraintReferencedField($this->constraint['references']['fields'], $this->field_name, $this->database_definition['tables'],$this->constraint['references']['table']);
+            if (PEAR::isError($result)) {
+                $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
+            } else {
+                $this->constraint['references']['fields'][] = $this->field_name;
             }
             break;
 
@@ -665,6 +699,64 @@ class MDB2_Schema_Parser extends XML_Parser
                 $this->field['length'].= $data;
             } else {
                 $this->field['length'] = $data;
+            }
+            break;
+
+        /* Foreign Key declaration */
+        case 'database-table-declaration-foreign-name':
+            if (isset($this->constraint_name)) {
+                $this->constraint_name.= $data;
+            } else {
+                $this->constraint_name = $data;
+            }
+            break;
+        case 'database-table-declaration-foreign-was':
+            if (isset($this->constraint['was'])) {
+                $this->constraint['was'].= $data;
+            } else {
+                $this->constraint['was'] = $data;
+            }
+            break;
+        case 'database-table-declaration-foreign-match':
+            if (isset($this->constraint['match'])) {
+                $this->constraint['match'].= $data;
+            } else {
+                $this->constraint['match'] = $data;
+            }
+            break;
+        case 'database-table-declaration-foreign-ondelete':
+            if (isset($this->constraint['ondelete'])) {
+                $this->constraint['ondelete'].= $data;
+            } else {
+                $this->constraint['ondelete'] = $data;
+            }
+            break;
+        case 'database-table-declaration-foreign-onupdate':
+            if (isset($this->constraint['onupdate'])) {
+                $this->constraint['onupdate'].= $data;
+            } else {
+                $this->constraint['onupdate'] = $data;
+            }
+            break;
+        case 'database-table-declaration-foreign-field':
+            if (isset($this->field_name)) {
+                $this->field_name.= $data;
+            } else {
+                $this->field_name = $data;
+            }
+            break;
+        case 'database-table-declaration-foreign-references-field':
+            if (isset($this->field_name)) {
+                $this->field_name.= $data;
+            } else {
+                $this->field_name = $data;
+            }
+            break;
+        case 'database-table-declaration-foreign-references-table':
+            if (isset($this->constraint['references']['table'])) {
+                $this->constraint['references']['table'].= $data;
+            } else {
+                $this->constraint['references']['table'] = $data;
             }
             break;
 
