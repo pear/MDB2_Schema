@@ -17,7 +17,7 @@
 
 <!ELEMENT declaration (field+, index*, foreign*)>
 <!ELEMENT index (name, was?, unique?, primary?, field+)>
-<!ELEMENT foreign (name, field+, references?, match?, ondelete?, onupdate?)>
+<!ELEMENT foreign (name, field+, references, match?, ondelete?, onupdate?)>
     
 <!ELEMENT references (table, field*)>
 <!ELEMENT where (expression)>
