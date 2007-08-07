@@ -294,17 +294,6 @@ class MDB2_Schema_Writer
                             }
                             $buffer.= "$eol   <field>$eol    <name>$field_name</name>$eol    <type>";
                             $buffer.= $field['type']."</type>$eol";
-                            if (!empty($field['unsigned'])) {
-                                $buffer.= "    <unsigned>".$this->_dumpBoolean($field['unsigned'])."</unsigned>$eol";
-                            }
-                            if (!empty($field['length'])) {
-                                $buffer.= '    <length>'.$field['length']."</length>$eol";
-                            }
-                            if (!empty($field['notnull'])) {
-                                $buffer.= "    <notnull>".$this->_dumpBoolean($field['notnull'])."</notnull>$eol";
-                            } else {
-                                $buffer.= "    <notnull>false</notnull>$eol";
-                            }
                             if (!empty($field['fixed']) && $field['type'] === 'text') {
                                 $buffer.= "    <fixed>".$this->_dumpBoolean($field['fixed'])."</fixed>$eol";
                             }
@@ -313,8 +302,19 @@ class MDB2_Schema_Writer
                             ) {
                                 $buffer.= '    <default>'.$this->_escapeSpecialChars($field['default'])."</default>$eol";
                             }
+                            if (!empty($field['notnull'])) {
+                                $buffer.= "    <notnull>".$this->_dumpBoolean($field['notnull'])."</notnull>$eol";
+                            } else {
+                                $buffer.= "    <notnull>false</notnull>$eol";
+                            }
                             if (!empty($field['autoincrement'])) {
                                 $buffer.= "    <autoincrement>" . $field['autoincrement'] ."</autoincrement>$eol";
+                            }
+                            if (!empty($field['unsigned'])) {
+                                $buffer.= "    <unsigned>".$this->_dumpBoolean($field['unsigned'])."</unsigned>$eol";
+                            }
+                            if (!empty($field['length'])) {
+                                $buffer.= '    <length>'.$field['length']."</length>$eol";
                             }
                             $buffer.= "   </field>$eol";
                         }

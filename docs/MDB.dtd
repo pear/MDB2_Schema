@@ -12,17 +12,17 @@
 
 <!-- CHILD ELEMENTS -->
 
-<!ELEMENT sequence (name, was?, start?, on, description?, comments?)>
+<!ELEMENT sequence (name, was?, start?, description?, comments?, on)>
 <!ELEMENT on (table, field)>
 
 <!ELEMENT declaration (field+, index*, foreign*)>
 <!ELEMENT index (name, was?, unique?, primary?, field+)>
-<!ELEMENT foreign (name, field+, references, match?, ondelete?, onupdate?)>
+<!ELEMENT foreign (name, was?, match?, ondelete?, onupdate?, deferrable?, initiallydeferred?, field+, references)>
     
 <!ELEMENT references (table, field*)>
 <!ELEMENT where (expression)>
 <!ELEMENT expression ((value | column | function | expression | null), operator, (value | column | function | expression | null))>
-<!ELEMENT field (#PCDATA | name | was | type | default | notnull | autoincrement | unsigned | description | comments | length | sorting | column | value | function | expression | null)*>
+<!ELEMENT field (#PCDATA | name | was | type | fixed | default | notnull | autoincrement | unsigned | length | description | comments | sorting | column | value | function | expression | null)*>
 <!ELEMENT function (name, (value | column | function | expression | null)*)>
 
 <!-- BASIC ELEMENTS -->

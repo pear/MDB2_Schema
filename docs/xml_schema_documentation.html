@@ -72,13 +72,13 @@
 
 <p><li><tt>create</tt></li></p>
 <p>Boolean flag that indicates whether the database manager class should create the specified database or use a previously installed database of the same name.</p>
-<p>This property may have to be set to <tt>0</tt> if you are splitting your database definition in multiple schema description files and only the installation of the first description file is supposed to lead to the actual database creation operation.</p>
-<p>Another circumstance on which this property may have to be set to <tt>0</tt> is when the <i>DBMS</i> driver does not support database creation or if this operation requires special database administrator permissions that may not be available to the database user.</p>
-<p><b>Default:</b> <tt>0</tt></p>
+<p>This property may have to be set to <tt>false</tt> if you are splitting your database definition in multiple schema description files and only the installation of the first description file is supposed to lead to the actual database creation operation.</p>
+<p>Another circumstance on which this property may have to be set to <tt>false</tt> is when the <i>DBMS</i> driver does not support database creation or if this operation requires special database administrator permissions that may not be available to the database user.</p>
+<p><b>Default:</b> <tt>false</tt></p>
 
 <p><li><tt>overwrite</tt></li></p>
 <p>Boolean flag that indicates whether the database manager class should overwrite previously created structures.</p>
-<p><b>Default:</b> <tt>0</tt></p>
+<p><b>Default:</b> <tt>false</tt></p>
 
 <p><li><tt>description</tt></li></p>
 <p>Free text property meant for describing the purpose of the database. This field is not processed by the schema parser. It may contain text or other XML well formed tags that may be useful for embedding additional data structures for documentation applications or other purposes.</p>
@@ -104,7 +104,7 @@
 <p><li><tt>was</tt></li></p>
 <p>Name that the table had before the last time it was renamed. This property is only meant to be used when the database is being upgraded and the table is meant to be renamed.</p>
 <p>Beware that if this property is not specified and the <tt>name</tt> is changed, that is intended as if it is meant to drop the table with the previous name and create a new table without keeping the data that was previously stored in the table.</p>
-<p><b>Default:</b> none</p>
+<p><b>Default:</b> table name</p>
 
 <p><li><tt>description</tt></li></p>
 <p>Free text property meant for describing the purpose of the table. This field is not processed by the schema parser. It may contain text or other XML well formed tags that may be useful for embedding additional data structures for documentation applications or other purposes.</p>
@@ -179,29 +179,33 @@
 
     <p><li><tt>was</tt></li></p>
     <p>Name that the field had before the last time it was renamed. This property is only meant to be used when the database is being upgraded and the field is meant to be renamed.</p>
-    <p><b>Default:</b> none</p>
+    <p><b>Default:</b> field name</p>
 
     <p><li><tt>type</tt> (required)</li></p>
     <p>Type of the field.  Valid type values are: <tt>integer</tt>, <tt>text</tt>, <tt>boolean</tt>, <tt>date</tt>, <tt>timestamp</tt>, <tt>time</tt>, <tt>float</tt>, <tt>decimal</tt>, <tt>clob</tt> and <tt>blob</tt>.</p>
     <p><b>Default:</b> none</p>
 
+    <p><li><tt>fixed</tt></li></p>
+    <p>Boolean flag property that specifies whether the table field should have a fixed length.</p>
+    <p><b>Default:</b> <tt>false</tt></p>
+
     <p><li><tt>default</tt></li></p>
     <p>Default value for the field.  The allowed values depend on the type of the field.  If this property is not specified the default value is assumed to be <tt>NULL</tt>.  If there is a table index on the field being declared, the <tt>default</tt> value must be specified because indexes can not be created on table fields with <tt>NULL</tt> values.</p>
     <p>Notice that some low end <i>DBMS</i> do not support specifying default values in the field definition.  Make sure that the you either specify all the values for each new row that is inserted in the tables or that the <i>DBMS</i> actually supports default values.</p>
     <p>Only some <i>DBMS</i> support default values for large object fields. For this reason it is not allowed to specify default values on the definition of this type of field.</p>
-    <p><b>Default:</b> none</p>
+    <p><b>Default:</b> depends on field type</p>
 
     <p><li><tt>notnull</tt></li></p>
     <p>Boolean flag property that specifies whether the table field should be created with the constraint <tt>NOT NULL</tt>.  As it suggests, this implies that it is not allowed to set this field value with <tt>NULL</tt>.  The parser does not allow that an index is declared on a field that is not declared with the <tt>notnull</tt> flag property.</p>
-    <p><b>Default:</b> <tt>0</tt></p>
+    <p><b>Default:</b> <tt>false</tt></p>
 
     <p><li><tt>autoincrement</tt></li></p>
     <p>Boolean flag property that specifies whether the field should be an auto incrementing not null integer field with a primary key. Note that some <i>DBMS</i> do not support auto increment natively in which case this is emulated with a trigger that updates a sequence.</p>
-    <p><b>Default:</b> <tt>0</tt></p>
+    <p><b>Default:</b> <tt>false</tt></p>
 
     <p><li><tt>unsigned</tt></li></p>
     <p>Boolean flag property that specifies whether an integer field should be declared as unsigned integer. Note that some <i>DBMS</i> do not support unsigned integer fields.  In such case the <i>DBMS</i> driver will ignore this property but it issues a warning.</p>
-    <p><b>Default:</b> <tt>0</tt></p>
+    <p><b>Default:</b> <tt>false</tt></p>
 
     <p><li><tt>length</tt></li></p>
     <p>Unsigned integer property that specifies the length of a text.  If this property is specified the text field may not have a longer length.  Text values shorter than the length are not padded.  If this property is not specified the length limit is determined by the <i>DBMS</i>.</p>
@@ -241,15 +245,15 @@
 
     <p><li><tt>was</tt></li></p>
     <p>Name that the index had before the last time it was renamed. This property is only meant to be used when the database is being upgraded and the field is meant to be renamed.</p>
-    <p><b>Default:</b> none</p>
+    <p><b>Default:</b> index name</p>
 
     <p><li><tt>unique</tt></li></p>
     <p>Boolean flag property that specifies whether the combination of the values of the index fields on each row of the table should unique.</p>
-    <p><b>Default:</b> <tt>0</tt></p>
+    <p><b>Default:</b> <tt>false</tt></p>
 
     <p><li><tt>primary</tt></li></p>
     <p>Boolean flag property that specifies whether the combination of the values of the index fields on each row of the table should be a primary key.</p>
-    <p><b>Default:</b> <tt>0</tt></p>
+    <p><b>Default:</b> <tt>false</tt></p>
 </ul>
 
 <h5>index <tt>field</tt></h5>
@@ -264,7 +268,7 @@
     <p><li><tt>sorting</tt></li></p>
     <p>Type of field sorting that should be assumed when the index is created.  On <i>DBMS</i> that support index sorting, queries that search tables on the fields specified by the given index may execute faster if the specified sorting type is chosen adequately.  <i>DBMS</i> that do not support index sorting will ignore this property.</p>
     <p>Valid sorting types are <tt>ascending</tt> and <tt>descending</tt>.</p>
-    <p><b>Default:</b> ascending</p>
+    <p><b>Default:</b> <tt>ascending</tt></p>
 </ul>
 
 <h5>Example</h5>
@@ -292,17 +296,29 @@
     <p>Name of the foreign key.</p>
     <p><b>Default:</b> none</p>
 
+    <p><li><tt>was</tt></li></p>
+    <p>Name that the foreign key had before the last time it was renamed. This property is only meant to be used when the database is being upgraded and the field is meant to be renamed.</p>
+    <p><b>Default:</b> foreign key name</p>
+
     <p><li><tt>match</tt></li></p>
     <p>Allow the litereal string values: <i>full</i>, <i>partial</i> or <i>simple</i>.</p>
     <p><b>Default:</b> none</p>
 
     <p><li><tt>ondelete</tt></li></p>
-    <p>Allow the litereal string values: <i>cascade</i>, <i>setnull</i>, <i>setdefault</i>, <i>restrict</i> or <i>noaction</i>.</p>
+    <p>Allow the litereal string values: <i>cascade</i>, <i>set null</i>, <i>set default</i>, <i>restrict</i> or <i>no action</i>.</p>
     <p><b>Default:</b> none</p>
 
     <p><li><tt>onupdate</tt></li></p>
-    <p>Allow the litereal string values: <i>cascade</i>, <i>setnull</i>, <i>setdefault</i>, <i>restrict</i> or <i>noaction</i>.</p>
+    <p>Allow the litereal string values: <i>cascade</i>, <i>set null</i>, <i>set default</i>, <i>restrict</i> or <i>no action</i>.</p>
     <p><b>Default:</b> none</p>
+
+    <p><li><tt>deferrable</tt></li></p>
+    <p>Boolean flag property.</p>
+    <p><b>Default:</b> <tt>false</tt></p>
+
+    <p><li><tt>initiallydeferred</tt></li></p>
+    <p>Boolean flag property.</p>
+    <p><b>Default:</b> <tt>false</tt></p>
 </ul>
 
 <h5>foreign <tt>field</tt></h5>
@@ -566,7 +582,7 @@
 
     <p><li><tt>was</tt></li></p>
     <p>Name that the sequence had before the last time it was renamed. This property is only meant to be used when the database is being upgraded and the sequence is meant to be renamed.</p>
-    <p><b>Default:</b> none</p>
+    <p><b>Default:</b> sequence name</p>
 
     <p><li><tt>start</tt></li></p>
     <p>Integer property that specifies the value that the sequence will return when it is fetched the next sequence value.</p>
@@ -633,13 +649,14 @@
     <tt>&lt;name/&gt;</tt><br/>
     <tt>&lt;was/&gt;?</tt><br/>
     <tt>&lt;type/&gt;</tt><br/>
+    <tt>&lt;fixed/&gt;</tt><br/>
     <tt>&lt;default/&gt;?</tt><br/>
     <tt>&lt;notnull/&gt;?</tt><br/>
     <tt>&lt;autoincrement/&gt;?</tt><br/>
     <tt>&lt;unsigned/&gt;?</tt><br/>
+    <tt>&lt;length/&gt;?</tt><br/>
     <tt>&lt;description/&gt;?</tt><br/>
     <tt>&lt;comments/&gt;?</tt><br/>
-    <tt>&lt;length/&gt;?</tt><br/>
    </ul></p>
    <tt>&lt;/field&gt;+</tt><br/>
    <tt>&lt;index&gt;</tt><br/>
@@ -659,6 +676,12 @@
    <tt>&lt;foreign&gt;</tt><br/>
    <ul><p>
     <tt>&lt;name/&gt;</tt><br/>
+    <tt>&lt;was/&gt;?</tt><br/>
+    <tt>&lt;match/&gt;?</tt><br/>
+    <tt>&lt;ondelete/&gt;?</tt><br/>
+    <tt>&lt;onupdate/&gt;?</tt><br/>
+    <tt>&lt;deferrable/&gt;?</tt><br/>
+    <tt>&lt;initiallydeferred/&gt;?</tt><br/>
     <tt>&lt;field/&gt;+</tt><br/>
     <tt>&lt;references&gt;</tt><br/>
     <ul><p>
@@ -666,9 +689,6 @@
      <tt>&lt;field/&gt;*</tt><br/>
     </ul></p>
     <tt>&lt;/references&gt;</tt><br/>
-    <tt>&lt;match/&gt;?</tt><br/>
-    <tt>&lt;ondelete/&gt;?</tt><br/>
-    <tt>&lt;onupdate/&gt;?</tt><br/>
    </ul></p>
    <tt>&lt;/foreign&gt;*</tt></br>
   </ul></p>
@@ -713,6 +733,8 @@
   <tt>&lt;name/&gt;</tt><br/>
   <tt>&lt;was/&gt;?</tt><br/>
   <tt>&lt;start/&gt;?</tt><br/>
+  <tt>&lt;description/&gt;?</tt><br/>
+  <tt>&lt;comments/&gt;?</tt><br/>
 
   <tt>&lt;on&gt;</tt><br/>
   <ul><p>
@@ -721,8 +743,6 @@
   </ul></p>
   <tt>&lt;/on&gt;</tt><br/>
 
-  <tt>&lt;description/&gt;?</tt><br/>
-  <tt>&lt;comments/&gt;?</tt><br/>
  </ul></p>
  <tt>&lt;/sequence&gt;*</tt><br/>
 
@@ -785,7 +805,7 @@
  <li>&lt;tag/&gt; stands for &lt;tag&gt;STRING&lt;/tag&gt;</li>
  <li>? Zero or one</li>
  <li>* Zero or more</li>
- <li>+ More than one</li>
+ <li>+ One or more</li>
 </ul>
 
 </body>

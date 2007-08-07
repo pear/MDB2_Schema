@@ -86,9 +86,9 @@
   <xsd:element ref="name"/>
   <xsd:element ref="was" minOccurs="0"/>
   <xsd:element ref="start" minOccurs="0"/>
-  <xsd:element name="on" type="on"/>
   <xsd:element ref="description" minOccurs="0"/>
   <xsd:element ref="comments" minOccurs="0"/>
+  <xsd:element name="on" type="on"/>
  </xsd:all>
 </xsd:complexType>
 
@@ -112,11 +112,14 @@
 <xsd:complexType name="foreign">
  <xsd:sequence>
   <xsd:element ref="name"/>
-  <xsd:element ref="field" maxOccurs="unbounded"/>
-  <xsd:element name="references" type="references"/>
+  <xsd:element ref="was" minOccurs="0"/>
   <xsd:element ref="match" minOccurs="0"/>
   <xsd:element ref="ondelete" minOccurs="0"/>
   <xsd:element ref="onupdate" minOccurs="0"/>
+  <xsd:element ref="deferrable" minOccurs="0"/>
+  <xsd:element ref="initiallydeferred" minOccurs="0"/>
+  <xsd:element ref="field" maxOccurs="unbounded"/>
+  <xsd:element name="references" type="references"/>
  </xsd:sequence>
 </xsd:complexType>
 
@@ -163,13 +166,14 @@
   <xsd:element ref="name"/>
   <xsd:element ref="was" minOccurs="0"/>
   <xsd:element ref="type"/>
+  <xsd:element ref="fixed" minOccurs="0"/>
   <xsd:element ref="default" minOccurs="0"/>
   <xsd:element ref="notnull" minOccurs="0"/>
   <xsd:element ref="autoincrement" minOccurs="0"/>
   <xsd:element ref="unsigned" minOccurs="0"/>
+  <xsd:element ref="length" minOccurs="0"/>
   <xsd:element ref="description" minOccurs="0"/>
   <xsd:element ref="comments" minOccurs="0"/>
-  <xsd:element ref="length" minOccurs="0"/>
  </xsd:all>
 </xsd:complexType>
 
@@ -216,10 +220,13 @@
 <xsd:element name="column" type="basic"/>
 <xsd:element name="operator" type="basic"/>
 <xsd:element name="was" type="basic"/>
+<xsd:element name="fixed" type="basic"/>
 <xsd:element name="null" type="basic"/>
 <xsd:element name="match" type="basic"/>
 <xsd:element name="ondelete" type="basic"/>
 <xsd:element name="onupdate" type="basic"/>
+<xsd:element name="deferrable" type="basic"/>
+<xsd:element name="initiallydeferred" type="basic"/>
 <xsd:element name="table" type="basic"/>
 <xsd:element name="field" type="basic"/>
 

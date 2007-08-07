@@ -109,10 +109,8 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             return $result;
         } else {
             $this->database_loaded = $this->getUnserializedData();
-            $this->fixDatabaseKeys($this->database_loaded);
+            return $this->fixDatabaseKeys($this->database_loaded);
         }
-
-        return MDB2_OK;
     }
 
     function setInputFile($filename)
@@ -129,7 +127,16 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
 
     function fixDatabaseKeys($database)
     {
-        $this->database_definition = array();
+        $this->database_definition = array(
+            'name' => '',
+            'create' => '',
+            'overwrite' => '',
+            'description' => '',
+            'comments' => '',
+            'tables' => array(),
+            'sequences' => array()
+        );
+
         if (!empty($database['name'])) {
             $this->database_definition['name'] = $database['name'];
         }
@@ -147,14 +154,12 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         }
 
         if (!empty($database['table']) && is_array($database['table'])) {
-            $this->database_definition['tables'] = array();
             foreach ($database['table'] as $table) {
                 $this->fixTableKeys($table);
             }
         }
 
         if (!empty($database['sequence']) && is_array($database['sequence'])) {
-            $this->database_definition['sequences'] = array();
             foreach ($database['sequence'] as $sequence) {
                 $this->fixSequenceKeys($sequence);
             }
@@ -170,7 +175,16 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
 
     function fixTableKeys($table)
     {
-        $this->table = array();
+        $this->table = array(
+            'was' => '',
+            'description' => '',
+            'comments' => '',
+            'fields' => array(),
+            'indexes' => array(),
+            'constraints' => array(),
+            'initialization' => array()
+        );
+
         if (!empty($table['name'])) {
             $this->table_name = $table['name'];
         } else {
@@ -187,21 +201,18 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         }
 
         if (!empty($table['declaration']) && is_array($table['declaration'])) {
-            $this->table['fields'] = array();
             if (!empty($table['declaration']['field']) && is_array($table['declaration']['field'])) {
                 foreach ($table['declaration']['field'] as $field) {
                     $this->fixTableFieldKeys($field);
                 }
             }
 
-            $this->table['indexes'] = array();
             if (!empty($table['declaration']['index']) && is_array($table['declaration']['index'])) {
                 foreach ($table['declaration']['index'] as $index) {
                     $this->fixTableIndexKeys($index);
                 }
             }
 
-            $this->table['constraints'] = array();
             if (!empty($table['declaration']['foreign']) && is_array($table['declaration']['foreign'])) {
                 foreach ($table['declaration']['foreign'] as $constraint) {
                     $this->fixTableConstraintKeys($constraint);
@@ -245,26 +256,29 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         } else {
             $this->field_name = '';
         }
+        if (!empty($field['was'])) {
+            $this->field['was'] = $field['was'];
+        }
         if (!empty($field['type'])) {
             $this->field['type'] = $field['type'];
         }
-        if (!empty($field['length'])) {
-            $this->field['length'] = $field['length'];
-        }
-        if (!empty($field['unsigned'])) {
-            $this->field['unsigned'] = $field['unsigned'];
-        }
-        if (!empty($field['notnull'])) {
-            $this->field['notnull'] = $field['notnull'];
+        if (!empty($field['fixed'])) {
+            $this->field['fixed'] = $field['fixed'];
         }
         if (isset($field['default'])) {
             $this->field['default'] = $field['default'];
         }
+        if (!empty($field['notnull'])) {
+            $this->field['notnull'] = $field['notnull'];
+        }
         if (!empty($field['autoincrement'])) {
             $this->field['autoincrement'] = $field['autoincrement'];
         }
-        if (!empty($field['was'])) {
-            $this->field['was'] = $field['was'];
+        if (!empty($field['unsigned'])) {
+            $this->field['unsigned'] = $field['unsigned'];
+        }
+        if (!empty($field['length'])) {
+            $this->field['length'] = $field['length'];
         }
         if (!empty($field['description'])) {
             $this->field['description'] = $field['description'];
@@ -285,7 +299,13 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
 
     function fixTableIndexKeys($index)
     {
-        $this->index = array();
+        $this->index = array(
+            'was' => '',
+            'unique' =>'',
+            'primary' => '',
+            'fields' => array()
+        );
+
         if (!empty($index['name'])) {
             $this->index_name = $index['name'];
         } else {
@@ -315,7 +335,17 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
     }
 
     function fixTableConstraintKeys($constraint) {
-        $this->constraint = array('fields' => array());
+        $this->constraint = array(
+            'was' => '',
+            'match' => '',
+            'ondelete' => '',
+            'onupdate' => '',
+            'deferrable' => '',
+            'initiallydeferred' => '',
+            'fields' => array(),
+            'references' => array('table' => '', 'fields' => array())
+        );
+
         if (!empty($constraint['name'])) {
             $this->constraint_name = $constraint['name'];
         } else {
@@ -332,6 +362,12 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         }
         if (!empty($constraint['onupdate'])) {
             $this->constraint['onupdate'] = $constraint['onupdate'];
+        }
+        if (!empty($constraint['deferrable'])) {
+            $this->constraint['deferrable'] = $constraint['deferrable'];
+        }
+        if (!empty($constraint['initiallydeferred'])) {
+            $this->constraint['initiallydeferred'] = $constraint['initiallydeferred'];
         }
         if (!empty($constraint['field']) && is_array($constraint['field'])) {
             $this->constraint['fields'] = $constraint['field'];
@@ -448,7 +484,14 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
 
     function fixSequenceKeys($sequence)
     {
-        $this->sequence = array();
+        $this->sequence = array(
+            'was' => '',
+            'start' => '',
+            'description' => '',
+            'comments' => '',
+            'on' => array('table' => '', 'field' => '')
+        );
+
         if (!empty($sequence['name'])) {
             $this->sequence_name = $sequence['name'];
         } else {
@@ -459,6 +502,12 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         }
         if (!empty($sequence['start'])) {
             $this->sequence['start'] = $sequence['start'];
+        }
+        if (!empty($sequence['description'])) {
+            $this->sequence['description'] = $sequence['description'];
+        }
+        if (!empty($sequence['comments'])) {
+            $this->sequence['comments'] = $sequence['comments'];
         }
         if (!empty($sequence['on']) && is_array($sequence['on'])) {
             /**
@@ -476,12 +525,6 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             if (!empty($sequence['on']['field']) && is_array($sequence['on']['field'])) {
                 $this->sequence['on']['field'] = $sequence['on']['field'][0];
             }
-        }
-        if (!empty($sequence['description'])) {
-            $this->sequence['description'] = $sequence['description'];
-        }
-        if (!empty($sequence['comments'])) {
-            $this->sequence['comments'] = $sequence['comments'];
         }
 
         $result = $this->val->validateSequence($this->database_definition['sequences'], $this->sequence, $this->sequence_name);
