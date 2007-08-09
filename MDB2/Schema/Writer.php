@@ -286,7 +286,7 @@ class MDB2_Schema_Writer
                             if (empty($field['type'])) {
                                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE, null, null,
                                     'it was not specified the type of the field "'.
-                                    $field_name.'" of the table "'.$table_name);
+                                    $field_name.'" of the table "'.$table_name.'"');
                             }
                             if (!empty($this->valid_types) && !array_key_exists($field['type'], $this->valid_types)) {
                                 return $this->raiseError(MDB2_SCHEMA_ERROR_UNSUPPORTED, null, null,
@@ -344,6 +344,48 @@ class MDB2_Schema_Writer
                             $buffer.= "   </index>$eol";
                         }
                     }
+
+                    if (!empty($table['constraints']) && is_array($table['constraints'])) {
+                        foreach ($table['constraints'] as $constraint_name => $constraint) {
+                            $buffer.= "$eol   <foreign>$eol    <name>$constraint_name</name>$eol";
+                            if (empty($constraint['fields']) || !is_array($constraint['fields'])) {
+                                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE, null, null,
+                                    'it was not specified a field for the foreign key "'.
+                                    $constraint_name.'" of the table "'.$table_name.'"');
+                            }
+                            if (!is_array($constraint['references']) || empty($constraint['references']['table'])) {
+                                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE, null, null,
+                                    'it was not specified the referenced table of the foreign key "'.
+                                    $constraint_name.'" of the table "'.$table_name.'"');
+                            }
+                            if (!empty($constraint['match'])) {
+                                $buffer.= "    <match>".$constraint['match']."</match>$eol";
+                            }
+                            if (!empty($constraint['ondelete'])) {
+                                $buffer.= "    <ondelete>".$constraint['ondelete']."</ondelete>$eol";
+                            }
+                            if (!empty($constraint['onupdate'])) {
+                                $buffer.= "    <onupdate>".$constraint['onupdate']."</onupdate>$eol";
+                            }
+                            if (!empty($constraint['deferrable'])) {
+                                $buffer.= "    <onupdate>".$constraint['deferrable']."</onupdate>$eol";
+                            }
+                            if (!empty($constraint['initiallydeferred'])) {
+                                $buffer.= "    <onupdate>".$constraint['initiallydeferred']."</onupdate>$eol";
+                            }
+                            foreach ($constraint['fields'] as $field_name) {
+                                $buffer.= "    <field>$field_name</field>$eol";
+                            }
+                            $buffer.= "    <references>$eol     <table>".$constraint['references']['table']."</table>$eol";
+                            foreach ($constraint['references']['fields'] as $field_name) {
+                                $buffer.= "     <field>$field_name</field>$eol";
+                            }
+                            $buffer.= "    </references>$eol";
+
+                            $buffer.= "   </foreign>$eol";
+                        }
+                    }
+
                     $buffer.= "$eol  </declaration>$eol";
                 }
 
