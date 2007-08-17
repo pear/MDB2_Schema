@@ -321,7 +321,21 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             $this->index['primary'] = $index['primary'];
         }
         if (!empty($index['field'])) {
-            $this->index['fields'] = $index['field'];
+            foreach($index['field'] as $field) {
+                if (!empty($field['name'])) {
+                    $this->field_name = $field['name'];
+                } else {
+                    $this->field_name = '';
+                }
+                $this->field = array(
+                    'sorting' => ''
+                );
+
+                if (!empty($field['sorting'])) {
+                    $this->field['sorting'] = $field['sorting'];
+                }
+                $this->index['fields'][$this->field_name] = $this->field;
+            }
         }
 
         $result = $this->val->validateIndex($this->table['indexes'], $this->index, $this->index_name);
@@ -342,6 +356,7 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             'onupdate' => '',
             'deferrable' => '',
             'initiallydeferred' => '',
+            'foreign' => true,
             'fields' => array(),
             'references' => array('table' => '', 'fields' => array())
         );
@@ -370,7 +385,9 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             $this->constraint['initiallydeferred'] = $constraint['initiallydeferred'];
         }
         if (!empty($constraint['field']) && is_array($constraint['field'])) {
-            $this->constraint['fields'] = $constraint['field'];
+            foreach($constraint['field'] as $field) {
+                $this->constraint['fields'][$field] = '';
+            }
         }
 
         if (!empty($constraint['references']) && is_array($constraint['references'])) {
@@ -383,7 +400,9 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             }
 
             if (!empty($constraint['references']['field']) && is_array($constraint['references']['field'])) {
-                $this->constraint['references']['fields'] = $constraint['references']['field'];
+                foreach($constraint['references']['field'] as $field) {
+                    $this->constraint['references']['fields'][$field] = '';
+                }
             }
         }
 

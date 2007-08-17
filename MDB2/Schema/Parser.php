@@ -220,11 +220,14 @@ class MDB2_Schema_Parser extends XML_Parser
             );
             break;
         case 'database-table-declaration-field':
-        case 'database-table-declaration-index-field':
         case 'database-table-declaration-foreign-field':
         case 'database-table-declaration-foreign-references-field':
             $this->field_name = '';
             $this->field = array();
+            break;
+        case 'database-table-declaration-index-field':
+            $this->field_name = '';
+            $this->field = array('sorting' => '');
             break;
         /* force field attributes to be initialized when the tag is empty in the XML */
         case 'database-table-declaration-field-was':
@@ -275,6 +278,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 'onupdate' => '',
                 'deferrable' => '',
                 'initiallydeferred' => '',
+                'foreign' => true,
                 'fields' => array(),
                 'references' => array('table' => '', 'fields' => array())
             );
@@ -419,7 +423,7 @@ class MDB2_Schema_Parser extends XML_Parser
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
             } else {
-                $this->constraint['fields'][] = $this->field_name;
+                $this->constraint['fields'][$this->field_name] = '';
             }
             break;
         case 'database-table-declaration-foreign-references-field':
@@ -427,7 +431,7 @@ class MDB2_Schema_Parser extends XML_Parser
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
             } else {
-                $this->constraint['references']['fields'][] = $this->field_name;
+                $this->constraint['references']['fields'][$this->field_name] = '';
             }
             break;
 
