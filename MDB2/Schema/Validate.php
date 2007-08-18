@@ -667,6 +667,62 @@ class MDB2_Schema_Validate
          * This have to be done here otherwise we can't guarantee that all
          * tables were already defined in the moment we are parsing sequences
          */
+        if (isset($database['tables'])) {
+            foreach ($database['tables'] as $table_name => $table) {
+                if (!empty($table['constraints'])) {
+                    foreach ($table['constraints'] as $constraint_name => $constraint) {
+                        $referenced_table_name = $constraint['references']['table'];
+
+                        if (!isset($database['tables'][$referenced_table_name])) {
+                            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                                'referenced table "'.$referenced_table_name.'" of foreign key "'.$constraint_name.'" of table "'.$table_name.'" does not exist');
+                        }
+
+                        if (empty($constraint['references']['fields'])) {
+                            $referenced_table = $database['tables'][$referenced_table_name];
+                            $primary = false;
+
+                            if (!empty($referenced_table['indexes'])) {
+                                foreach ($referenced_table['indexes'] as $index_name => $index) {
+                                    if (array_key_exists('primary', $index)
+                                        && $index['primary']
+                                    ) {
+                                        $primary = array();
+                                        foreach ($index['fields'] as $field_name => $field) {
+                                            $primary[$field_name] = '';
+                                        }
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!$primary) {
+                                foreach ($referenced_table['fields'] as $field_name => $field) {
+                                    if (array_key_exists('autoincrement', $field)
+                                        && $field['autoincrement']
+                                    ) {
+                                        $primary = array( $field_name => '' );
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if (!$primary) {
+                                return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                                    'referenced table "'.$referenced_table_name.'" has no primary key and no referenced field was specified for foreign key "'.$constraint_name.'" of table "'.$table_name.'"');
+                            } else {
+                                $database['tables'][$table_name]['constraints'][$constraint_name]['references']['fields'] = $primary;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        /*
+         * This have to be done here otherwise we can't guarantee that all
+         * tables were already defined in the moment we are parsing sequences
+         */
         if (isset($database['sequences'])) {
             foreach ($database['sequences'] as $seq_name => $seq) {
                 if (!empty($seq['on'])
