@@ -368,16 +368,16 @@ class MDB2_Schema_Writer
                                 $buffer.= "    <onupdate>".$constraint['onupdate']."</onupdate>$eol";
                             }
                             if (!empty($constraint['deferrable'])) {
-                                $buffer.= "    <onupdate>".$constraint['deferrable']."</onupdate>$eol";
+                                $buffer.= "    <deferrable>".$constraint['deferrable']."</deferrable>$eol";
                             }
                             if (!empty($constraint['initiallydeferred'])) {
-                                $buffer.= "    <onupdate>".$constraint['initiallydeferred']."</onupdate>$eol";
+                                $buffer.= "    <initiallydeferred>".$constraint['initiallydeferred']."</initiallydeferred>$eol";
                             }
-                            foreach ($constraint['fields'] as $field_name) {
+                            foreach ($constraint['fields'] as $field_name => $field) {
                                 $buffer.= "    <field>$field_name</field>$eol";
                             }
                             $buffer.= "    <references>$eol     <table>".$constraint['references']['table']."</table>$eol";
-                            foreach ($constraint['references']['fields'] as $field_name) {
+                            foreach ($constraint['references']['fields'] as $field_name => $field) {
                                 $buffer.= "     <field>$field_name</field>$eol";
                             }
                             $buffer.= "    </references>$eol";
