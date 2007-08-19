@@ -665,7 +665,7 @@ class MDB2_Schema_Validate
 
         /*
          * This have to be done here otherwise we can't guarantee that all
-         * tables were already defined in the moment we are parsing sequences
+         * tables were already defined in the moment we are parsing constraints
          */
         if (isset($database['tables'])) {
             foreach ($database['tables'] as $table_name => $table) {
