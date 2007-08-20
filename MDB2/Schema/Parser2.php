@@ -334,6 +334,12 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
                 if (!empty($field['sorting'])) {
                     $this->field['sorting'] = $field['sorting'];
                 }
+
+                $result = $this->val->validateIndexField($this->index['fields'], $this->field, $this->field_name);
+                if (PEAR::isError($result)) {
+                    return $this->raiseError($result->getUserinfo());
+                }
+
                 $this->index['fields'][$this->field_name] = $this->field;
             }
         }
@@ -386,6 +392,11 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         }
         if (!empty($constraint['field']) && is_array($constraint['field'])) {
             foreach($constraint['field'] as $field) {
+                $result = $this->val->validateConstraintField($this->constraint['fields'], $field);
+                if (PEAR::isError($result)) {
+                    return $this->raiseError($result->getUserinfo());
+                }
+
                 $this->constraint['fields'][$field] = '';
             }
         }
@@ -401,6 +412,11 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
 
             if (!empty($constraint['references']['field']) && is_array($constraint['references']['field'])) {
                 foreach($constraint['references']['field'] as $field) {
+                    $result = $this->val->validateConstraintReferencedField($this->constraint['references']['fields'], $field);
+                    if (PEAR::isError($result)) {
+                        return $this->raiseError($result->getUserinfo());
+                    }
+
                     $this->constraint['references']['fields'][$field] = '';
                 }
             }

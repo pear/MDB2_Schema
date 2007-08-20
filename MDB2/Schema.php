@@ -480,6 +480,7 @@ class MDB2_Schema extends PEAR
                 }
             }
 
+            $keys = array();
             $indexes = $this->db->manager->listTableIndexes($table_name);
             if (PEAR::isError($indexes)) {
                 return $indexes;
@@ -497,16 +498,7 @@ class MDB2_Schema extends PEAR
                         return $definition;
                     }
 
-                    /**
-                     * The first parameter is used to verify if there are duplicated
-                     * indices which we can guarantee that won't happen when reverse engineering
-                     */
-                    $result = $val->validateIndex(array(), $definition, $index_name);
-                    if (PEAR::isError($result)) {
-                        return $result;
-                    }
-
-                    $table_definition['indexes'][$index_name] = $definition;
+                    $keys[$index_name] = $definition;
                 }
             }
 
@@ -527,31 +519,74 @@ class MDB2_Schema extends PEAR
                         return $definition;
                     }
 
-                    if (array_key_exists('foreign', $definition)
-                        && $definition['foreign']
-                    ) {
-                        /**
-                         * The first parameter is used to verify if there are duplicated
-                         * foreign keys which we can guarantee that won't happen when reverse engineering
-                         */
-                        $result = $val->validateConstraint(array(), $definition, $constraint_name);
-                        if (PEAR::isError($result)) {
-                            return $result;
-                        }
+                    $keys[$constraint_name] = $definition;
+                }
+            }
 
-                        $table_definition['constraints'][$constraint_name] = $definition;
-                    } else {
-                        /**
-                         * The first parameter is used to verify if there are duplicated
-                         * foreign keys which we can guarantee that won't happen when reverse engineering
-                         */
-                        $result = $val->validateIndex(array(), $definition, $constraint_name);
-                        if (PEAR::isError($result)) {
-                            return $result;
-                        }
-
-                        $table_definition['indexes'][$constraint_name] = $definition;
+            foreach ($keys as $key_name => $definition) {
+                if (array_key_exists('foreign', $definition)
+                    && $definition['foreign']
+                ) {
+                    /**
+                     * The first parameter is used to verify if there are duplicated
+                     * foreign keys which we can guarantee that won't happen when reverse engineering
+                     */
+                    $result = $val->validateConstraint(array(), $definition, $key_name);
+                    if (PEAR::isError($result)) {
+                        return $result;
                     }
+
+                    foreach ($definition['fields'] as $field_name => $field) {
+                        /**
+                         * The first parameter is used to verify if there are duplicated
+                         * referencing fields which we can guarantee that won't happen when reverse engineering
+                         */
+                        $result = $val->validateConstraintField(array(), $field_name);
+                        if (PEAR::isError($result)) {
+                            return $result;
+                        }
+
+                        $definition['fields'][$field_name] = '';
+                    }
+
+                    foreach ($definition['references']['fields'] as $field_name => $field) {
+                        /**
+                         * The first parameter is used to verify if there are duplicated
+                         * referenced fields which we can guarantee that won't happen when reverse engineering
+                         */
+                        $result = $val->validateConstraintReferencedField(array(), $field_name);
+                        if (PEAR::isError($result)) {
+                            return $result;
+                        }
+
+                        $definition['references']['fields'][$field_name] = '';
+                    }
+
+                    $table_definition['constraints'][$key_name] = $definition;
+                } else {
+                    /**
+                     * The first parameter is used to verify if there are duplicated
+                     * indices which we can guarantee that won't happen when reverse engineering
+                     */
+                    $result = $val->validateIndex(array(), $definition, $key_name);
+                    if (PEAR::isError($result)) {
+                        return $result;
+                    }
+
+                    foreach ($definition['fields'] as $field_name => $field) {
+                        /**
+                         * The first parameter is used to verify if there are duplicated
+                         * index fields which we can guarantee that won't happen when reverse engineering
+                         */
+                        $result = $val->validateIndexField(array(), $field, $field_name);
+                        if (PEAR::isError($result)) {
+                            return $result;
+                        }
+
+                        $definition['fields'][$field_name] = $field;
+                    }
+
+                    $table_definition['indexes'][$key_name] = $definition;
                 }
             }
 
