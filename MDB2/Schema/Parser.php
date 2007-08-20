@@ -427,7 +427,7 @@ class MDB2_Schema_Parser extends XML_Parser
             }
             break;
         case 'database-table-declaration-foreign-references-field':
-            $result = $this->val->validateConstraintReferencedField($this->constraint['references']['fields'], $this->field_name, $this->database_definition['tables'],$this->constraint['references']['table']);
+            $result = $this->val->validateConstraintReferencedField($this->constraint['references']['fields'], $this->field_name);
             if (PEAR::isError($result)) {
                 $this->raiseError($result->getUserinfo(), 0, $xp, $result->getCode());
             } else {

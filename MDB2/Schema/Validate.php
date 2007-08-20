@@ -505,7 +505,19 @@ class MDB2_Schema_Validate
         /* Have we got fields? */
         if (empty($constraint['fields']) || !is_array($constraint['fields'])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'foreign keys need one or more fields');
+                'foreign key "'.$constraint_name.'" need one or more fields');
+        }
+
+        /* Have we got referenced fields? */
+        if (empty($constraint['references']) || !is_array($constraint['references'])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'foreign key "'.$constraint_name.'" need to reference one or more fields');
+        }
+
+        /* Have we got referenced table? */
+        if (empty($constraint['references']['table'])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'foreign key "'.$constraint_name.'" need to reference a table');
         }
 
         if (empty($constraint['was'])) {
@@ -518,7 +530,7 @@ class MDB2_Schema_Validate
     // {{{ validateConstraintField()
 
     /**
-     * Checks whether a parsed foreign-field is valid.
+     * Checks whether a foreign-field is valid.
      *
      * @param array  multi dimensional array that contains the
      *                fields of current foreign key.
@@ -534,7 +546,7 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'empty value for foreign-field');
         }
-        if (is_array($constraint_fields) && in_array($field_name, $constraint_fields)) {
+        if (is_array($constraint_fields) && isset($constraint_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'foreign field "'.$field_name.'" already exists');
         }
@@ -545,7 +557,7 @@ class MDB2_Schema_Validate
     // {{{ validateConstraintReferencedField()
 
     /**
-     * Checks whether a referenced field by of a foreign key exists.
+     * Checks whether a foreign-referenced field is valid.
      *
      * @param array  multi dimensional array that contains the
      *                fields of current foreign key.
@@ -555,9 +567,16 @@ class MDB2_Schema_Validate
      *
      * @access public
      */
-    function validateConstraintReferencedField($referenced_fields, $field_name, $tables, $table_name)
+    function validateConstraintReferencedField($referenced_fields, $field_name)
     {
-        // to be implemented yet
+        if (!$field_name) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'empty value for referenced foreign-field');
+        }
+        if (is_array($referenced_fields) && isset($referenced_fields[$field_name])) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                'foreign field "'.$field_name.'" already referenced');
+        }
         return MDB2_OK;
     }
 
@@ -710,10 +729,18 @@ class MDB2_Schema_Validate
                             if (!$primary) {
                                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                                     'referenced table "'.$referenced_table_name.'" has no primary key and no referenced field was specified for foreign key "'.$constraint_name.'" of table "'.$table_name.'"');
-                            } else {
-                                $database['tables'][$table_name]['constraints'][$constraint_name]['references']['fields'] = $primary;
                             }
+
+                            $constraint['references']['fields'] = $primary;
                         }
+
+                        /* the same number of referencing and referenced fields ? */
+                        if (count($constraint['fields']) != count($constraint['references']['fields'])) {
+                            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                                'The number of fields in the referenced key must match those of the foreign key "'.$constraint_name.'"');
+                        }
+
+                        $database['tables'][$table_name]['constraints'][$constraint_name]['references']['fields'] = $constraint['references']['fields'];
                     }
                 }
             }
