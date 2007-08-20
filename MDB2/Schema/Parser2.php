@@ -572,30 +572,10 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         return MDB2_OK;
     }
 
-    /* blindly copied from original parser. to be implemented yet. */
-    function &raiseError($msg = null, $xmlecode = 0, $xp = null, $ecode = MDB2_SCHEMA_ERROR_PARSE)
+    function &raiseError($msg = null, $ecode = MDB2_SCHEMA_ERROR_PARSE)
     {
         if (is_null($this->error)) {
-            $error = '';
-            if (is_resource($msg)) {
-                $error.= 'Parser error: '.xml_error_string(xml_get_error_code($msg));
-                $xp = $msg;
-            } else {
-                $error.= 'Parser error: '.$msg;
-                if (!is_resource($xp)) {
-                    $xp = $this->parser;
-                }
-            }
-            if ($error_string = xml_error_string($xmlecode)) {
-                $error.= ' - '.$error_string;
-            }
-            if (is_resource($xp)) {
-                $byte = @xml_get_current_byte_index($xp);
-                $line = @xml_get_current_line_number($xp);
-                $column = @xml_get_current_column_number($xp);
-                $error.= " - Byte: $byte; Line: $line; Col: $column";
-            }
-            $error.= "\n";
+            $error = 'Parser error: '.$msg."\n";
             $this->error =& MDB2_Schema::raiseError($ecode, null, null, $error);
         }
         return $this->error;
