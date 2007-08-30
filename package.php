@@ -47,28 +47,11 @@ require_once 'PEAR/PackageFileManager2.php';
 PEAR::setErrorHandling(PEAR_ERROR_DIE);
 
 $version_api = '0.8.0';
-$version_release = '0.8.0';
+$version_release = '0.8.1';
 $state = 'beta';
 
 $notes = <<<EOT
-- Primary Key is removed when updating a table against its XML (Bug #11604)
-- Added support to INSERT...SELECT syntax, so it is now possible to prevent data loss when rollback an updated database (Bug #10892)
-- Updated API of getInstructionFields() and getInstructionWhere()
-- It is now possible to prevent updateDatabase() of overwriting the old schema file
-- alterDatabaseTables() first add new tables, then remove the old one. it is necessary to save table data before a remove
-- updateDatabase() was aborting, under certain conditions, when <was> was not found (Bug #11600)
-- Now validating database definition when reverse engineering (Bug #11604)
-- createDatabase() has a new parameter that is passed to the database driver to set some options like table engine
-- Foreign Keys support
-- It is now possible to assign to a column the value of another column, of the same table, when inserting data
-- Fixed the HTML etities issue when parsing a schema file (Bug #11676)
-- XML Documentation, XSD and DST updated to show/expect the attributes in a unique order. Writer and parsers was also updated to handle the attributes in that some order. That said Parser and Parser2 must have the exactly same output for a given XML
-- Except for table fields, all other database elements are being initialized with all its attributes, no matter if those attributes are present on the XML or not
-- Many bugs fixed in Parser2, that was not creating a valid database definition
-- Introduced attribute "fixed" of table field declaration
-- validateIndex() is now checking whether a index has fields
-- Validate is not returning MDB2_OK instead of boolean true
-- XML Documentation and schema validators revised and updated
+- updated dependency
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
