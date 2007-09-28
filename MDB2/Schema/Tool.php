@@ -263,11 +263,66 @@ EOH
 
         //read password if necessary
         if ($bAskPassword) {
-            $strPassword = $this->readPasswordFromStdin();
-            //FIXME: Integrate password into DSN
+            $password = $this->readPasswordFromStdin($arg);
+            $arg      = self::setPasswordIntoDsn($arg, $password);
+            self::toStdErr($arg);
         }
         return array('dsn', $arg);
     }//protected function getFileOrDsn(&$args)
+
+
+
+    /**
+    * Takes a DSN data source name and integrates the given
+    * password into it.
+    *
+    * @param string $dsn      Data source name
+    * @param string $password Password
+    *
+    * @return string DSN with password
+    */
+    protected function setPasswordIntoDsn($dsn, $password)
+    {
+        //simple try to integrate password
+        if (strpos($dsn, '@') === false) {
+            //no @ -> no user and no password
+            return str_replace('://', '://:' . $password . '@', $dsn);
+        } else if (preg_match('|://[^:]+@|', $dsn)) {
+            //user only, no password
+            return str_replace('@', ':' . $password . '@', $dsn);
+        } else if (strpos($dsn, ':@') !== false) {
+            //abstract version
+            return str_replace(':@', ':' . $password . '@', $dsn);
+        }
+
+        return $dsn;
+    }//protected function setPasswordIntoDsn($dsn, $password)
+
+
+
+    /**
+    * Reads a password from stdin
+    *
+    * @param string $dsn DSN name to put into the message
+    *
+    * @return string Password
+    */
+    protected function readPasswordFromStdin($dsn)
+    {
+        $stdin = fopen('php://stdin', 'r');
+        self::toStdErr('Please insert password for ' . $dsn . "\n");
+        $password = '';
+        $breakme  = false;
+        while (false !== ($char = fgetc($stdin))) {
+            if (ord($char) == 10 || $char == "\n" || $char == "\r") {
+                break;
+            }
+            $password .= $char;
+        }
+        fclose($stdin);
+
+        return trim($password);
+    }//protected function readPasswordFromStdin()
 
 
 
