@@ -9,7 +9,7 @@
  * @author     Bertrand Gugger <bertrand@toggg.com>
  * @copyright  2006 bertrand Gugger
  * @license    http://www.opensource.org/licenses/bsd-license.php BSD license
- * @version    CVS: $Id: schema2html.xsl,v 1.5 2006-04-22 12:40:15 toggg Exp $
+ * @version    CVS: $Id: schema2html.xsl,v 1.6 2007-10-16 20:29:28 ifeghali Exp $
  * @link       http://pear.php.net/package/MDB2_Schema
  *
 -->
@@ -144,7 +144,7 @@
 </xsl:template>
 
 <!-- <length> for some <type> -->
-<xsl:template name="showlength">(<xsl:value-of select="//length"/>)
+        <xsl:template name="showlength">(<xsl:value-of select="current()"/>)
 </xsl:template>
 
 <!-- So <table> has a <declaration> with few <field>
