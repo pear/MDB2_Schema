@@ -1,6 +1,6 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 <!--
-     @(#) $Id: MDB.xsl,v 1.3 2006-04-16 10:20:35 toggg Exp $
+     @(#) $Id: MDB.xsl,v 1.4 2007-10-17 21:20:39 ifeghali Exp $
   -->
 <xsl:template match="/">
     <!--  -->
@@ -87,7 +87,7 @@
     </tr>
 </xsl:template>
 
-<xsl:template name="showlength">(<xsl:value-of select="//length"/>)
+<xsl:template name="showlength">(<xsl:value-of select="current()"/>)
 </xsl:template>
 
 <xsl:template name="showdefault">
