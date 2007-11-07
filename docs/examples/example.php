@@ -268,7 +268,7 @@ if (isset($_REQUEST['submit'])) {
     $warnings = $schema->getWarnings();
     if (count($warnings) > 0) {
         echo('<h1>Warnings</h1>');
-        call_user_func($var_dump, $operation);
+        call_user_func($var_dump, $warnings);
     }
 
     if ($schema->db->getOption('debug')) {
