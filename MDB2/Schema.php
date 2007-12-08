@@ -1236,51 +1236,45 @@ class MDB2_Schema extends PEAR
         }
         $create = (isset($database_definition['create']) && $database_definition['create']);
         $overwrite = (isset($database_definition['overwrite']) && $database_definition['overwrite']);
+
+        /**
+         *
+         * We need to clean up database name before any query to prevent
+         * database driver from using a inexistent database
+         *
+         */
+        $this->db->setDatabase('');
+
+        // Lower / Upper case the db name if the portability deems so.
+        if ($this->db->options['portability'] & MDB2_PORTABILITY_FIX_CASE) {
+            $func = $this->db->options['field_case'] == CASE_LOWER ? 'strtolower' : 'strtoupper';
+            $db_name = $func($database_definition['name']);
+        }
+
         if ($create) {
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
-            $this->db->expectError($errorcodes);
-
-            /**
-             *
-             * We need to clean up database name before any query to prevent
-             * database driver from using a inexistent database
-             *
-             */
-            $this->db->setDatabase("");
-            $databases = $this->db->manager->listDatabases();
-
-            // Lower / Upper case the db name if the portability deems so.
-            if ($this->db->options['portability'] & MDB2_PORTABILITY_FIX_CASE) {
-                $func = $this->db->options['field_case'] == CASE_LOWER ? 'strtolower' : 'strtoupper';
-                $db_name = $func($database_definition['name']);
+            if ($overwrite) {
+                $this->db->expectError(MDB2_ERROR_CANNOT_DROP);
+                $result = $this->db->manager->dropDatabase($database_definition['name']);
+                $this->db->popExpect();
+                if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_CANNOT_DROP)) {
+                    return $result;
+                }
+                $this->db->debug('Overwritting database: '.$database_definition['name'], __FUNCTION__);
             }
 
+            $this->db->expectError(MDB2_ERROR_ALREADY_EXISTS);
+            $result = $this->db->manager->createDatabase($database_definition['name']);
             $this->db->popExpect();
-            if (PEAR::isError($databases)) {
-                if (!MDB2::isError($databases, $errorcodes)) {
-                    return $databases;
-                }
-            } elseif (is_array($databases) && isset($db_name) && in_array($db_name, $databases)) {
-                if (!$overwrite) {
+            if (PEAR::isError($result)) {
+                if (MDB2::isError($result, MDB2_ERROR_ALREADY_EXISTS)) {
                     $this->db->debug('Database already exists: ' . $database_definition['name'], __FUNCTION__);
                     $create = false;
                 } else {
-                    $result = $this->db->manager->dropDatabase($database_definition['name']);
-                    if (PEAR::isError($result)) {
-                        return $result;
-                    }
-                    $this->db->debug('Overwritting database: '.$database_definition['name'], __FUNCTION__);
-                }
-            }
-            if ($create) {
-                $this->db->expectError(MDB2_ERROR_ALREADY_EXISTS);
-                $result = $this->db->manager->createDatabase($database_definition['name']);
-                $this->db->popExpect();
-                if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_ALREADY_EXISTS)) {
                     return $result;
                 }
             }
         }
+
         $previous_database_name = $this->db->setDatabase($database_definition['name']);
         if (($support_transactions = $this->db->supports('transactions'))
             && PEAR::isError($result = $this->db->beginNestedTransaction())
@@ -2435,21 +2429,6 @@ class MDB2_Schema extends PEAR
         }
 
         if ($previous_definition) {
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NOT_CAPABLE);
-            $this->db->expectError($errorcodes);
-            $databases = $this->db->manager->listDatabases();
-            $this->db->popExpect();
-            if (PEAR::isError($databases)) {
-                if (!MDB2::isError($databases, $errorcodes)) {
-                    return $databases;
-                }
-            } elseif (!is_array($databases) ||
-                !in_array($current_definition['name'], $databases)
-            ) {
-                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                    'database to update does not exist: '.$current_definition['name']);
-            }
-
             $changes = $this->compareDefinitions($current_definition, $previous_definition);
             if (PEAR::isError($changes)) {
                 return $changes;
