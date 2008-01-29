@@ -201,6 +201,7 @@ class MDB2_Schema_Parser extends XML_Parser
                 'name' => '',
                 'create' => '',
                 'overwrite' => '',
+                'charset' => '',
                 'description' => '',
                 'comments' => '',
                 'tables' => array(),
@@ -625,6 +626,9 @@ class MDB2_Schema_Parser extends XML_Parser
             break;
         case 'database-overwrite':
             $this->database_definition['overwrite'].= $data;
+            break;
+        case 'database-charset':
+            $this->database_definition['charset'].= $data;
             break;
         case 'database-description':
             $this->database_definition['description'].= $data;

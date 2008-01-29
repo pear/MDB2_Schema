@@ -269,6 +269,7 @@ class MDB2_Schema_Writer
         $buffer.= "<database>$eol$eol <name>".$database_definition['name']."</name>";
         $buffer.= "$eol <create>".$this->_dumpBoolean($database_definition['create'])."</create>";
         $buffer.= "$eol <overwrite>".$this->_dumpBoolean($database_definition['overwrite'])."</overwrite>$eol";
+        $buffer.= "$eol <charset>".$database_definition['charset']."</charset>$eol";
 
         if ($output) {
             call_user_func($output, $buffer);

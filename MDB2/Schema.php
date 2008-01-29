@@ -419,6 +419,7 @@ class MDB2_Schema extends PEAR
             'name' => $database,
             'create' => true,
             'overwrite' => false,
+            'charset' => '',
             'description' => '',
             'comments' => '',
             'tables' => array(),
@@ -691,13 +692,14 @@ class MDB2_Schema extends PEAR
                 } else {
                     $this->db->debug('Preparing to overwrite index: '.$index_name, __FUNCTION__);
 
+                    $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     if (!empty($index['primary']) || !empty($index['unique'])) {
                         $result = $this->db->manager->dropConstraint($table_name, $index_name);
                     } else {
                         $result = $this->db->manager->dropIndex($table_name, $index_name);
                     }
-
-                    if (PEAR::isError($result)) {
+                    $this->db->popExpect();
+                    if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_NOT_FOUND)) {
                         return $result;
                     }
                 }
@@ -887,6 +889,7 @@ class MDB2_Schema extends PEAR
         $table_name = $this->db->quoteIdentifier($table_name, true);
 
         $result = MDB2_OK;
+        $support_transactions = $this->db->supports('transactions');
 
         foreach ($table['initialization'] as $instruction) {
             $query = '';
@@ -928,9 +931,17 @@ class MDB2_Schema extends PEAR
                 break;
             }
             if ($query) {
+                if ($support_transactions && PEAR::isError($res = $this->db->beginNestedTransaction())) {
+                    return $res;
+                }
+
                 $result = $this->db->exec($query);
                 if (PEAR::isError($result)) {
                     return $result;
+                }
+
+                if ($support_transactions && PEAR::isError($res = $this->db->completeNestedTransaction())) {
+                    return $res;
                 }
             }
         }
@@ -1262,12 +1273,23 @@ class MDB2_Schema extends PEAR
                 $this->db->debug('Overwritting database: '.$database_definition['name'], __FUNCTION__);
             }
 
-            $this->db->expectError(MDB2_ERROR_ALREADY_EXISTS);
-            $result = $this->db->manager->createDatabase($database_definition['name']);
+            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_UNSUPPORTED);
+            $this->db->expectError($errorcodes);
+            $dbOptions = array();
+            if (isset($database_definition['charset'])) {
+                $dbOptions['charset'] = $database_definition['charset'];
+            }
+            $result = $this->db->manager->createDatabase($database_definition['name'], $dbOptions);
             $this->db->popExpect();
-            if (PEAR::isError($result)) {
+            if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_UNSUPPORTED)) {
                 if (MDB2::isError($result, MDB2_ERROR_ALREADY_EXISTS)) {
                     $this->db->debug('Database already exists: ' . $database_definition['name'], __FUNCTION__);
+                    if (!empty($dbOptions)) {
+                        $result = $this->db->manager->alterDatabase($database_definition['name'], $dbOptions);
+                        if (PEAR::isError($result)) {
+                            return $result;
+                        }
+                    }
                     $create = false;
                 } else {
                     return $result;
@@ -1326,9 +1348,11 @@ class MDB2_Schema extends PEAR
         if (PEAR::isError($result) && $create
             && PEAR::isError($result2 = $this->db->manager->dropDatabase($database_definition['name']))
         ) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
-                'Could not drop the created database after unsuccessful creation attempt ('.
-                $result2->getMessage().' ('.$result2->getUserinfo().'))');
+            if (!MDB2::isError($result2, MDB2_ERROR_UNSUPPORTED)) {
+                return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
+                       'Could not drop the created database after unsuccessful creation attempt ('.
+                       $result2->getMessage().' ('.$result2->getUserinfo().'))');
+            }
         }
 
         return $result;
@@ -1812,12 +1836,14 @@ class MDB2_Schema extends PEAR
 
         if (!empty($changes['remove']) && is_array($changes['remove'])) {
             foreach ($changes['remove'] as $index_name => $index) {
+                $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                 if (!empty($index['primary']) || !empty($index['unique'])) {
                     $result = $this->db->manager->dropConstraint($table_name, $index_name, !empty($index['primary']));
                 } else {
                     $result = $this->db->manager->dropIndex($table_name, $index_name);
                 }
-                if (PEAR::isError($result)) {
+                $this->db->popExpect();
+                if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_NOT_FOUND)) {
                     return $result;
                 }
                 $alterations++;
@@ -1826,14 +1852,18 @@ class MDB2_Schema extends PEAR
         if (!empty($changes['change']) && is_array($changes['change'])) {
             foreach ($changes['change'] as $index_name => $index) {
                 if (!empty($index['primary']) || !empty($index['unique'])) {
+                    $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     $result = $this->db->manager->dropConstraint($table_name, $index_name, !empty($index['primary']));
-                    if (PEAR::isError($result)) {
+                    $this->db->popExpect();
+                    if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_NOT_FOUND)) {
                         return $result;
                     }
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
+                    $this->db->expectError(MDB2_ERROR_NOT_FOUND);
                     $result = $this->db->manager->dropIndex($table_name, $index_name);
-                    if (PEAR::isError($result)) {
+                    $this->db->popExpect();
+                    if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_NOT_FOUND)) {
                         return $result;
                     }
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);

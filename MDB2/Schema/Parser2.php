@@ -131,6 +131,7 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             'name' => '',
             'create' => '',
             'overwrite' => '',
+            'charset' => '',
             'description' => '',
             'comments' => '',
             'tables' => array(),
@@ -145,6 +146,9 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         }
         if (!empty($database['overwrite'])) {
             $this->database_definition['overwrite'] = $database['overwrite'];
+        }
+        if (!empty($database['charset'])) {
+            $this->database_definition['charset'] = $database['charset'];
         }
         if (!empty($database['description'])) {
             $this->database_definition['description'] = $database['description'];
