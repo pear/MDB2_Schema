@@ -332,11 +332,15 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
                     $this->field_name = '';
                 }
                 $this->field = array(
-                    'sorting' => ''
+                    'sorting' => '',
+                    'length' => ''
                 );
 
                 if (!empty($field['sorting'])) {
                     $this->field['sorting'] = $field['sorting'];
+                }
+                if (!empty($field['length'])) {
+                    $this->field['length'] = $field['length'];
                 }
 
                 $result = $this->val->validateIndexField($this->index['fields'], $this->field, $this->field_name);

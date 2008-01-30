@@ -273,6 +273,11 @@
     <p>Type of field sorting that should be assumed when the index is created.  On <i>DBMS</i> that support index sorting, queries that search tables on the fields specified by the given index may execute faster if the specified sorting type is chosen adequately.  <i>DBMS</i> that do not support index sorting will ignore this property.</p>
     <p>Valid sorting types are <tt>ascending</tt> and <tt>descending</tt>.</p>
     <p><b>Default:</b> <tt>ascending</tt></p>
+
+    <p><li><tt>length</tt></li></p>
+    <p>The <tt>length</tt> attribute is only supported by the <i>MySQL</i> and <i>MySQLi</i> drivers.</p>
+    <p>Expects an integer.</p>
+    <p><b>Default:</b> none</p>
 </ul>
 
 <h5>Example</h5>
@@ -674,6 +679,7 @@
     <ul><p>
      <tt>&lt;name/&gt;</tt><br/>
      <tt>&lt;sorting/&gt;?</tt><br/>
+     <tt>&lt;length/&gt;?</tt><br/>
     </ul></p>
     <tt>&lt;/field&gt;+</tt><br/>
    </ul></p>

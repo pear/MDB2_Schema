@@ -228,7 +228,7 @@ class MDB2_Schema_Parser extends XML_Parser
             break;
         case 'database-table-declaration-index-field':
             $this->field_name = '';
-            $this->field = array('sorting' => '');
+            $this->field = array('sorting' => '', 'length' => '');
             break;
         /* force field attributes to be initialized when the tag is empty in the XML */
         case 'database-table-declaration-field-was':
@@ -705,14 +705,9 @@ class MDB2_Schema_Parser extends XML_Parser
         case 'database-table-declaration-index-field-sorting':
             $this->field['sorting'].= $data;
             break;
-        /* todo: check the following attribute as it is not documented anywhere */
         /* Add by Leoncx */
         case 'database-table-declaration-index-field-length':
-            if (isset($this->field['length'])) {
-                $this->field['length'].= $data;
-            } else {
-                $this->field['length'] = $data;
-            }
+            $this->field['length'].= $data;
             break;
 
         /* Foreign Key declaration */
