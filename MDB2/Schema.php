@@ -1254,7 +1254,7 @@ class MDB2_Schema extends PEAR
          * database driver from using a inexistent database
          *
          */
-        $this->db->setDatabase('');
+        $previous_database_name = $this->db->setDatabase('');
 
         // Lower / Upper case the db name if the portability deems so.
         if ($this->db->options['portability'] & MDB2_PORTABILITY_FIX_CASE) {
@@ -1297,7 +1297,7 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        $previous_database_name = $this->db->setDatabase($database_definition['name']);
+        $this->db->setDatabase($database_definition['name']);
         if (($support_transactions = $this->db->supports('transactions'))
             && PEAR::isError($result = $this->db->beginNestedTransaction())
         ) {
