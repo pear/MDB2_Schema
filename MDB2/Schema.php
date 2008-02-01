@@ -1108,7 +1108,8 @@ class MDB2_Schema extends PEAR
         $fields = array();
         if (!empty($instruction['field']) && is_array($instruction['field'])) {
             foreach ($instruction['field'] as $field) {
-                $fields[$field['name']] = $this->getExpression($field['group'], $fields_definition);
+                $field_name = $this->db->quoteIdentifier($field['name'], true);
+                $fields[$field_name] = $this->getExpression($field['group'], $fields_definition);
             }
         }
         return $fields;
