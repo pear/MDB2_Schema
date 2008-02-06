@@ -181,6 +181,7 @@
  <xsd:all>
   <xsd:element ref="name"/>
   <xsd:element ref="sorting" minOccurs="0"/>
+  <xsd:element ref="length" minOccurs="0"/>
  </xsd:all>
 </xsd:complexType>
 
