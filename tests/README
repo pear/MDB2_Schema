@@ -1,3 +1,5 @@
+*** The contents of this directory are outdated ***
+
 This is a test framework for MDB2_Schema built using PHPUnit.
 These tests directly access the MDB2_Schema API - hopefully this framework
 should give better feedback as to where or what caused when error are encountered.
@@ -27,6 +29,6 @@ To setup the tests
 
 Writing tests:
 
-The tests are written using PHPUnit from pear so first make sure you
-have the latest stable release, and have read the docs,
-http://pear.php.net/manual/en/packages.phpunit.php
+The tests are written using PHPUnit so first make sure you
+have the latest stable release, and have read the docs.
+http://www.phpunit.de
