@@ -88,6 +88,7 @@ $databases = array(
 );
 
 $options = array(
+    'use_transactions' => false,
     'log_line_break' => '<br>',
     'idxname_format' => '%s',
     'debug' => true,
@@ -116,6 +117,7 @@ if (isset($_REQUEST['submit'])) {
     $dsn = $_REQUEST['type'].'://'.$_REQUEST['user'].':'.$_REQUEST['pass'].'@'.$_REQUEST['host'].'/'.$_REQUEST['name'];
 
     $schema =& MDB2_Schema::factory($dsn, $options);
+    $schema->db->supported['transactions'] = false;
     if (PEAR::isError($schema)) {
         $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
     } elseif (array_key_exists('action', $_REQUEST)) {
