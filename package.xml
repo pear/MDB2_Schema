@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.6.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>MDB2_Schema</name>
  <channel>pear.php.net</channel>
  <extends>MDB2</extends>
@@ -31,26 +31,43 @@ PEAR::MDB and Metabase.</description>
   <name>Andrew Hill</name>
   <user>fornax</user>
   <email>andrew-pear@fornax.net</email>
+  <active>no</active>
+ </contributor>
+ <contributor>
+  <name>Ali Fazelzadeh</name>
+  <user>afz</user>
+  <email>afz@dev-code.com</email>
   <active>yes</active>
  </contributor>
  <helper>
   <name>Lars Olesen</name>
   <user>lsolesen</user>
   <email>lars@legestue.net</email>
-  <active>yes</active>
+  <active>no</active>
  </helper>
- <date>2007-08-30</date>
- <time>16:47:12</time>
+ <date>2008-02-23</date>
+ <time>02:04:04</time>
  <version>
-  <release>0.8.1</release>
+  <release>0.8.2</release>
   <api>0.8.0</api>
  </version>
  <stability>
   <release>beta</release>
   <api>beta</api>
  </stability>
- <license>BSD License</license>
+ <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
  <notes>- updated dependency
+- updated license disclaimer in source code files
+- use quoteIdentifier in getInstructionFields() (Bug #13037)
+- After database creation, sqlite db connection not usable (Bug #11920)
+- Supporting Database Charset (Bug #12908)
+- writeInitialization() fails at given conditions (Bug #12950)
+- drop usage of listDatabases() (Bug #12636), as a consequence updateDatabase() doesn&apos;t check anymore whether updating database exists
+- index-length documented and included in Parser2 (Bug #12540)
+- xsl transformation chooses wrong value for length (Bug #12261)
+- added README file for docs dir
+- the correct variable name for warning is &quot;warnings&quot; not &quot;operation&quot; in example script
+- disabled transactions in the example script
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -74,6 +91,9 @@ open todo items:
 - Fulltext index support</notes>
  <contents>
   <dir baseinstalldir="/" name="/">
+   <dir name="bin">
+    <file name="mdb2_schematool" role="data" />
+   </dir> <!-- /bin -->
    <dir name="docs">
     <dir name="examples">
      <file name="example.php" role="doc">
@@ -98,6 +118,7 @@ open todo items:
     <file name="MDB.xsl" role="doc">
      <tasks:replace from="@package_version@" to="version" type="package-info" />
     </file>
+    <file name="README" role="doc" />
     <file name="schema2html.css" role="doc">
      <tasks:replace from="@package_version@" to="version" type="package-info" />
     </file>
@@ -127,10 +148,14 @@ open todo items:
        <tasks:replace from="@package_version@" to="version" type="package-info" />
       </file>
      </dir> <!-- /MDB2/Schema/Reserved -->
+     <dir name="Tool">
+      <file name="ParameterException.php" role="php" />
+     </dir> <!-- /MDB2/Schema/Tool -->
      <file name="Parser.php" role="php">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
      <file name="Parser2.php" role="php" />
+     <file name="Tool.php" role="php" />
      <file name="Validate.php" role="php">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
@@ -191,29 +216,76 @@ open todo items:
     <min>1.6.0</min>
    </pearinstaller>
    <package>
-    <name>PEAR</name>
+    <name>MDB2</name>
     <channel>pear.php.net</channel>
-    <min>1.6.0</min>
+    <min>2.4.1</min>
    </package>
    <package>
     <name>XML_Parser</name>
     <channel>pear.php.net</channel>
-   </package>
-   <package>
-    <name>MDB2</name>
-    <channel>pear.php.net</channel>
-    <min>2.4.1</min>
+    <min>1.2.8</min>
    </package>
   </required>
   <optional>
    <package>
     <name>XML_DTD</name>
     <channel>pear.php.net</channel>
+    <min>0.4.2</min>
+   </package>
+   <package>
+    <name>XML_Serializer</name>
+    <channel>pear.php.net</channel>
+    <min>0.18.0</min>
    </package>
   </optional>
  </dependencies>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.8.2</release>
+    <api>0.8.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2008-02-23</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+   <notes>- updated dependency
+- updated license disclaimer in source code files
+- use quoteIdentifier in getInstructionFields() (Bug #13037)
+- After database creation, sqlite db connection not usable (Bug #11920)
+- Supporting Database Charset (Bug #12908)
+- writeInitialization() fails at given conditions (Bug #12950)
+- drop usage of listDatabases() (Bug #12636), as a consequence updateDatabase() doesn&apos;t check anymore whether updating database exists
+- index-length documented and included in Parser2 (Bug #12540)
+- xsl transformation chooses wrong value for length (Bug #12261)
+- added README file for docs dir
+- the correct variable name for warning is &quot;warnings&quot; not &quot;operation&quot; in example script
+- disabled transactions in the example script
+
+open todo items:
+- Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
+- Automatically load reserved keywords
+- Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- Allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). This would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- Modularize Writer code or remake it
+- Add specific error codes for Validate class
+- Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
+  problem)
+- Update description.schema.xml
+- Create unit test for comparedefinitions()
+- Create unit test for initializetable()
+- Create unit test to compare the expected array definition with what is parsed
+- Improve validateDataFieldValue() to validate &lt;column&gt;
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
+- Views support
+- Fulltext index support</notes>
+  </release>
   <release>
    <version>
     <release>0.8.1</release>
