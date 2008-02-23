@@ -46,7 +46,7 @@ PEAR::MDB and Metabase.</description>
   <active>no</active>
  </helper>
  <date>2008-02-23</date>
- <time>02:04:04</time>
+ <time>02:10:52</time>
  <version>
   <release>0.8.2</release>
   <api>0.8.0</api>
@@ -68,6 +68,7 @@ PEAR::MDB and Metabase.</description>
 - added README file for docs dir
 - the correct variable name for warning is &quot;warnings&quot; not &quot;operation&quot; in example script
 - disabled transactions in the example script
+- introducing mdb2_schematool, a command line tool to dump and load schemas
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -264,6 +265,7 @@ open todo items:
 - added README file for docs dir
 - the correct variable name for warning is &quot;warnings&quot; not &quot;operation&quot; in example script
 - disabled transactions in the example script
+- introducing mdb2_schematool, a command line tool to dump and load schemas
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.

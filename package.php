@@ -65,6 +65,7 @@ $notes = <<<EOT
 - added README file for docs dir
 - the correct variable name for warning is "warnings" not "operation" in example script
 - disabled transactions in the example script
+- introducing mdb2_schematool, a command line tool to dump and load schemas
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
