@@ -3,7 +3,7 @@
 // | PHP versions 4 and 5                                                 |
 // +----------------------------------------------------------------------+
 // | Copyright (c) 1998-2006 Manuel Lemos, Tomas V.V.Cox,                 |
-// | Stig. S. Bakken, Lukas Smith                                         |
+// | Stig. S. Bakken, Lukas Smith, Igor Feghali                           |
 // | All rights reserved.                                                 |
 // +----------------------------------------------------------------------+
 // | MDB2 is a merge of PEAR DB and Metabases that provides a unified DB  |
@@ -22,9 +22,9 @@
 // | documentation and/or other materials provided with the distribution. |
 // |                                                                      |
 // | Neither the name of Manuel Lemos, Tomas V.V.Cox, Stig. S. Bakken,    |
-// | Lukas Smith nor the names of his contributors may be used to endorse |
-// | or promote products derived from this software without specific prior|
-// | written permission.                                                  |
+// | Lukas Smith, Igor Feghali  nor the names of his contributors may be  |
+// | used to endorse or promote products derived from this software       |
+// | without specific prior written permission.                           |
 // |                                                                      |
 // | THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  |
 // | "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    |
@@ -40,6 +40,7 @@
 // | POSSIBILITY OF SUCH DAMAGE.                                          |
 // +----------------------------------------------------------------------+
 // | Author: Lukas Smith <smith@pooteeweet.org>                           |
+// | Author: Igor Feghali <ifeghali@php.net>                              |
 // +----------------------------------------------------------------------+
 //
 // $Id$
@@ -91,6 +92,8 @@ $options = array(
     'use_transactions' => false,
     'log_line_break' => '<br>',
     'idxname_format' => '%s',
+    'DBA_username' => '',
+    'DBA_password' => '',
     'debug' => true,
     'quote_identifier' => true,
     'force_defaults' => false,
@@ -373,6 +376,14 @@ if (!isset($_REQUEST['submit']) || isset($error)) {
     <tr>
         <td><label for="idxname_format">Index Name Format:</label></td>
         <td><input type="text" name="idxname_format" id="idxname_format" value="%s" /></td>
+    </tr>
+    <tr>
+        <td><label for="DBA_username">DBA_username:</label></td>
+        <td><input type="text" name="DBA_username" id="DBA_username" value="" /></td>
+    </tr>
+    <tr>
+        <td><label for="DBA_password">DBA_password:</label></td>
+        <td><input type="text" name="DBA_password" id="DBA_password" value="" /></td>
     </tr>
     <tr>
         <td><label for="debug">Debug:</label></td>
