@@ -1262,44 +1262,57 @@ class MDB2_Schema extends PEAR
         if ($this->db->options['portability'] & MDB2_PORTABILITY_FIX_CASE) {
             $func = $this->db->options['field_case'] == CASE_LOWER ? 'strtolower' : 'strtoupper';
             $db_name = $func($database_definition['name']);
+        } else {
+            $db_name = $database_definition['name'];
         }
 
         if ($create) {
-            if ($overwrite) {
+
+            $dbExists = $this->db->databaseExists($db_name);
+            if (PEAR::isError($dbExists)) {
+                return $dbExists;
+            }
+
+            if ($dbExists && $overwrite) {
                 $this->db->expectError(MDB2_ERROR_CANNOT_DROP);
-                $result = $this->db->manager->dropDatabase($database_definition['name']);
+                $result = $this->db->manager->dropDatabase($db_name);
                 $this->db->popExpect();
                 if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_CANNOT_DROP)) {
                     return $result;
                 }
-                $this->db->debug('Overwritting database: '.$database_definition['name'], __FUNCTION__);
+                $dbExists = false;
+                $this->db->debug('Overwritting database: ' . $db_name, __FUNCTION__);
             }
 
-            $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_UNSUPPORTED);
-            $this->db->expectError($errorcodes);
             $dbOptions = array();
             if (isset($database_definition['charset'])) {
                 $dbOptions['charset'] = $database_definition['charset'];
             }
-            $result = $this->db->manager->createDatabase($database_definition['name'], $dbOptions);
-            $this->db->popExpect();
-            if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_UNSUPPORTED)) {
-                if (MDB2::isError($result, MDB2_ERROR_ALREADY_EXISTS)) {
-                    $this->db->debug('Database already exists: ' . $database_definition['name'], __FUNCTION__);
-                    if (!empty($dbOptions)) {
-                        $result = $this->db->manager->alterDatabase($database_definition['name'], $dbOptions);
-                        if (PEAR::isError($result)) {
-                            return $result;
-                        }
+
+            if ($dbExists) {
+                $this->db->debug('Database already exists: ' . $db_name, __FUNCTION__);
+                if (!empty($dbOptions)) {
+                    $errorcodes = array(MDB2_ERROR_UNSUPPORTED, MDB2_ERROR_NO_PERMISSION);
+                    $this->db->expectError($errorcodes);
+                    $result = $this->db->manager->alterDatabase($db_name, $dbOptions);
+                    $this->db->popExpect();
+                    if (PEAR::isError($result) && !MDB2::isError($result, $errorcodes)) {
+                        return $result;
                     }
-                    $create = false;
-                } else {
+                }
+                $create = false;
+            } else {
+                $this->db->expectError(MDB2_ERROR_UNSUPPORTED);
+                $result = $this->db->manager->createDatabase($db_name, $dbOptions);
+                $this->db->popExpect();
+                if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_UNSUPPORTED)) {
                     return $result;
                 }
+                $this->db->debug('Creating database: ' . $db_name, __FUNCTION__);
             }
         }
 
-        $this->db->setDatabase($database_definition['name']);
+        $this->db->setDatabase($db_name);
         if (($support_transactions = $this->db->supports('transactions'))
             && PEAR::isError($result = $this->db->beginNestedTransaction())
         ) {
@@ -1348,7 +1361,7 @@ class MDB2_Schema extends PEAR
         $this->db->setDatabase($previous_database_name);
 
         if (PEAR::isError($result) && $create
-            && PEAR::isError($result2 = $this->db->manager->dropDatabase($database_definition['name']))
+            && PEAR::isError($result2 = $this->db->manager->dropDatabase($db_name))
         ) {
             if (!MDB2::isError($result2, MDB2_ERROR_UNSUPPORTED)) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,
@@ -2461,6 +2474,16 @@ class MDB2_Schema extends PEAR
         }
 
         if ($previous_definition) {
+            $dbExists = $this->db->databaseExists($current_definition['name']);
+            if (PEAR::isError($dbExists)) {
+                return $dbExists;
+            }
+
+            if (!$dbExists) {
+                 return $this->raiseError(MDB2_SCHEMA_ERROR, null, null,     
+                    'database to update does not exist: '.$current_definition['name']);
+            }
+
             $changes = $this->compareDefinitions($current_definition, $previous_definition);
             if (PEAR::isError($changes)) {
                 return $changes;
