@@ -1968,6 +1968,12 @@ class MDB2_Schema extends PEAR
                     return $result;
                 }
                 $alterations++;
+
+                // table may be renamed at this point
+                if (!empty($table['name'])) {
+                    $table_name = $table['name'];
+                }
+
                 if (!empty($indexes)) {
                     $result = $this->alterDatabaseIndexes($table_name, $indexes);
                     if (PEAR::isError($result)) {
