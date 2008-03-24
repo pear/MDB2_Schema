@@ -116,6 +116,11 @@ class MDB2_Schema_Tool
         }
         $arg = array_shift($args);
         switch ($arg) {
+        case 'h':
+        case 'help':
+        case '-h':
+        case '--help':
+            return 'help';
         case 'd':
         case 'dump':
         case '-d':
@@ -123,7 +128,7 @@ class MDB2_Schema_Tool
             return 'dump';
         case 'l':
         case 'load':
-        case '--l':
+        case '-l':
         case '--load':
             return 'load';
         case 'i':
@@ -137,7 +142,7 @@ class MDB2_Schema_Tool
         case '--apply':
             return 'apply';
         default:
-            throw new MDB2_Schema_Tool_ParameterException('Unknown mode "' . $arg . '"');
+            throw new MDB2_Schema_Tool_ParameterException("Unknown mode \"$arg\"");
         }
     }//protected function getAction(&$args)
 
@@ -247,7 +252,8 @@ EOH
             'debug' => true,
             'quote_identifier' => true,
             'force_defaults' => false,
-            'portability' => true
+            'portability' => true,
+            'use_transactions' => false,
         );
         return $options;
     }//protected function getSchemaOptions()
