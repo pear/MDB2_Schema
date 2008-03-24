@@ -215,7 +215,7 @@
     <type>text</type>
     <length>128</length>
     <notnull>true</notnull>
-    <default></default>
+    <default>unknown</default>
    </field>
 
    <field>
