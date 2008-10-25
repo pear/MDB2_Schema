@@ -60,6 +60,8 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
     var $lob_input_file = 'lob_test.schema';
     //contains the name of the extension to use for backup schemas
     var $backup_extension = '.before';
+    //contains the name of the extension to use for dump schemas
+    var $dump_extension = '.dump';
 
     function MDB2_Schema_Test($name) {
         $this->PHPUnit_TestCase($name);
@@ -162,6 +164,29 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
             );
         }
         $this->assertFalse(PEAR::isError($result), 'Error updating database');
+    }
+    
+    function testDumpDatabase() {
+	if (!$this->methodExists($this->schema, 'getDefinitionFromDatabase')) {
+            return;
+        }
+	$definition = $this->schema->getDefinitionFromDatabase();
+        
+	$this->assertFalse(PEAR::isError($definition), 
+		           'Error getting definition from database');
+ 		
+	if (!$this->methodExists($this->schema, 'dumpDatabase')) {
+            return;
+        }
+        $dump_file = $this->lob_input_file.'.'.$this->dsn['phptype'].$this->dump_extension;
+	$result = $this->schema->dumpDatabase(
+            $definition, 
+            array('output_mode' => 'file',
+                  'output' => $dump_file,
+                  'end_of_line' => "\n",
+                  ),
+            MDB2_SCHEMA_DUMP_ALL);
+        $this->assertFalse(PEAR::isError($result), 'Error dumping database');
     }
 }
 

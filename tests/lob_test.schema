@@ -26,4 +26,13 @@
   </declaration>
  </table>
 
+ <sequence>
+	<name>mysequence</name>
+	<on>
+		<table>files</table>
+		<field>id</field>
+	</on>
+ </sequence>
+
+
 </database>

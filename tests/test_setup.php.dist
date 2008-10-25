@@ -14,6 +14,7 @@ $mysql = array(
         'username' => 'username',
         'password' => 'password',
         'hostspec' => 'hostname',
+        'database' => 'driver_test',
     ),
     'options' => array(
         'use_transactions' => true
@@ -48,6 +49,7 @@ $sqlite = array(
         'username' => '',
         'password' => 'password',
         'hostspec' => 'hostname',
+        'database' => 'driver_test',
     ),
     'options' => array(
         'database_path' => '',
