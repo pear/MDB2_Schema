@@ -92,14 +92,22 @@ open todo items:
 - Fulltext index support</notes>
  <contents>
   <dir baseinstalldir="/" name="/">
-   <dir name="bin">
-    <file name="mdb2_schematool" role="data" />
-   </dir> <!-- /bin -->
+   <dir name="www">
+    <dir name="mdb2_schematool">
+     <file name="action.php" role="www" />
+     <file name="class.inc.php" role="www" />
+     <file name="index.php" role="www" />
+     <file name="result.php" role="www" />
+    </dir>
+   </dir> <!-- /www -->
+   <dir name="scripts">
+    <file name="mdb2_schematool" role="script">
+      <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+      <tasks:replace from="@package_version@" to="version" type="package-info" />
+    </file>
+   </dir> <!-- /scripts -->
    <dir name="docs">
     <dir name="examples">
-     <file name="example.php" role="doc">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
      <file name="parse.php" role="doc">
       <tasks:replace from="@package_version@" to="version" type="package-info" />
      </file>
