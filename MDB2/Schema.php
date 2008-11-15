@@ -1486,6 +1486,11 @@ class MDB2_Schema extends PEAR
                         return $change;
                     }
                     if (!empty($change)) {
+                        if (array_key_exists('default', $change)
+                            && $change['default']
+                            && !array_key_exists('default', $field)) {
+                                $field['default'] = NULL;
+                        }
                         $change['definition'] = $field;
                         $changes['change'][$field_name] = $change;
                     }
