@@ -1406,7 +1406,7 @@ class MDB2_Schema extends PEAR
             if (!empty($previous_definition['tables']) && is_array($previous_definition['tables'])) {
                 foreach ($previous_definition['tables'] as $table_name => $table) {
                     if (empty($defined_tables[$table_name])) {
-                        $changes['remove'][$table_name] = true;
+                        $changes['tables']['remove'][$table_name] = true;
                     }
                 }
             }
@@ -1434,7 +1434,7 @@ class MDB2_Schema extends PEAR
             if (!empty($previous_definition['sequences']) && is_array($previous_definition['sequences'])) {
                 foreach ($previous_definition['sequences'] as $sequence_name => $sequence) {
                     if (empty($defined_sequences[$sequence_name])) {
-                        $changes['remove'][$sequence_name] = true;
+                        $changes['sequences']['remove'][$sequence_name] = true;
                     }
                 }
             }
