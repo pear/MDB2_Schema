@@ -872,6 +872,7 @@ class MDB2_Schema_Validate
             break;
         case 'timestamp':
             if (!preg_match('/([0-9]{4})-([0-9]{1,2})-([0-9]{1,2}) ([0-9]{2}):([0-9]{2}):([0-9]{2})/', $field_value)
+                && strcasecmp($field_value, 'now()') != 0
                 && $field_value !== 'CURRENT_TIMESTAMP'
             ) {
                 return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
