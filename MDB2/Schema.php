@@ -1871,21 +1871,23 @@ class MDB2_Schema extends PEAR
         }
         if (!empty($changes['change']) && is_array($changes['change'])) {
             foreach ($changes['change'] as $index_name => $index) {
+                /**
+                 * Drop existing index/constraint first.
+                 * Since $changes doesn't tell us whether it's an index or a constraint before the change,
+                 * we have to find out and call the appropriate method.
+                 */
+                if (in_array($index_name, $this->db->manager->listTableIndexes($table_name))) {
+                    $result = $this->db->manager->dropIndex($table_name, $index_name);
+                } elseif (in_array($index_name, $this->db->manager->listTableConstraints($table_name))) {
+                    $result = $this->db->manager->dropConstraint($table_name, $index_name);
+                }
+                if (!empty($result) && PEAR::isError($result)) {
+                    return $result;
+                }
+
                 if (!empty($index['primary']) || !empty($index['unique'])) {
-                    $this->db->expectError(MDB2_ERROR_NOT_FOUND);
-                    $result = $this->db->manager->dropConstraint($table_name, $index_name, !empty($index['primary']));
-                    $this->db->popExpect();
-                    if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_NOT_FOUND)) {
-                        return $result;
-                    }
                     $result = $this->db->manager->createConstraint($table_name, $index_name, $index);
                 } else {
-                    $this->db->expectError(MDB2_ERROR_NOT_FOUND);
-                    $result = $this->db->manager->dropIndex($table_name, $index_name);
-                    $this->db->popExpect();
-                    if (PEAR::isError($result) && !MDB2::isError($result, MDB2_ERROR_NOT_FOUND)) {
-                        return $result;
-                    }
                     $result = $this->db->manager->createIndex($table_name, $index_name, $index);
                 }
                 if (PEAR::isError($result)) {
