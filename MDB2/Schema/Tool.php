@@ -1,6 +1,6 @@
 <?php
 // +----------------------------------------------------------------------+
-// | PHP versions 4 and 5                                                 |
+// | PHP version 5                                                        |
 // +----------------------------------------------------------------------+
 // | Copyright (c) 1998-2008 Manuel Lemos, Tomas V.V.Cox,                 |
 // | Stig. S. Bakken, Lukas Smith, Igor Feghali                           |
@@ -141,6 +141,11 @@ class MDB2_Schema_Tool
         case '-a':
         case '--apply':
             return 'apply';
+        case 'n':
+        case 'init':
+        case '-i':
+        case '--init':
+            return 'init';
         default:
             throw new MDB2_Schema_Tool_ParameterException("Unknown mode \"$arg\"");
         }
@@ -180,6 +185,7 @@ mode: (- and -- are optional)
  l,  load     Load a schema into database
  i,  diff     Create a diff between two schemas and dump it to stdout
  a,  apply    Apply a diff to a database
+ n,  init     Initialize a database with data
 
 EOH
         );
@@ -195,9 +201,11 @@ EOH
     protected function doHelpDump()
     {
         self::toStdErr( <<<EOH
-Usage: mdb2_schematool dump [-p] DSN
+Usage: mdb2_schematool dump [all|data|schema] [-p] DSN
 
 Dumps a database schema to stdout
+
+If dump type is not specified, defaults to "schema".
 
 DSN: Data source name in the form of
  driver://user:password@host/database
@@ -208,6 +216,34 @@ Using -p reads password from stdin which is more secure than passing it in the p
 EOH
         );
     }//protected function doHelpDump()
+
+
+
+    /**
+    * Displays the help screen for "init" command
+    *
+    * @return void
+    */
+    protected function doHelpInit()
+    {
+        self::toStdErr( <<<EOH
+Usage: mdb2_schematool init source [-p] destination
+
+Initializes a database with data
+ (Inserts data on a previous created database at destination)
+
+source should be a schema file containing data,
+destination should be a DSN
+
+DSN: Data source name in the form of
+ driver://user:password@host/database
+
+User and password may be omitted.
+Using -p reads password from stdin which is more secure than passing it in the parameter.
+
+EOH
+        );
+    }//protected function doHelpInit()
 
 
 
@@ -387,8 +423,26 @@ EOH
     */
     protected function doDump($args)
     {
-        list($type, $dsn) = $this->getFileOrDsn($args);
+        $dump_what = MDB2_SCHEMA_DUMP_STRUCTURE;
+        $arg = '';
+        if (count($args)) {
+            $arg = $args[0];
+        }
 
+        switch (strtolower($arg)) {
+        case 'all':
+            $dump_what = MDB2_SCHEMA_DUMP_ALL;
+            array_shift($args);
+            break;
+        case 'data':
+            $dump_what = MDB2_SCHEMA_DUMP_CONTENT;
+            array_shift($args);
+            break;
+        case 'schema':
+            array_shift($args);
+        }
+
+        list($type, $dsn) = $this->getFileOrDsn($args);
         if ($type == 'file') {
             throw new MDB2_Schema_Tool_ParameterException(
                 'Dumping a schema file as a schema file does not make much sense'
@@ -408,7 +462,7 @@ EOH
             'end_of_line' => "\r\n"
         );
         $op = $schema->dumpDatabase(
-            $definition, $dump_options, MDB2_SCHEMA_DUMP_STRUCTURE
+            $definition, $dump_options, $dump_what
         );
         $this->throwExceptionOnError($op);
 
@@ -458,6 +512,42 @@ EOH
         $op       = $schemaDest->createDatabase($definition, array(), $simulate);
         $this->throwExceptionOnError($op, 'creating the database');
     }//protected function doLoad($args)
+
+
+
+    /**
+    * Initializes a database with data
+    *
+    * @param array $args Command line arguments
+    *
+    * @return void
+    */
+    protected function doInit($args)
+    {
+        list($typeSource, $dsnSource) = $this->getFileOrDsn($args);
+        list($typeDest,   $dsnDest)   = $this->getFileOrDsn($args);
+
+        if ($typeSource != 'file') {
+            throw new MDB2_Schema_Tool_ParameterException(
+                'Data must come from a source file'
+            );
+        }
+
+        if ($typeDest != 'dsn') {
+            throw new MDB2_Schema_Tool_ParameterException(
+                'A schema can only be loaded into a database, not a file'
+            );
+        }
+
+        $schemaDest = MDB2_Schema::factory($dsnDest, $this->getSchemaOptions());
+        $this->throwExceptionOnError($schemaDest, 'connecting to destination database');
+
+        $definition = $schemaDest->getDefinitionFromDatabase();
+        $this->throwExceptionOnError($definition, 'loading definition from database');
+
+        $op = $schemaDest->writeInitialization($dsnSource, $definition);
+        $this->throwExceptionOnError($op, 'initializing database');
+    }//protected function doInit($args)
 
 
 }//class MDB2_Schema_Tool
