@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.7.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.7.2" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>MDB2_Schema</name>
  <channel>pear.php.net</channel>
  <extends>MDB2</extends>
@@ -45,10 +45,10 @@ PEAR::MDB and Metabase.</description>
   <email>lars@legestue.net</email>
   <active>no</active>
  </helper>
- <date>2008-02-23</date>
- <time>02:10:52</time>
+ <date>2008-11-16</date>
+ <time>22:28:22</time>
  <version>
-  <release>0.8.2</release>
+  <release>0.8.3</release>
   <api>0.8.0</api>
  </version>
  <stability>
@@ -56,19 +56,21 @@ PEAR::MDB and Metabase.</description>
   <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
- <notes>- updated dependency
-- updated license disclaimer in source code files
-- use quoteIdentifier in getInstructionFields() (Bug #13037)
-- After database creation, sqlite db connection not usable (Bug #11920)
-- Supporting Database Charset (Bug #12908)
-- writeInitialization() fails at given conditions (Bug #12950)
-- drop usage of listDatabases() (Bug #12636), as a consequence updateDatabase() doesn&apos;t check anymore whether updating database exists
-- index-length documented and included in Parser2 (Bug #12540)
-- xsl transformation chooses wrong value for length (Bug #12261)
-- added README file for docs dir
-- the correct variable name for warning is &quot;warnings&quot; not &quot;operation&quot; in example script
-- disabled transactions in the example script
-- introducing mdb2_schematool, a command line tool to dump and load schemas
+ <notes>- updateDatabase() cannot add UNIQUE attribute to an existing index (Bug #13977). Patch by Holger Schletz
+- updateDatabase() keeps old default value even though new column has no default (Bug #13836). Patch by Holger Schletz
+- Obsolete tables and sequences not dropped on updateDatabase() (Bug #13608). Patch by Holger Schletz
+- Error when creating a new index for a renamed table (Bug #13397)
+- Makes use of MDB2::databaseExists() to check whether updating database exists (Bug #13073). This feature was removed on previous release and now is back again.
+- createDatabase() correctly lower/upper database name when portability option deems so. 
+- mdb2_schematool now disables transactions
+- mdb2_schematool was missing argument &quot;help&quot;
+- mdb2_schematool moved from &quot;bin&quot; to &quot;scripts&quot; folder. now installs to pear_bin dir
+- Schema validation not failing when autoincrement field is defined but another column is used as primary key (Bug #14213)
+- Accepting NOW() as value for timestamp fields on schema validation (Bug #14052). Patch by Holger Schletz
+- Introducing www/mdb2_schematool that is a rewrite of docs/examples/example.php and is now installed to web root
+- Web frontend (www/mdb2_schematool) has new options &quot;DBA_username&quot; and &quot;DBA_password&quot;
+- Tests missing sequences on database dump (Bug #13562). Patch by Luca Corbo
+- When reverse engineering a database, the XML schema file will have &lt;charset&gt; forced to UTF8
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -92,128 +94,65 @@ open todo items:
 - Fulltext index support</notes>
  <contents>
   <dir baseinstalldir="/" name="/">
+   <dir name="docs">
+    <dir name="examples">
+     <file name="parse.php" role="doc" />
+     <file name="schema.xml" role="doc" />
+    </dir> <!-- /docs/examples -->
+    <file name="description.schema.xml" role="doc" />
+    <file name="MDB.dtd" role="doc" />
+    <file name="MDB.xsd" role="doc" />
+    <file name="MDB.xsl" role="doc" />
+    <file name="README" role="doc" />
+    <file name="schema2html.css" role="doc" />
+    <file name="schema2html.xsl" role="doc" />
+    <file name="xml_schema_documentation.html" role="doc" />
+   </dir> <!-- /docs -->
+   <dir name="MDB2">
+    <dir name="Schema">
+     <dir name="Reserved">
+      <file name="ibase.php" role="php" />
+      <file name="mssql.php" role="php" />
+      <file name="mysql.php" role="php" />
+      <file name="oci8.php" role="php" />
+      <file name="pgsql.php" role="php" />
+     </dir> <!-- /MDB2/Schema/Reserved -->
+     <dir name="Tool">
+      <file name="ParameterException.php" role="php" />
+     </dir> <!-- /MDB2/Schema/Tool -->
+     <file name="Parser.php" role="php" />
+     <file name="Parser2.php" role="php" />
+     <file name="Tool.php" role="php" />
+     <file name="Validate.php" role="php" />
+     <file name="Writer.php" role="php" />
+    </dir> <!-- /MDB2/Schema -->
+    <file name="Schema.php" role="php" />
+   </dir> <!-- /MDB2 -->
+   <dir name="scripts">
+    <file name="mdb2_schematool" role="script" />
+   </dir> <!-- /scripts -->
+   <dir name="tests">
+    <file name="clitest.php" role="test" />
+    <file name="Console_TestListener.php" role="test" />
+    <file name="driver_test.schema" role="test" />
+    <file name="HTML_TestListener.php" role="test" />
+    <file name="lob_test.schema" role="test" />
+    <file name="MDB2_Schema_testcase.php" role="test" />
+    <file name="README" role="test" />
+    <file name="test.php" role="test" />
+    <file name="testchoose.php" role="test" />
+    <file name="tests.css" role="test" />
+    <file name="testUtils.php" role="test" />
+    <file name="test_setup.php.dist" role="test" />
+   </dir> <!-- /tests -->
    <dir name="www">
     <dir name="mdb2_schematool">
      <file name="action.php" role="www" />
      <file name="class.inc.php" role="www" />
      <file name="index.php" role="www" />
      <file name="result.php" role="www" />
-    </dir>
+    </dir> <!-- /www/mdb2_schematool -->
    </dir> <!-- /www -->
-   <dir name="scripts">
-    <file name="mdb2_schematool" role="script">
-      <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-   </dir> <!-- /scripts -->
-   <dir name="docs">
-    <dir name="examples">
-     <file name="parse.php" role="doc">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
-     <file name="schema.xml" role="doc">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
-    </dir> <!-- /docs/examples -->
-    <file name="description.schema.xml" role="doc">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="MDB.dtd" role="doc">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="MDB.xsd" role="doc">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="MDB.xsl" role="doc">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="README" role="doc" />
-    <file name="schema2html.css" role="doc">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="schema2html.xsl" role="doc">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="xml_schema_documentation.html" role="doc">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-   </dir> <!-- /docs -->
-   <dir name="MDB2">
-    <dir name="Schema">
-     <dir name="Reserved">
-      <file name="ibase.php" role="php">
-       <tasks:replace from="@package_version@" to="version" type="package-info" />
-      </file>
-      <file name="mssql.php" role="php">
-       <tasks:replace from="@package_version@" to="version" type="package-info" />
-      </file>
-      <file name="mysql.php" role="php">
-       <tasks:replace from="@package_version@" to="version" type="package-info" />
-      </file>
-      <file name="oci8.php" role="php">
-       <tasks:replace from="@package_version@" to="version" type="package-info" />
-      </file>
-      <file name="pgsql.php" role="php">
-       <tasks:replace from="@package_version@" to="version" type="package-info" />
-      </file>
-     </dir> <!-- /MDB2/Schema/Reserved -->
-     <dir name="Tool">
-      <file name="ParameterException.php" role="php" />
-     </dir> <!-- /MDB2/Schema/Tool -->
-     <file name="Parser.php" role="php">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
-     <file name="Parser2.php" role="php" />
-     <file name="Tool.php" role="php" />
-     <file name="Validate.php" role="php">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
-     <file name="Writer.php" role="php">
-      <tasks:replace from="@package_version@" to="version" type="package-info" />
-     </file>
-    </dir> <!-- /MDB2/Schema -->
-    <file name="Schema.php" role="php">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-   </dir> <!-- /MDB2 -->
-   <dir name="tests">
-    <file name="clitest.php" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="Console_TestListener.php" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="driver_test.schema" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="HTML_TestListener.php" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="lob_test.schema" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="MDB2_Schema_testcase.php" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="README" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="test.php" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="testchoose.php" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="tests.css" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="testUtils.php" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-    <file name="test_setup.php.dist" role="test">
-     <tasks:replace from="@package_version@" to="version" type="package-info" />
-    </file>
-   </dir> <!-- /tests -->
   </dir> <!-- / -->
  </contents>
  <dependencies>
@@ -227,7 +166,7 @@ open todo items:
    <package>
     <name>MDB2</name>
     <channel>pear.php.net</channel>
-    <min>2.4.1</min>
+    <min>2.5.0b1</min>
    </package>
    <package>
     <name>XML_Parser</name>
@@ -248,8 +187,64 @@ open todo items:
    </package>
   </optional>
  </dependencies>
+ <phprelease>
+  <filelist>
+   <install as="mdb2_schematool/action.php" name="www/mdb2_schematool/action.php" />
+   <install as="mdb2_schematool/class.inc.php" name="www/mdb2_schematool/class.inc.php" />
+   <install as="mdb2_schematool/index.php" name="www/mdb2_schematool/index.php" />
+   <install as="mdb2_schematool/result.php" name="www/mdb2_schematool/result.php" />
+  </filelist>
+ </phprelease>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.8.3</release>
+    <api>0.8.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2008-11-16</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+   <notes>- updateDatabase() cannot add UNIQUE attribute to an existing index (Bug #13977). Patch by Holger Schletz
+- updateDatabase() keeps old default value even though new column has no default (Bug #13836). Patch by Holger Schletz
+- Obsolete tables and sequences not dropped on updateDatabase() (Bug #13608). Patch by Holger Schletz
+- Error when creating a new index for a renamed table (Bug #13397)
+- Makes use of MDB2::databaseExists() to check whether updating database exists (Bug #13073). This feature was removed on previous release and now is back again.
+- createDatabase() correctly lower/upper database name when portability option deems so. 
+- mdb2_schematool now disables transactions
+- mdb2_schematool was missing argument &quot;help&quot;
+- mdb2_schematool moved from &quot;bin&quot; to &quot;scripts&quot; folder. now installs to pear_bin dir
+- Schema validation not failing when autoincrement field is defined but another column is used as primary key (Bug #14213)
+- Accepting NOW() as value for timestamp fields on schema validation (Bug #14052). Patch by Holger Schletz
+- Introducing www/mdb2_schematool that is a rewrite of docs/examples/example.php and is now installed to web root
+- Web frontend (www/mdb2_schematool) has new options &quot;DBA_username&quot; and &quot;DBA_password&quot;
+- Tests missing sequences on database dump (Bug #13562). Patch by Luca Corbo
+- When reverse engineering a database, the XML schema file will have &lt;charset&gt; forced to UTF8
+
+open todo items:
+- Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
+- Automatically load reserved keywords
+- Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- Allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). This would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- Modularize Writer code or remake it
+- Add specific error codes for Validate class
+- Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
+  problem)
+- Update description.schema.xml
+- Create unit test for comparedefinitions()
+- Create unit test for initializetable()
+- Create unit test to compare the expected array definition with what is parsed
+- Improve validateDataFieldValue() to validate &lt;column&gt;
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
+- Views support
+- Fulltext index support</notes>
+  </release>
   <release>
    <version>
     <release>0.8.2</release>

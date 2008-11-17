@@ -48,24 +48,35 @@
 require_once 'PEAR/PackageFileManager2.php';
 PEAR::setErrorHandling(PEAR_ERROR_DIE);
 
+$summary = 'XML based database schema manager'; 
+$description = <<<EOT
+PEAR::MDB2_Schema enables users to maintain RDBMS independant schema
+files in XML that can be used to create, alter and drop database entities
+and insert data into a database. Reverse engineering database schemas from
+existing databases is also supported. The format is compatible with both
+PEAR::MDB and Metabase.
+EOT;
+
 $version_api = '0.8.0';
-$version_release = '0.8.2';
+$version_release = '0.8.3';
 $state = 'beta';
 
 $notes = <<<EOT
-- updated dependency
-- updated license disclaimer in source code files
-- use quoteIdentifier in getInstructionFields() (Bug #13037)
-- After database creation, sqlite db connection not usable (Bug #11920)
-- Supporting Database Charset (Bug #12908)
-- writeInitialization() fails at given conditions (Bug #12950)
-- drop usage of listDatabases() (Bug #12636), as a consequence updateDatabase() doesn't check anymore whether updating database exists
-- index-length documented and included in Parser2 (Bug #12540)
-- xsl transformation chooses wrong value for length (Bug #12261)
-- added README file for docs dir
-- the correct variable name for warning is "warnings" not "operation" in example script
-- disabled transactions in the example script
-- introducing mdb2_schematool, a command line tool to dump and load schemas
+- updateDatabase() cannot add UNIQUE attribute to an existing index (Bug #13977). Patch by Holger Schletz
+- updateDatabase() keeps old default value even though new column has no default (Bug #13836). Patch by Holger Schletz
+- Obsolete tables and sequences not dropped on updateDatabase() (Bug #13608). Patch by Holger Schletz
+- Error when creating a new index for a renamed table (Bug #13397)
+- Makes use of MDB2::databaseExists() to check whether updating database exists (Bug #13073). This feature was removed on previous release and now is back again.
+- createDatabase() correctly lower/upper database name when portability option deems so. 
+- mdb2_schematool now disables transactions
+- mdb2_schematool was missing argument "help"
+- mdb2_schematool moved from "bin" to "scripts" folder. now installs to pear_bin dir
+- Schema validation not failing when autoincrement field is defined but another column is used as primary key (Bug #14213)
+- Accepting NOW() as value for timestamp fields on schema validation (Bug #14052). Patch by Holger Schletz
+- Introducing www/mdb2_schematool that is a rewrite of docs/examples/example.php and is now installed to web root
+- Web frontend (www/mdb2_schematool) has new options "DBA_username" and "DBA_password"
+- Tests missing sequences on database dump (Bug #13562). Patch by Luca Corbo
+- When reverse engineering a database, the XML schema file will have <charset> forced to UTF8
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -89,18 +100,7 @@ open todo items:
 - Fulltext index support
 EOT;
 
-$description = <<<EOT
-PEAR::MDB2_Schema enables users to maintain RDBMS independant schema
-files in XML that can be used to create, alter and drop database entities
-and insert data into a database. Reverse engineering database schemas from
-existing databases is also supported. The format is compatible with both
-PEAR::MDB and Metabase.
-EOT;
-
-$summary = 'XML based database schema manager'; 
-
 $packagefile = './package.xml';
-
 $options = array(
     'filelistgenerator' => 'cvs',
     'changelogoldtonew' => false,
@@ -112,11 +112,12 @@ $options = array(
     'ignore'            => array('package.php', 'package.xml'),
     'dir_roles'         => array(
         'docs'      => 'doc',
-         'examples' => 'doc',
-         'tests'    => 'test',
+        'examples'  => 'doc',
+        'tests'     => 'test',
+        'scripts'   => 'script',
+        'www'       => 'www',
     ),
 );
-
 $package = &PEAR_PackageFileManager2::importOptions($packagefile, $options);
 
 $package->setPackageType('php');
@@ -129,6 +130,11 @@ $package->addPackageDepWithChannel('required', 'MDB2', 'pear.php.net', '2.5.0b1'
 $package->addPackageDepWithChannel('required', 'XML_Parser', 'pear.php.net', '1.2.8');
 $package->addPackageDepWithChannel('optional', 'XML_DTD', 'pear.php.net', '0.4.2');
 $package->addPackageDepWithChannel('optional', 'XML_Serializer', 'pear.php.net', '0.18.0');
+
+$package->addInstallAs('www/mdb2_schematool/action.php',    'mdb2_schematool/action.php');
+$package->addInstallAs('www/mdb2_schematool/class.inc.php', 'mdb2_schematool/class.inc.php');
+$package->addInstallAs('www/mdb2_schematool/index.php',     'mdb2_schematool/index.php');
+$package->addInstallAs('www/mdb2_schematool/result.php',    'mdb2_schematool/result.php');
 
 $package->updateMaintainer('lead', 'lsmith', 'Lukas Kahwe Smith', 'smith@pooteeweet.org', 'no');
 $package->updateMaintainer('lead', 'ifeghali', 'Igor Feghali', 'ifeghali@php.net');
