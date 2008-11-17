@@ -25,7 +25,7 @@ PEAR::MDB and Metabase.</description>
   <name>Helgi Thormar</name>
   <user>dufuz</user>
   <email>dufuz@php.net</email>
-  <active>yes</active>
+  <active>no</active>
  </lead>
  <contributor>
   <name>Andrew Hill</name>
@@ -37,7 +37,7 @@ PEAR::MDB and Metabase.</description>
   <name>Ali Fazelzadeh</name>
   <user>afz</user>
   <email>afz@dev-code.com</email>
-  <active>yes</active>
+  <active>no</active>
  </contributor>
  <helper>
   <name>Lars Olesen</name>
@@ -45,10 +45,10 @@ PEAR::MDB and Metabase.</description>
   <email>lars@legestue.net</email>
   <active>no</active>
  </helper>
- <date>2008-11-16</date>
- <time>22:28:22</time>
+ <date>2008-11-17</date>
+ <time>21:27:41</time>
  <version>
-  <release>0.8.3</release>
+  <release>0.8.4</release>
   <api>0.8.0</api>
  </version>
  <stability>
@@ -56,21 +56,10 @@ PEAR::MDB and Metabase.</description>
   <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
- <notes>- updateDatabase() cannot add UNIQUE attribute to an existing index (Bug #13977). Patch by Holger Schletz
-- updateDatabase() keeps old default value even though new column has no default (Bug #13836). Patch by Holger Schletz
-- Obsolete tables and sequences not dropped on updateDatabase() (Bug #13608). Patch by Holger Schletz
-- Error when creating a new index for a renamed table (Bug #13397)
-- Makes use of MDB2::databaseExists() to check whether updating database exists (Bug #13073). This feature was removed on previous release and now is back again.
-- createDatabase() correctly lower/upper database name when portability option deems so. 
-- mdb2_schematool now disables transactions
-- mdb2_schematool was missing argument &quot;help&quot;
-- mdb2_schematool moved from &quot;bin&quot; to &quot;scripts&quot; folder. now installs to pear_bin dir
-- Schema validation not failing when autoincrement field is defined but another column is used as primary key (Bug #14213)
-- Accepting NOW() as value for timestamp fields on schema validation (Bug #14052). Patch by Holger Schletz
-- Introducing www/mdb2_schematool that is a rewrite of docs/examples/example.php and is now installed to web root
-- Web frontend (www/mdb2_schematool) has new options &quot;DBA_username&quot; and &quot;DBA_password&quot;
-- Tests missing sequences on database dump (Bug #13562). Patch by Luca Corbo
-- When reverse engineering a database, the XML schema file will have &lt;charset&gt; forced to UTF8
+ <notes>- fixed warning in validateTable() that was introduced in last release (Bug #15055)
+- fixed interpreter for mdb2_schematool, plus it is now been installed to bin_dir (now, really!)
+- mdb2_schematool has a new feature: initialize database
+- mdb2_schematool can now be used to dump data and/or database structure
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -129,7 +118,9 @@ open todo items:
     <file name="Schema.php" role="php" />
    </dir> <!-- /MDB2 -->
    <dir name="scripts">
-    <file name="mdb2_schematool" role="script" />
+    <file name="mdb2_schematool" role="script">
+     <tasks:replace from="@php_bin@" to="php_bin" type="pear-config" />
+    </file>
    </dir> <!-- /scripts -->
    <dir name="tests">
     <file name="clitest.php" role="test" />
@@ -193,10 +184,48 @@ open todo items:
    <install as="mdb2_schematool/class.inc.php" name="www/mdb2_schematool/class.inc.php" />
    <install as="mdb2_schematool/index.php" name="www/mdb2_schematool/index.php" />
    <install as="mdb2_schematool/result.php" name="www/mdb2_schematool/result.php" />
+   <install as="mdb2_schematool" name="scripts/mdb2_schematool" />
   </filelist>
  </phprelease>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.8.4</release>
+    <api>0.8.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2008-11-17</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+   <notes>- fixed warning in validateTable() that was introduced in last release (Bug #15055)
+- fixed interpreter for mdb2_schematool, plus it is now been installed to bin_dir (now, really!)
+- mdb2_schematool has a new feature: initialize database
+- mdb2_schematool can now be used to dump data and/or database structure
+
+open todo items:
+- Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
+- Automatically load reserved keywords
+- Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- Allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). This would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- Modularize Writer code or remake it
+- Add specific error codes for Validate class
+- Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
+  problem)
+- Update description.schema.xml
+- Create unit test for comparedefinitions()
+- Create unit test for initializetable()
+- Create unit test to compare the expected array definition with what is parsed
+- Improve validateDataFieldValue() to validate &lt;column&gt;
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
+- Views support
+- Fulltext index support</notes>
+  </release>
   <release>
    <version>
     <release>0.8.3</release>

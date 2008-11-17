@@ -58,25 +58,14 @@ PEAR::MDB and Metabase.
 EOT;
 
 $version_api = '0.8.0';
-$version_release = '0.8.3';
+$version_release = '0.8.4';
 $state = 'beta';
 
 $notes = <<<EOT
-- updateDatabase() cannot add UNIQUE attribute to an existing index (Bug #13977). Patch by Holger Schletz
-- updateDatabase() keeps old default value even though new column has no default (Bug #13836). Patch by Holger Schletz
-- Obsolete tables and sequences not dropped on updateDatabase() (Bug #13608). Patch by Holger Schletz
-- Error when creating a new index for a renamed table (Bug #13397)
-- Makes use of MDB2::databaseExists() to check whether updating database exists (Bug #13073). This feature was removed on previous release and now is back again.
-- createDatabase() correctly lower/upper database name when portability option deems so. 
-- mdb2_schematool now disables transactions
-- mdb2_schematool was missing argument "help"
-- mdb2_schematool moved from "bin" to "scripts" folder. now installs to pear_bin dir
-- Schema validation not failing when autoincrement field is defined but another column is used as primary key (Bug #14213)
-- Accepting NOW() as value for timestamp fields on schema validation (Bug #14052). Patch by Holger Schletz
-- Introducing www/mdb2_schematool that is a rewrite of docs/examples/example.php and is now installed to web root
-- Web frontend (www/mdb2_schematool) has new options "DBA_username" and "DBA_password"
-- Tests missing sequences on database dump (Bug #13562). Patch by Luca Corbo
-- When reverse engineering a database, the XML schema file will have <charset> forced to UTF8
+- fixed warning in validateTable() that was introduced in last release (Bug #15055)
+- fixed interpreter for mdb2_schematool, plus it is now been installed to bin_dir (now, really!)
+- mdb2_schematool has a new feature: initialize database
+- mdb2_schematool can now be used to dump data and/or database structure
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -108,7 +97,7 @@ $options = array(
     'baseinstalldir'    => '/',
     'packagedirectory'  => './',
     'packagefile'       => $packagefile,
-    'clearcontents'     => false,
+    'clearcontents'     => true,
     'ignore'            => array('package.php', 'package.xml'),
     'dir_roles'         => array(
         'docs'      => 'doc',
@@ -135,13 +124,16 @@ $package->addInstallAs('www/mdb2_schematool/action.php',    'mdb2_schematool/act
 $package->addInstallAs('www/mdb2_schematool/class.inc.php', 'mdb2_schematool/class.inc.php');
 $package->addInstallAs('www/mdb2_schematool/index.php',     'mdb2_schematool/index.php');
 $package->addInstallAs('www/mdb2_schematool/result.php',    'mdb2_schematool/result.php');
+$package->addInstallAs('scripts/mdb2_schematool',           'mdb2_schematool');
+
+$package->addReplacement('scripts/mdb2_schematool', 'pear-config', '@php_bin@', 'php_bin');
 
 $package->updateMaintainer('lead', 'lsmith', 'Lukas Kahwe Smith', 'smith@pooteeweet.org', 'no');
 $package->updateMaintainer('lead', 'ifeghali', 'Igor Feghali', 'ifeghali@php.net');
-$package->updateMaintainer('lead', 'dufuz', 'Helgi Thormar', 'dufuz@php.net');
+$package->updateMaintainer('lead', 'dufuz', 'Helgi Thormar', 'dufuz@php.net', 'no');
 $package->updateMaintainer('contributor', 'fornax', 'Andrew Hill', 'andrew-pear@fornax.net', 'no');
 $package->updateMaintainer('helper', 'lsolesen', 'Lars Olesen', 'lars@legestue.net', 'no');
-$package->updateMaintainer('contributor', 'afz', 'Ali Fazelzadeh', 'afz@dev-code.com');
+$package->updateMaintainer('contributor', 'afz', 'Ali Fazelzadeh', 'afz@dev-code.com', 'no');
 
 $package->addRelease();
 $package->setReleaseVersion($version_release);
