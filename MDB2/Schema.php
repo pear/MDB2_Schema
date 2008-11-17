@@ -420,7 +420,7 @@ class MDB2_Schema extends PEAR
             'name' => $database,
             'create' => true,
             'overwrite' => false,
-            'charset' => '',
+            'charset' => 'utf8',
             'description' => '',
             'comments' => '',
             'tables' => array(),
@@ -1285,7 +1285,8 @@ class MDB2_Schema extends PEAR
             }
 
             $dbOptions = array();
-            if (isset($database_definition['charset'])) {
+            if (array_key_exists('charset', $database_definition)
+                && !empty($database_definition['charset'])) {
                 $dbOptions['charset'] = $database_definition['charset'];
             }
 
