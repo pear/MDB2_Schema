@@ -227,6 +227,7 @@ class MDB2_Schema_Validate
                      * a primary key index.
                      */
                     if (count($index['fields']) == '1'
+                        && $autoinc
                         && array_key_exists($autoinc, $index['fields'])) {
                         $skip_index = true;
                     } elseif ($autoinc || $primary) {
