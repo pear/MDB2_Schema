@@ -51,6 +51,7 @@
  * However the idea was to keep the magic and dependencies low, to just
  * illustrate the MDB2_Schema API a bit.
  */
+setcookie('error','');
 
 require_once 'MDB2/Schema.php';
 require_once 'class.inc.php';
@@ -175,22 +176,14 @@ case 'initialize':
         $schema->db->setOption('debug_handler', 'printQueries');
     }
 
-    $definition = $schema->parseDatabaseDefinition(
-        $data->file, false, array(), $schema->options['fail_on_invalid_names']
-    );
+    $definition = $schema->getDefinitionFromDatabase();
     if (PEAR::isError($definition)) {
         $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
     } else {
         $schema->db->setOption('disable_query', $data->disable_query);
-        if (isset($definition['tables'])
-            && is_array($definition['tables'])
-        ) {
-            foreach ($definition['tables'] as $table_name => $table) {
-                $operation = $schema->initializeTable($table_name, $table);
-                if (PEAR::isError($operation)) {
-                    $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
-                }
-            }
+        $operation = $schema->writeInitialization($data->file, $definition);
+        if (PEAR::isError($operation)) {
+            $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
         }
         $schema->db->setOption('disable_query', false);
     }

@@ -148,6 +148,10 @@ class MDB2_Schema_Example
         case 'update':
         case 'create':
         case 'initialize':
+            if (!array_key_exists('file', $input)) {
+                return 'no input file specified';
+            }
+            $this->file = $input['file'];
             break;
 
         default:

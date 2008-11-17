@@ -51,7 +51,7 @@
  * However the idea was to keep the magic and dependencies low, to just
  * illustrate the MDB2_Schema API a bit.
  */
- 
+
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -85,7 +85,6 @@ if (isset($error) && $error) {
     echo '<div id="errors"><ul>';
     echo '<li>' . $error . '</li>';
     echo '</ul></div>';
-    setcookie('error','');
 }
 ?>
 </body>
