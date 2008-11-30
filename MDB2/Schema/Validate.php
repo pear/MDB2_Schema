@@ -1,65 +1,73 @@
 <?php
-// +----------------------------------------------------------------------+
-// | PHP versions 4 and 5                                                 |
-// +----------------------------------------------------------------------+
-// | Copyright (c) 1998-2008 Manuel Lemos, Tomas V.V.Cox,                 |
-// | Stig. S. Bakken, Lukas Smith, Igor Feghali                           |
-// | All rights reserved.                                                 |
-// +----------------------------------------------------------------------+
-// | MDB2_Schema enables users to maintain RDBMS independant schema files |
-// | in XML that can be used to manipulate both data and database schemas |
-// | This LICENSE is in the BSD license style.                            |
-// |                                                                      |
-// | Redistribution and use in source and binary forms, with or without   |
-// | modification, are permitted provided that the following conditions   |
-// | are met:                                                             |
-// |                                                                      |
-// | Redistributions of source code must retain the above copyright       |
-// | notice, this list of conditions and the following disclaimer.        |
-// |                                                                      |
-// | Redistributions in binary form must reproduce the above copyright    |
-// | notice, this list of conditions and the following disclaimer in the  |
-// | documentation and/or other materials provided with the distribution. |
-// |                                                                      |
-// | Neither the name of Manuel Lemos, Tomas V.V.Cox, Stig. S. Bakken,    |
-// | Lukas Smith, Igor Feghali nor the names of his contributors may be   |
-// | used to endorse or promote products derived from this software       |
-// | without specific prior written permission.                           |
-// |                                                                      |
-// | THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS  |
-// | "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT    |
-// | LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS    |
-// | FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE      |
-// | REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,          |
-// | INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, |
-// | BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS|
-// |  OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED  |
-// | AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT          |
-// | LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY|
-// | WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE          |
-// | POSSIBILITY OF SUCH DAMAGE.                                          |
-// +----------------------------------------------------------------------+
-// | Author: Christian Dickmann <dickmann@php.net>                        |
-// | Author: Igor Feghali <ifeghali@php.net>                              |
-// +----------------------------------------------------------------------+
-//
-// $Id$
-//
+/**
+ * PHP versions 4 and 5
+ *
+ * Copyright (c) 1998-2008 Manuel Lemos, Tomas V.V.Cox,
+ * Stig. S. Bakken, Lukas Smith, Igor Feghali
+ * All rights reserved.
+ *
+ * MDB2_Schema enables users to maintain RDBMS independant schema files
+ * in XML that can be used to manipulate both data and database schemas
+ * This LICENSE is in the BSD license style.
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that the following conditions
+ * are met:
+ *
+ * Redistributions of source code must retain the above copyright
+ * notice, this list of conditions and the following disclaimer.
+ *
+ * Redistributions in binary form must reproduce the above copyright
+ * notice, this list of conditions and the following disclaimer in the
+ * documentation and/or other materials provided with the distribution.
+ *
+ * Neither the name of Manuel Lemos, Tomas V.V.Cox, Stig. S. Bakken,
+ * Lukas Smith, Igor Feghali nor the names of his contributors may be
+ * used to endorse or promote products derived from this software
+ * without specific prior written permission.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE
+ * REGENTS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
+ *  OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
+ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+ * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * Author: Christian Dickmann <dickmann@php.net>
+ * Author: Igor Feghali <ifeghali@php.net>
+ *
+ * @category Database
+ * @package  MDB2_Schema
+ * @author   Christian Dickmann <dickmann@php.net>
+ * @author   Igor Feghali <ifeghali@php.net>
+ * @license  BSD http://www.opensource.org/licenses/bsd-license.php
+ * @version  CVS: $Id$
+ * @link     http://pear.php.net/packages/MDB2_Schema
+ */
 
 /**
  * Validates an XML schema file
  *
- * @package MDB2_Schema
  * @category Database
- * @access protected
- * @author Igor Feghali <ifeghali@php.net>
+ * @package  MDB2_Schema
+ * @author   Igor Feghali <ifeghali@php.net>
+ * @license  BSD http://www.opensource.org/licenses/bsd-license.php
+ * @link     http://pear.php.net/packages/MDB2_Schema
  */
 class MDB2_Schema_Validate
 {
     // {{{ properties
 
     var $fail_on_invalid_names = true;
+
     var $valid_types = array();
+
     var $force_defaults = true;
 
     // }}}
@@ -72,14 +80,14 @@ class MDB2_Schema_Validate
         }
 
         if (is_array($fail_on_invalid_names)) {
-            $this->fail_on_invalid_names
-                = array_intersect($fail_on_invalid_names, array_keys($GLOBALS['_MDB2_Schema_Reserved']));
+            $this->fail_on_invalid_names = array_intersect($fail_on_invalid_names,
+                                                           array_keys($GLOBALS['_MDB2_Schema_Reserved']));
         } elseif ($fail_on_invalid_names === true) {
             $this->fail_on_invalid_names = array_keys($GLOBALS['_MDB2_Schema_Reserved']);
         } else {
             $this->fail_on_invalid_names = array();
         }
-        $this->valid_types = $valid_types;
+        $this->valid_types    = $valid_types;
         $this->force_defaults = $force_defaults;
     }
 
@@ -105,7 +113,7 @@ class MDB2_Schema_Validate
      * to true or false according to its actual contents and return true. If
      * not, keep its contents untouched and return false.
      *
-     * @param mixed  value to be checked
+     * @param mixed &$value value to be checked
      *
      * @return bool
      *
@@ -117,13 +125,16 @@ class MDB2_Schema_Validate
         if (is_bool($value)) {
             return true;
         }
+
         if ($value === 0 || $value === 1 || $value === '') {
             $value = (bool)$value;
             return true;
         }
+
         if (!is_string($value)) {
             return false;
         }
+
         switch ($value) {
         case '0':
         case 'N':
@@ -153,11 +164,11 @@ class MDB2_Schema_Validate
      * Checks whether the definition of a parsed table is valid. Modify table
      * definition when necessary.
      *
-     * @param array  multi dimensional array that contains the
-     *                tables of current database.
-     * @param array  multi dimensional array that contains the
-     *                structure and optional data of the table.
-     * @param string  name of the parsed table
+     * @param array  $tables     multi dimensional array that contains the
+     *                           tables of current database.
+     * @param array  &$table     multi dimensional array that contains the
+     *                           structure and optional data of the table.
+     * @param string $table_name name of the parsed table
      *
      * @return bool|error object
      *
@@ -266,11 +277,11 @@ class MDB2_Schema_Validate
      * Checks whether the definition of a parsed field is valid. Modify field
      * definition when necessary.
      *
-     * @param array  multi dimensional array that contains the
-     *                fields of current table.
-     * @param array  multi dimensional array that contains the
-     *                structure of the parsed field.
-     * @param string  name of the parsed field
+     * @param array  $fields     multi dimensional array that contains the
+     *                           fields of current table.
+     * @param array  &$field     multi dimensional array that contains the
+     *                           structure of the parsed field.
+     * @param string $field_name name of the parsed field
      *
      * @return bool|error object
      *
@@ -328,7 +339,7 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'length has to be an integer greater 0');
         }
- 
+
         // if it's a DECIMAL datatype, check if a 'scale' value is provided:
         // <length>8,4</length> should be translated to DECIMAL(8,4)
         if (is_float($this->valid_types[$field['type']])
@@ -399,11 +410,11 @@ class MDB2_Schema_Validate
      * Checks whether a parsed index is valid. Modify index definition when
      * necessary.
      *
-     * @param array  multi dimensional array that contains the
-     *                indexes of current table.
-     * @param array  multi dimensional array that contains the
-     *                structure of the parsed index.
-     * @param string  name of the parsed index
+     * @param array  $table_indexes multi dimensional array that contains the
+     *                              indexes of current table.
+     * @param array  &$index        multi dimensional array that contains the
+     *                              structure of the parsed index.
+     * @param string $index_name    name of the parsed index
      *
      * @return bool|error object
      *
@@ -447,11 +458,11 @@ class MDB2_Schema_Validate
      * Checks whether a parsed index-field is valid. Modify its definition when
      * necessary.
      *
-     * @param array  multi dimensional array that contains the
-     *                fields of current index.
-     * @param array  multi dimensional array that contains the
-     *                structure of the parsed index-field.
-     * @param string  name of the parsed index-field
+     * @param array  $index_fields multi dimensional array that contains the
+     *                             fields of current index.
+     * @param array  &$field       multi dimensional array that contains the
+     *                             structure of the parsed index-field.
+     * @param string $field_name   name of the parsed index-field
      *
      * @return bool|error object
      *
@@ -469,7 +480,7 @@ class MDB2_Schema_Validate
         }
         if (empty($field['sorting'])) {
             $field['sorting'] = 'ascending';
-        } elseif($field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending') {
+        } elseif ($field['sorting'] !== 'ascending' && $field['sorting'] !== 'descending') {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'sorting type unknown');
         }
@@ -483,11 +494,11 @@ class MDB2_Schema_Validate
      * Checks whether a parsed foreign key is valid. Modify its definition when
      * necessary.
      *
-     * @param array  multi dimensional array that contains the
-     *                constraints of current table.
-     * @param array  multi dimensional array that contains the
-     *                structure of the parsed foreign key.
-     * @param string  name of the parsed foreign key
+     * @param array  $table_constraints multi dimensional array that contains the
+     *                                  constraints of current table.
+     * @param array  &$constraint       multi dimensional array that contains the
+     *                                  structure of the parsed foreign key.
+     * @param string $constraint_name   name of the parsed foreign key
      *
      * @return bool|error object
      *
@@ -534,9 +545,9 @@ class MDB2_Schema_Validate
     /**
      * Checks whether a foreign-field is valid.
      *
-     * @param array  multi dimensional array that contains the
-     *                fields of current foreign key.
-     * @param string  name of the parsed foreign-field
+     * @param array  $constraint_fields multi dimensional array that contains the
+     *                                  fields of current foreign key.
+     * @param string $field_name        name of the parsed foreign-field
      *
      * @return bool|error object
      *
@@ -561,9 +572,9 @@ class MDB2_Schema_Validate
     /**
      * Checks whether a foreign-referenced field is valid.
      *
-     * @param array  multi dimensional array that contains the
-     *                fields of current foreign key.
-     * @param string  name of the parsed foreign-field
+     * @param array  $referenced_fields multi dimensional array that contains the
+     *                                  fields of current foreign key.
+     * @param string $field_name        name of the parsed foreign-field
      *
      * @return bool|error object
      *
@@ -589,11 +600,11 @@ class MDB2_Schema_Validate
      * Checks whether the definition of a parsed sequence is valid. Modify
      * sequence definition when necessary.
      *
-     * @param array  multi dimensional array that contains the
-     *                sequences of current database.
-     * @param array  multi dimensional array that contains the
-     *                structure of the parsed sequence.
-     * @param string  name of the parsed sequence
+     * @param array  $sequences     multi dimensional array that contains the
+     *                              sequences of current database.
+     * @param array  &$sequence     multi dimensional array that contains the
+     *                              structure of the parsed sequence.
+     * @param string $sequence_name name of the parsed sequence
      *
      * @return bool|error object
      *
@@ -641,8 +652,8 @@ class MDB2_Schema_Validate
      * Checks whether a parsed database is valid. Modify its structure and
      * data when necessary.
      *
-     * @param array  multi dimensional array that contains the
-     *                structure and optional data of the database.
+     * @param array &$database multi dimensional array that contains the
+     *                         structure and optional data of the database.
      *
      * @return bool|error object
      *
@@ -701,6 +712,7 @@ class MDB2_Schema_Validate
 
                         if (empty($constraint['references']['fields'])) {
                             $referenced_table = $database['tables'][$referenced_table_name];
+
                             $primary = false;
 
                             if (!empty($referenced_table['indexes'])) {
@@ -774,11 +786,11 @@ class MDB2_Schema_Validate
      * necessary. This is called when validating INSERT and
      * UPDATE.
      *
-     * @param array  multi dimensional array that contains the
-     *                definition for current table's fields.
-     * @param array  multi dimensional array that contains the
-     *                parsed fields of the current DML instruction.
-     * @param string  array that contains the parsed instruction field
+     * @param array  $table_fields       multi dimensional array that contains the
+     *                                   definition for current table's fields.
+     * @param array  $instruction_fields multi dimensional array that contains the
+     *                                   parsed fields of the current DML instruction.
+     * @param string &$field             array that contains the parsed instruction field
      *
      * @return bool|error object
      *
@@ -790,18 +802,22 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field-name has to be specified');
         }
+
         if (is_array($instruction_fields) && isset($instruction_fields[$field['name']])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field['name'].'" already initialized');
         }
+
         if (is_array($table_fields) && !isset($table_fields[$field['name']])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 '"'.$field['name'].'" is not defined');
         }
+
         if (!isset($field['group']['type'])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 '"'.$field['name'].'" has no initial value');
         }
+
         if (isset($field['group']['data'])
             && $field['group']['type'] == 'value'
             && $field['group']['data'] !== ''
@@ -810,6 +826,7 @@ class MDB2_Schema_Validate
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'value of "'.$field['name'].'" is incorrect: '.$result->getUserinfo());
         }
+
         return MDB2_OK;
     }
 
@@ -820,10 +837,10 @@ class MDB2_Schema_Validate
      * Checks whether a given value is compatible with a table field. This is
      * done when parsing a field for a INSERT or UPDATE instruction.
      *
-     * @param array  multi dimensional array that contains the
-     *                definition for current table's fields.
-     * @param string  value to fill the parsed field
-     * @param string  name of the parsed field
+     * @param array  $field_def    multi dimensional array that contains the
+     *                             definition for current table's fields.
+     * @param string &$field_value value to fill the parsed field
+     * @param string $field_name   name of the parsed field
      *
      * @return bool|error object
      *
