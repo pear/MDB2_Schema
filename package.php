@@ -114,7 +114,7 @@ $package->setExtends('MDB2');
 
 $package->clearDeps();
 $package->setPhpDep('4.3.2');
-$package->setPearInstallerDep('1.6.0');
+$package->setPearInstallerDep('1.7.0');
 $package->addPackageDepWithChannel('required', 'MDB2', 'pear.php.net', '2.5.0b1');
 $package->addPackageDepWithChannel('required', 'XML_Parser', 'pear.php.net', '1.2.8');
 $package->addPackageDepWithChannel('optional', 'XML_DTD', 'pear.php.net', '0.4.2');
