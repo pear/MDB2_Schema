@@ -1456,8 +1456,7 @@ class MDB2_Schema extends PEAR
                 }
             }
 
-            if ($this->options['drop_missing_tables']
-                && !empty($previous_definition['tables'])
+            if (!empty($previous_definition['tables'])
                 && is_array($previous_definition['tables'])) {
                 foreach ($previous_definition['tables'] as $table_name => $table) {
                     if (empty($defined_tables[$table_name])) {
@@ -2022,8 +2021,10 @@ class MDB2_Schema extends PEAR
                 $alterations++;
             }
         }
-
-        if (!empty($changes['remove']) && is_array($changes['remove'])) {
+ 
+        if ($this->options['drop_missing_tables']
+            && !empty($changes['remove'])
+            && is_array($changes['remove'])) {
             foreach ($changes['remove'] as $table_name => $table) {
                 $result = $this->db->manager->dropTable($table_name);
                 if (PEAR::isError($result)) {
@@ -2231,9 +2232,15 @@ class MDB2_Schema extends PEAR
             }
 
             if (!empty($changes['tables']['remove']) && is_array($changes['tables']['remove'])) {
-                foreach ($changes['tables']['remove'] as $table_name => $table) {
-                    $this->db->debug("$table_name:", __FUNCTION__);
-                    $this->db->debug("\tRemoved table '$table_name'", __FUNCTION__);
+                if ($this->options['drop_missing_tables']) {
+                    foreach ($changes['tables']['remove'] as $table_name => $table) {
+                        $this->db->debug("$table_name:", __FUNCTION__);
+                        $this->db->debug("\tRemoved table '$table_name'", __FUNCTION__);
+                    }
+                } else {
+                    foreach ($changes['tables']['remove'] as $table_name => $table) {
+                        $this->db->debug("\tDeprecated table '$table_name' left as is", __FUNCTION__);
+                    }
                 }
             }
 
