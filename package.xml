@@ -27,28 +27,10 @@ PEAR::MDB and Metabase.</description>
   <email>dufuz@php.net</email>
   <active>no</active>
  </lead>
- <contributor>
-  <name>Andrew Hill</name>
-  <user>fornax</user>
-  <email>andrew-pear@fornax.net</email>
-  <active>no</active>
- </contributor>
- <contributor>
-  <name>Ali Fazelzadeh</name>
-  <user>afz</user>
-  <email>afz@dev-code.com</email>
-  <active>no</active>
- </contributor>
- <helper>
-  <name>Lars Olesen</name>
-  <user>lsolesen</user>
-  <email>lars@legestue.net</email>
-  <active>no</active>
- </helper>
- <date>2008-11-17</date>
- <time>21:27:41</time>
+ <date>2009-02-22</date>
+ <time>19:05:00</time>
  <version>
-  <release>0.8.4</release>
+  <release>0.8.5</release>
   <api>0.8.0</api>
  </version>
  <stability>
@@ -56,10 +38,10 @@ PEAR::MDB and Metabase.</description>
   <api>beta</api>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
- <notes>- fixed warning in validateTable() that was introduced in last release (Bug #15055)
-- fixed interpreter for mdb2_schematool, plus it is now been installed to bin_dir (now, really!)
-- mdb2_schematool has a new feature: initialize database
-- mdb2_schematool can now be used to dump data and/or database structure
+ <notes>- PEAR dependency updated (Bug #15923)
+- XML_DTD dependency updated (past releases of XML_DTD doesn&apos;t works anymore. release 0.5.1 works only with PHP 5).
+- Fixed &apos;disable_queries&apos; and &apos;show_structure&apos; options that were malfunctioning in mdb2_schematool web version
+- Added an option to not drop obsolete tables when updating (Request #15278). It defaults not to drop, which reverts the behavior introduced in Release 0.8.3
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -80,7 +62,9 @@ open todo items:
 - Improve validateDataFieldValue() to validate &lt;column&gt;
 - Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
 - Views support
-- Fulltext index support</notes>
+- Fulltext index support
+- PKs as constraints, not indices
+- Creation of constraints only after all tables have been created/updated to avoid invalid references.</notes>
  <contents>
   <dir baseinstalldir="/" name="/">
    <dir name="docs">
@@ -152,7 +136,7 @@ open todo items:
     <min>4.3.2</min>
    </php>
    <pearinstaller>
-    <min>1.6.0</min>
+    <min>1.7.0</min>
    </pearinstaller>
    <package>
     <name>MDB2</name>
@@ -169,7 +153,7 @@ open todo items:
    <package>
     <name>XML_DTD</name>
     <channel>pear.php.net</channel>
-    <min>0.4.2</min>
+    <min>0.5.1</min>
    </package>
    <package>
     <name>XML_Serializer</name>
@@ -189,6 +173,45 @@ open todo items:
  </phprelease>
  <phprelease />
  <changelog>
+  <release>
+   <version>
+    <release>0.8.5</release>
+    <api>0.8.0</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2009-02-22</date>
+   <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
+   <notes>- PEAR dependency updated (Bug #15923)
+- XML_DTD dependency updated (past releases of XML_DTD doesn&apos;t works anymore. release 0.5.1 works only with PHP 5).
+- Fixed &apos;disable_queries&apos; and &apos;show_structure&apos; options that were malfunctioning in mdb2_schematool web version
+- Added an option to not drop obsolete tables when updating (Request #15278). It defaults not to drop, which reverts the behavior introduced in Release 0.8.3
+
+open todo items:
+- Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
+- Automatically load reserved keywords
+- Make MDB2_Schema loadable via MDB2_Driver_Common::loadModule() (Bug #8270)
+- Allow simple if statements that mean that anything enclosed is only executed
+  if it meets certain criterias based on that version number (or some other
+  variable). This would enable people to add DML statements that are only
+  executed when updating from a specific version.
+- Modularize Writer code or remake it
+- Add specific error codes for Validate class
+- Add support for ORDER clauses on UPDATEs (to resolve the duplicate key 
+  problem)
+- Update description.schema.xml
+- Create unit test for comparedefinitions()
+- Create unit test for initializetable()
+- Create unit test to compare the expected array definition with what is parsed
+- Improve validateDataFieldValue() to validate &lt;column&gt;
+- Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
+- Views support
+- Fulltext index support
+- PKs as constraints, not indices
+- Creation of constraints only after all tables have been created/updated to avoid invalid references.</notes>
+  </release>
   <release>
    <version>
     <release>0.8.4</release>

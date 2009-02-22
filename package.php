@@ -58,14 +58,14 @@ PEAR::MDB and Metabase.
 EOT;
 
 $version_api = '0.8.0';
-$version_release = '0.8.4';
+$version_release = '0.8.5';
 $state = 'beta';
 
 $notes = <<<EOT
-- fixed warning in validateTable() that was introduced in last release (Bug #15055)
-- fixed interpreter for mdb2_schematool, plus it is now been installed to bin_dir (now, really!)
-- mdb2_schematool has a new feature: initialize database
-- mdb2_schematool can now be used to dump data and/or database structure
+- PEAR dependency updated (Bug #15923)
+- XML_DTD dependency updated (past releases of XML_DTD doesn't works anymore. release 0.5.1 works only with PHP 5).
+- Fixed 'disable_queries' and 'show_structure' options that were malfunctioning in mdb2_schematool web version
+- Added an option to not drop obsolete tables when updating (Request #15278). It defaults not to drop, which reverts the behavior introduced in Release 0.8.3
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -87,6 +87,8 @@ open todo items:
 - Provide more info on MDB2_Schema_Validate errors (output parsed value and expected value)
 - Views support
 - Fulltext index support
+- PKs as constraints, not indices
+- Creation of constraints only after all tables have been created/updated to avoid invalid references.
 EOT;
 
 $packagefile = './package.xml';
@@ -117,7 +119,7 @@ $package->setPhpDep('4.3.2');
 $package->setPearInstallerDep('1.7.0');
 $package->addPackageDepWithChannel('required', 'MDB2', 'pear.php.net', '2.5.0b1');
 $package->addPackageDepWithChannel('required', 'XML_Parser', 'pear.php.net', '1.2.8');
-$package->addPackageDepWithChannel('optional', 'XML_DTD', 'pear.php.net', '0.4.2');
+$package->addPackageDepWithChannel('optional', 'XML_DTD', 'pear.php.net', '0.5.1');
 $package->addPackageDepWithChannel('optional', 'XML_Serializer', 'pear.php.net', '0.18.0');
 
 $package->addInstallAs('www/mdb2_schematool/action.php',    'mdb2_schematool/action.php');
@@ -131,9 +133,6 @@ $package->addReplacement('scripts/mdb2_schematool', 'pear-config', '@php_bin@', 
 $package->updateMaintainer('lead', 'lsmith', 'Lukas Kahwe Smith', 'smith@pooteeweet.org', 'no');
 $package->updateMaintainer('lead', 'ifeghali', 'Igor Feghali', 'ifeghali@php.net');
 $package->updateMaintainer('lead', 'dufuz', 'Helgi Thormar', 'dufuz@php.net', 'no');
-$package->updateMaintainer('contributor', 'fornax', 'Andrew Hill', 'andrew-pear@fornax.net', 'no');
-$package->updateMaintainer('helper', 'lsolesen', 'Lars Olesen', 'lars@legestue.net', 'no');
-$package->updateMaintainer('contributor', 'afz', 'Ali Fazelzadeh', 'afz@dev-code.com', 'no');
 
 $package->addRelease();
 $package->setReleaseVersion($version_release);
