@@ -92,14 +92,6 @@ class MDB2_Schema_Example
         }
     }
 
-    function printQueries(&$db, $scope, $message)
-    {
-        if ($scope == 'query') {
-            echo $message.$db->getOption('log_line_break');
-        }
-        MDB2_defaultDebugOutput($db, $scope, $message);
-    }
-
     function setOptions($options)
     {
         foreach ($this->options as $k => $v) {
@@ -159,9 +151,19 @@ class MDB2_Schema_Example
         }
 
         $this->action = $input['action'];
+
         if (isset($input['show_structure'])) {
             $this->show_structure = $input['show_structure'];
+        } else {
+            $this->show_structure = false;
         }
+
+        if (isset($input['disable_query'])) {
+            $this->disable_query = $input['disable_query'];
+        } else {
+            $this->disable_query = false;
+        }
+
         return false;
     }
 

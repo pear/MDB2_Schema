@@ -52,6 +52,12 @@
  * illustrate the MDB2_Schema API a bit.
  */
 
+$error = '';
+if (isset($_COOKIE['error']) && $_COOKIE['error']) {
+    $error = $_COOKIE['error'];
+    setcookie('error','');
+}
+
 if (!isset($_REQUEST['loaded'])) {
     require_once 'class.inc.php';
     $defaults = new MDB2_Schema_Example();
@@ -73,12 +79,11 @@ $databases = array(
       <head><title>MDB2_Schema Web Frontend</title></head>
 <body>
 <?php
-if (isset($_COOKIE['error']) && $_COOKIE['error']) {
+if (strlen($error)) {
     echo '<h1>Error</h1>';
     echo '<div id="errors"><ul>';
-    echo '<li>' . $_COOKIE['error'] . '</li>';
+    echo "<li>$error</li>";
     echo '</ul></div>';
-    setcookie('error','');
 }
 ?>
     <form method="get" action="action.php">
@@ -201,6 +206,10 @@ if (isset($_COOKIE['error']) && $_COOKIE['error']) {
     <tr>
         <td><label for="disable_query">Do not modify database:</label></td>
         <td><input type="checkbox" name="disable_query" id="disable_query" value="1" <?php if (isset($_REQUEST['disable_query']) && $_REQUEST['disable_query']) {echo (' checked="checked"');} ?>/></td>
+    </tr>
+    <tr>
+        <td><label for="drop_missing_tables">Drop deprecated tables:</label></td>
+        <td><input type="checkbox" name="drop_missing_tables" id="drop_missing_tables" value="1" <?php if (isset($_REQUEST['drop_missing_tables']) && $_REQUEST['drop_missing_tables']) {echo (' checked="checked"');} ?>/></td>
     </tr>
     </table>
     </fieldset>

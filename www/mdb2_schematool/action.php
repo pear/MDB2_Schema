@@ -197,4 +197,13 @@ case 'initialize':
 
 include 'result.php';
 $schema->disconnect();
+
+function printQueries(&$db, $scope, $message)
+{
+    if ($scope == 'query') {
+        echo $message.$db->getOption('log_line_break');
+    }
+    MDB2_defaultDebugOutput($db, $scope, $message);
+}
+
 ?>
