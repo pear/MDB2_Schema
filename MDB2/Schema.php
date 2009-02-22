@@ -2239,7 +2239,7 @@ class MDB2_Schema extends PEAR
                     }
                 } else {
                     foreach ($changes['tables']['remove'] as $table_name => $table) {
-                        $this->db->debug("\tDeprecated table '$table_name' left as is", __FUNCTION__);
+                        $this->db->debug("\tObsolete table '$table_name' left as is", __FUNCTION__);
                     }
                 }
             }

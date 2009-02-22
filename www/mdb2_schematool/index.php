@@ -208,7 +208,7 @@ if (strlen($error)) {
         <td><input type="checkbox" name="disable_query" id="disable_query" value="1" <?php if (isset($_REQUEST['disable_query']) && $_REQUEST['disable_query']) {echo (' checked="checked"');} ?>/></td>
     </tr>
     <tr>
-        <td><label for="drop_missing_tables">Drop deprecated tables:</label></td>
+        <td><label for="drop_missing_tables">Drop obsolete tables:</label></td>
         <td><input type="checkbox" name="drop_missing_tables" id="drop_missing_tables" value="1" <?php if (isset($_REQUEST['drop_missing_tables']) && $_REQUEST['drop_missing_tables']) {echo (' checked="checked"');} ?>/></td>
     </tr>
     </table>
