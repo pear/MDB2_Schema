@@ -90,12 +90,13 @@ class MDB2_Schema extends PEAR
 
     var $options = array(
         'fail_on_invalid_names' => true,
-        'dtd_file' => false,
-        'valid_types' => array(),
-        'force_defaults' => true,
-        'parser' => 'MDB2_Schema_Parser',
-        'writer' => 'MDB2_Schema_Writer',
-        'validate' => 'MDB2_Schema_Validate'
+        'dtd_file'              => false,
+        'valid_types'           => array(),
+        'force_defaults'        => true,
+        'parser'                => 'MDB2_Schema_Parser',
+        'writer'                => 'MDB2_Schema_Writer',
+        'validate'              => 'MDB2_Schema_Validate',
+        'drop_missing_tables'   => false
     );
 
     // }}}
@@ -1454,7 +1455,10 @@ class MDB2_Schema extends PEAR
                     $changes['tables'] = MDB2_Schema::arrayMergeClobber($changes['tables'], $change);
                 }
             }
-            if (!empty($previous_definition['tables']) && is_array($previous_definition['tables'])) {
+
+            if ($this->options['drop_missing_tables']
+                && !empty($previous_definition['tables'])
+                && is_array($previous_definition['tables'])) {
                 foreach ($previous_definition['tables'] as $table_name => $table) {
                     if (empty($defined_tables[$table_name])) {
                         $changes['tables']['remove'][$table_name] = true;
