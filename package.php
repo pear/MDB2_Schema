@@ -57,8 +57,8 @@ existing databases is also supported. The format is compatible with both
 PEAR::MDB and Metabase.
 EOT;
 
-$version_api = '0.8.0';
-$version_release = '0.8.5';
+$version_api = '0.8.6';
+$version_release = '0.8.6';
 $state = 'beta';
 
 $notes = <<<EOT

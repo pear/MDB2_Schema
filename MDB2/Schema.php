@@ -96,7 +96,7 @@ class MDB2_Schema extends PEAR
         'parser'                => 'MDB2_Schema_Parser',
         'writer'                => 'MDB2_Schema_Writer',
         'validate'              => 'MDB2_Schema_Validate',
-        'drop_missing_tables'   => false
+        'drop_obsolete_objects' => false
     );
 
     // }}}
@@ -1455,16 +1455,17 @@ class MDB2_Schema extends PEAR
                     $changes['tables'] = MDB2_Schema::arrayMergeClobber($changes['tables'], $change);
                 }
             }
-
-            if (!empty($previous_definition['tables'])
-                && is_array($previous_definition['tables'])) {
-                foreach ($previous_definition['tables'] as $table_name => $table) {
-                    if (empty($defined_tables[$table_name])) {
-                        $changes['tables']['remove'][$table_name] = true;
-                    }
+        }
+        if (!empty($previous_definition['tables'])
+            && is_array($previous_definition['tables'])
+        ) {
+            foreach ($previous_definition['tables'] as $table_name => $table) {
+                if (empty($defined_tables[$table_name])) {
+                    $changes['tables']['remove'][$table_name] = true;
                 }
             }
         }
+
         if (!empty($current_definition['sequences']) && is_array($current_definition['sequences'])) {
             $changes['sequences'] = $defined_sequences = array();
             foreach ($current_definition['sequences'] as $sequence_name => $sequence) {
@@ -1484,14 +1485,17 @@ class MDB2_Schema extends PEAR
                     $changes['sequences'] = MDB2_Schema::arrayMergeClobber($changes['sequences'], $change);
                 }
             }
-            if (!empty($previous_definition['sequences']) && is_array($previous_definition['sequences'])) {
-                foreach ($previous_definition['sequences'] as $sequence_name => $sequence) {
-                    if (empty($defined_sequences[$sequence_name])) {
-                        $changes['sequences']['remove'][$sequence_name] = true;
-                    }
+        }
+        if (!empty($previous_definition['sequences'])
+            && is_array($previous_definition['sequences'])
+        ) {
+            foreach ($previous_definition['sequences'] as $sequence_name => $sequence) {
+                if (empty($defined_sequences[$sequence_name])) {
+                    $changes['sequences']['remove'][$sequence_name] = true;
                 }
             }
         }
+
         return $changes;
     }
 
@@ -2022,9 +2026,10 @@ class MDB2_Schema extends PEAR
             }
         }
  
-        if ($this->options['drop_missing_tables']
+        if ($this->options['drop_obsolete_objects']
             && !empty($changes['remove'])
-            && is_array($changes['remove'])) {
+            && is_array($changes['remove'])
+        ) {
             foreach ($changes['remove'] as $table_name => $table) {
                 $result = $this->db->manager->dropTable($table_name);
                 if (PEAR::isError($result)) {
@@ -2105,7 +2110,10 @@ class MDB2_Schema extends PEAR
             }
         }
 
-        if (!empty($changes['remove']) && is_array($changes['remove'])) {
+        if ($this->options['drop_obsolete_objects']
+            && !empty($changes['remove'])
+            && is_array($changes['remove'])
+        ) {
             foreach ($changes['remove'] as $sequence_name => $sequence) {
                 $result = $this->db->manager->dropSequence($sequence_name);
                 if (PEAR::isError($result)) {
@@ -2232,7 +2240,7 @@ class MDB2_Schema extends PEAR
             }
 
             if (!empty($changes['tables']['remove']) && is_array($changes['tables']['remove'])) {
-                if ($this->options['drop_missing_tables']) {
+                if ($this->options['drop_obsolete_objects']) {
                     foreach ($changes['tables']['remove'] as $table_name => $table) {
                         $this->db->debug("$table_name:", __FUNCTION__);
                         $this->db->debug("\tRemoved table '$table_name'", __FUNCTION__);
@@ -2338,9 +2346,15 @@ class MDB2_Schema extends PEAR
                 }
             }
             if (!empty($changes['sequences']['remove']) && is_array($changes['sequences']['remove'])) {
-                foreach ($changes['sequences']['remove'] as $sequence_name => $sequence) {
-                    $this->db->debug("$sequence_name:", __FUNCTION__);
-                    $this->db->debug("\tAdded sequence '$sequence_name'", __FUNCTION__);
+                if ($this->options['drop_obsolete_objects']) {
+                    foreach ($changes['sequences']['remove'] as $sequence_name => $sequence) {
+                        $this->db->debug("$sequence_name:", __FUNCTION__);
+                        $this->db->debug("\tRemoved sequence '$sequence_name'", __FUNCTION__);
+                    }
+                } else {
+                    foreach ($changes['sequences']['remove'] as $sequence_name => $sequence) {
+                        $this->db->debug("\tObsolete sequence '$sequence_name' left as is", __FUNCTION__);
+                    }
                 }
             }
             if (!empty($changes['sequences']['change']) && is_array($changes['sequences']['change'])) {
