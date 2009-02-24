@@ -562,7 +562,6 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
             'start' => '',
             'description' => '',
             'comments' => '',
-            'on' => array('table' => '', 'field' => '')
         );
 
         if (!empty($sequence['name'])) {

@@ -580,7 +580,7 @@
 <!-- SEQUENCE -->
 <h3><a name="3.3.0"><tt>sequence</tt></a></h3>
 <p>The <tt>sequence</tt> is another main database schema object.  It may be used in a schema description multiple times, once per each sequence that is contained the database being described.</p>
-<p>A <tt>sequence</tt> is an object that only contains an integer value.  A sequence value is automatically incremented after every time it is fetch the next sequence value.  The fetch and increment actions constitute an atomic operation.  This means that if two concurrent accesses to the database fetch the next sequence value, they will always different values.</p>
+<p>A <tt>sequence</tt> is an object that only contains an integer value.  A sequence value is automatically incremented after every time it is fetch the next sequence value.  The fetch and increment actions constitute an atomic operation.  This means that if two concurrent accesses to the database fetch the next sequence value, they will always get different values.</p>
 <p>Sequences are useful to generate integer numbers that may be used to store in fields that must contain unique numbers.</p>
 <p>The <tt>sequence</tt> object definition may contain one <tt>on</tt> section besides the properties.  The <tt>sequence</tt> schema object may have the following properties:</p>
 
@@ -752,7 +752,7 @@
    <tt>&lt;table/&gt;</tt><br/>
    <tt>&lt;field/&gt;</tt><br/>
   </ul></p>
-  <tt>&lt;/on&gt;</tt><br/>
+  <tt>&lt;/on&gt;?</tt><br/>
 
  </ul></p>
  <tt>&lt;/sequence&gt;*</tt><br/>

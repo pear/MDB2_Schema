@@ -335,7 +335,6 @@ class MDB2_Schema_Parser extends XML_Parser
                 'start' => '',
                 'description' => '',
                 'comments' => '',
-                'on' => array('table' => '', 'field' => '')
             );
             break;
         }
@@ -805,6 +804,9 @@ class MDB2_Schema_Parser extends XML_Parser
             break;
         case 'database-sequence-comments':
             $this->sequence['comments'] .= $data;
+            break;
+        case 'database-sequence-on':
+            $this->sequence['on'] = array('table' => '', 'field' => '');
             break;
         case 'database-sequence-on-table':
             $this->sequence['on']['table'] .= $data;
