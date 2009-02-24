@@ -77,7 +77,7 @@ if ($data->show_structure
     && is_array($definition)
 ) {
     echo '<h1>Database structure</h1>';
-    $var_dump($definition);
+    var_dump($definition);
 }
 
 if (isset($error) && $error) {

@@ -64,7 +64,7 @@ class MDB2_Schema_Example
         'quote_identifier' => true,
         'force_defaults' => false,
         'portability' => false,
-        'drop_missing_tables' => false,
+        'drop_obsolete_objects' => false,
     );
 
     var $dsn = array(
@@ -179,7 +179,7 @@ class MDB2_Schema_Example
         setcookie('quote_identifier', $this->options['quote_identifier']);
         setcookie('force_defaults', $this->options['force_defaults']);
         setcookie('portability', $this->options['portability']);
-        setcookie('drop_missing_tables', $this->options['drop_missing_tables']);
+        setcookie('drop_obsolete_objects', $this->options['drop_obsolete_objects']);
         
         setcookie('disable_query', $this->disable_query);
         setcookie('action', $this->action);
