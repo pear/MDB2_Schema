@@ -100,8 +100,10 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
 
     var $init = array();
 
-    function __construct($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
-    {
+    function __construct($variables, $fail_on_invalid_names = true,
+        $structure = false, $valid_types = array(), $force_defaults = true,
+        $max_identifiers_length = null
+    ) {
         // force ISO-8859-1 due to different defaults for PHP4 and PHP5
         // todo: this probably needs to be investigated some more and cleaned up
         $this->options['encoding'] = 'ISO-8859-1';
@@ -123,8 +125,10 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         parent::XML_Unserializer($this->options);
     }
 
-    function MDB2_Schema_Parser2($variables, $fail_on_invalid_names = true, $structure = false, $valid_types = array(), $force_defaults = true)
-    {
+    function MDB2_Schema_Parser2($variables, $fail_on_invalid_names = true,
+        $structure = false, $valid_types = array(), $force_defaults = true,
+        $max_identifiers_length = null
+    ) {
         $this->__construct($variables, $fail_on_invalid_names, $structure, $valid_types, $force_defaults);
     }
 

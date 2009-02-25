@@ -393,7 +393,16 @@ class MDB2_Schema extends PEAR
             return $result;
         }
 
-        $parser =& new $class_name($variables, $fail_on_invalid_names, $structure, $this->options['valid_types'], $this->options['force_defaults']);
+        $max_identifiers_length = null;
+        if (isset($this->db->options['max_identifiers_length'])) {
+            $max_identifiers_length = $this->db->options['max_identifiers_length'];
+        }
+        
+        $parser =& new $class_name($variables, $fail_on_invalid_names, $structure,
+            $this->options['valid_types'], $this->options['force_defaults'],
+            $max_identifiers_length
+        );
+
         $result = $parser->setInputFile($input_file);
         if (PEAR::isError($result)) {
             return $result;
@@ -436,7 +445,17 @@ class MDB2_Schema extends PEAR
             return $result;
         }
 
-        $val =& new $class_name($this->options['fail_on_invalid_names'], $this->options['valid_types'], $this->options['force_defaults']);
+        $max_identifiers_length = null;
+        if (isset($this->db->options['max_identifiers_length'])) {
+            $max_identifiers_length = $this->db->options['max_identifiers_length'];
+        }
+
+        $val =& new $class_name(
+            $this->options['fail_on_invalid_names'],
+            $this->options['valid_types'],
+            $this->options['force_defaults'],
+            $max_identifiers_length
+        );
 
         $database_definition = array(
             'name' => $database,

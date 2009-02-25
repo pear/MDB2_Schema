@@ -70,11 +70,14 @@ class MDB2_Schema_Validate
 
     var $force_defaults = true;
 
+    var $max_identifiers_length = null;
+
     // }}}
     // {{{ constructor
 
-    function __construct($fail_on_invalid_names = true, $valid_types = array(), $force_defaults = true)
-    {
+    function __construct($fail_on_invalid_names = true, $valid_types = array(),
+        $force_defaults = true, $max_identifiers_length = null
+    ) {
         if (empty($GLOBALS['_MDB2_Schema_Reserved'])) {
             $GLOBALS['_MDB2_Schema_Reserved'] = array();
         }
@@ -87,12 +90,14 @@ class MDB2_Schema_Validate
         } else {
             $this->fail_on_invalid_names = array();
         }
-        $this->valid_types    = $valid_types;
-        $this->force_defaults = $force_defaults;
+        $this->valid_types            = $valid_types;
+        $this->force_defaults         = $force_defaults;
+        $this->max_identifiers_length = $max_identifiers_length;
     }
 
-    function MDB2_Schema_Validate($fail_on_invalid_names = true, $valid_types = array(), $force_defaults = true)
-    {
+    function MDB2_Schema_Validate($fail_on_invalid_names = true, $valid_types = array(),
+        $force_defaults = true, $max_identifiers_length = null
+    ) {
         $this->__construct($fail_on_invalid_names, $valid_types, $force_defaults);
     }
 
@@ -176,27 +181,18 @@ class MDB2_Schema_Validate
      */
     function validateTable($tables, &$table, $table_name)
     {
-        /* Have we got a name? */
-        if (!$table_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'a table has to have a name');
-        }
-
         /* Table name duplicated? */
         if (is_array($tables) && isset($tables[$table_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'table "'.$table_name.'" already exists');
         }
 
-        /* Table name reserved? */
-        if (is_array($this->fail_on_invalid_names)) {
-            $name = strtoupper($table_name);
-            foreach ($this->fail_on_invalid_names as $rdbms) {
-                if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                        'table name "'.$table_name.'" is a reserved word in: '.$rdbms);
-                }
-            }
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($table_name, 'table');
+        if (PEAR::isError($result)) {
+            return $result;
         }
 
         /* Was */
@@ -289,27 +285,18 @@ class MDB2_Schema_Validate
      */
     function validateField($fields, &$field, $field_name)
     {
-        /* Have we got a name? */
-        if (!$field_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'field name missing');
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($field_name, 'field');
+        if (PEAR::isError($result)) {
+            return $result;
         }
 
         /* Field name duplicated? */
         if (is_array($fields) && isset($fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'field "'.$field_name.'" already exists');
-        }
-
-        /* Field name reserverd? */
-        if (is_array($this->fail_on_invalid_names)) {
-            $name = strtoupper($field_name);
-            foreach ($this->fail_on_invalid_names as $rdbms) {
-                if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                        'field name "'.$field_name.'" is a reserved word in: '.$rdbms);
-                }
-            }
         }
 
         /* Type check */
@@ -422,10 +409,14 @@ class MDB2_Schema_Validate
      */
     function validateIndex($table_indexes, &$index, $index_name)
     {
-        if (!$index_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'an index has to have a name');
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($index_name, 'index');
+        if (PEAR::isError($result)) {
+            return $result;
         }
+
         if (is_array($table_indexes) && isset($table_indexes[$index_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'index "'.$index_name.'" already exists');
@@ -470,13 +461,17 @@ class MDB2_Schema_Validate
      */
     function validateIndexField($index_fields, &$field, $field_name)
     {
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($field_name, 'index field');
+        if (PEAR::isError($result)) {
+            return $result;
+        }
+
         if (is_array($index_fields) && isset($index_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'index field "'.$field_name.'" already exists');
-        }
-        if (!$field_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'the index-field-name is required');
         }
         if (empty($field['sorting'])) {
             $field['sorting'] = 'ascending';
@@ -506,10 +501,14 @@ class MDB2_Schema_Validate
      */
     function validateConstraint($table_constraints, &$constraint, $constraint_name)
     {
-        if (!$constraint_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'a foreign key has to have a name');
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($constraint_name, 'foreign key');
+        if (PEAR::isError($result)) {
+            return $result;
         }
+
         if (is_array($table_constraints) && isset($table_constraints[$constraint_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'foreign key "'.$constraint_name.'" already exists');
@@ -555,10 +554,14 @@ class MDB2_Schema_Validate
      */
     function validateConstraintField($constraint_fields, $field_name)
     {
-        if (!$field_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'empty value for foreign-field');
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($field_name, 'foreign key field');
+        if (PEAR::isError($result)) {
+            return $result;
         }
+
         if (is_array($constraint_fields) && isset($constraint_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'foreign field "'.$field_name.'" already exists');
@@ -582,10 +585,14 @@ class MDB2_Schema_Validate
      */
     function validateConstraintReferencedField($referenced_fields, $field_name)
     {
-        if (!$field_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'empty value for referenced foreign-field');
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($field_name, 'referenced foreign field');
+        if (PEAR::isError($result)) {
+            return $result;
         }
+
         if (is_array($referenced_fields) && isset($referenced_fields[$field_name])) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
                 'foreign field "'.$field_name.'" already referenced');
@@ -612,9 +619,12 @@ class MDB2_Schema_Validate
      */
     function validateSequence($sequences, &$sequence, $sequence_name)
     {
-        if (!$sequence_name) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'a sequence has to have a name');
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($sequence_name, 'sequence');
+        if (PEAR::isError($result)) {
+            return $result;
         }
 
         if (is_array($sequences) && isset($sequences[$sequence_name])) {
@@ -661,21 +671,17 @@ class MDB2_Schema_Validate
      */
     function validateDatabase(&$database)
     {
-        /* Have we got a name? */
-        if (!is_array($database) || !isset($database['name']) || !$database['name']) {
+        if (!is_array($database)) {
             return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'a database has to have a name');
+                'something wrong went with database definition');
         }
 
-        /* Database name reserved? */
-        if (is_array($this->fail_on_invalid_names)) {
-            $name = strtoupper($database['name']);
-            foreach ($this->fail_on_invalid_names as $rdbms) {
-                if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
-                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                        'database name "'.$database['name'].'" is a reserved word in: '.$rdbms);
-                }
-            }
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($database['name'], 'database');
+        if (PEAR::isError($result)) {
+            return $result;
         }
 
         /* Create */
@@ -798,9 +804,12 @@ class MDB2_Schema_Validate
      */
     function validateDataField($table_fields, $instruction_fields, &$field)
     {
-        if (!$field['name']) {
-            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
-                'field-name has to be specified');
+        /**
+         * Valid name ?
+         */
+        $result = $this->validateIdentifier($field['name'], 'field');
+        if (PEAR::isError($result)) {
+            return $result;
         }
 
         if (is_array($instruction_fields) && isset($instruction_fields[$field['name']])) {
@@ -917,6 +926,64 @@ class MDB2_Schema_Validate
         }
         return MDB2_OK;
     }
+
+    // }}}
+    // {{{ validateIdentifier()
+
+    /**
+     * Checks whether a given identifier is valid for current driver.
+     *
+     * @param string $id    identifier to check
+     * @param string $type  whether identifier represents a table name, index, etc.
+     *
+     * @return bool|error object
+     *
+     * @access public
+     */
+    function validateIdentifier($id, $type)
+    {
+        $max_length = $this->max_identifiers_length;
+        $cur_length = strlen($id);
+
+        /**
+         * Have we got a name?
+         */
+        if (!$id) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                "a $type has to have a name");
+        }
+
+        /**
+         * Supported length ?
+         */
+        if ($max_length !== null
+            && $cur_length > $max_length
+        ) {
+            return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                "$type name '$id' is too long for current driver");
+        } elseif ($cur_length > 30) {
+            // FIXME: find a way to issue a warning in MDB2_Schema object
+            /* $this->warnings[] = "$type name '$id' might not be 
+            portable to other drivers"; */
+        }
+
+        /**
+         * Reserved ?
+         */
+        if (is_array($this->fail_on_invalid_names)) {
+            $name = strtoupper($id);
+            foreach ($this->fail_on_invalid_names as $rdbms) {
+                if (in_array($name, $GLOBALS['_MDB2_Schema_Reserved'][$rdbms])) {
+                    return $this->raiseError(MDB2_SCHEMA_ERROR_VALIDATE,
+                        "$type name '$id' is a reserved word in: $rdbms");
+                }
+            }
+        }
+
+        return MDB2_OK;
+    }
+
+    // }}}
 }
 
 ?>
