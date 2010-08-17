@@ -430,4 +430,3 @@ $GLOBALS['_MDB2_Schema_Reserved']['ibase'] = array(
     'ZONE',
 );
 // }}}
-?>

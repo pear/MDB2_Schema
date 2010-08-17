@@ -277,4 +277,3 @@ $GLOBALS['_MDB2_Schema_Reserved']['mysql'] = array(
     'ZEROFILL',
     );
     // }}}
-?>

@@ -578,4 +578,3 @@ class MDB2_Schema_Writer
 
     // }}}
 }
-?>

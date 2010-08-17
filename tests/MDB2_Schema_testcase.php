@@ -189,5 +189,3 @@ class MDB2_Schema_TestCase extends PHPUnit_TestCase {
         $this->assertFalse(PEAR::isError($result), 'Error dumping database');
     }
 }
-
-?>

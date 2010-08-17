@@ -120,4 +120,3 @@ set_error_handler('errorHandler');
 if (function_exists('xdebug_disable')) {
     xdebug_disable();
 }
-?>

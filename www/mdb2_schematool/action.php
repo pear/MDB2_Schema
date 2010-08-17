@@ -205,5 +205,3 @@ function printQueries(&$db, $scope, $message)
     }
     MDB2_defaultDebugOutput($db, $scope, $message);
 }
-
-?>

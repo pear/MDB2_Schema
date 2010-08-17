@@ -623,5 +623,3 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         return $this->error;
     }
 }
-
-?>

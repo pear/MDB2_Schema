@@ -140,5 +140,3 @@ $GLOBALS['_MDB2_Schema_Reserved']['pgsql'] = array(
     'WHERE'
 );
 // }}}
-?>
-

@@ -985,5 +985,3 @@ class MDB2_Schema_Validate
 
     // }}}
 }
-
-?>

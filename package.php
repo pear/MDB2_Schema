@@ -154,5 +154,3 @@ if (isset($_GET['make']) || (isset($_SERVER['argv']) && @$_SERVER['argv'][1] == 
 } else {
     $package->debugPackageFile();
 }
-
-?>

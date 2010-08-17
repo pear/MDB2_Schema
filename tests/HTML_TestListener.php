@@ -30,5 +30,3 @@ class HTML_TestListener extends PHPUnit_TestListener {
         echo("\n<div class=\"testcase\">".get_class($test).' : Starting '.$test->getName().' ...');
     }
 }
-
-?>

@@ -127,5 +127,3 @@ foreach ($dbarray as $db) {
 
     echo "=== End test of $display_dsn ===\n\n";
 }
-
-?>

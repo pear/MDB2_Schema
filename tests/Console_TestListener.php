@@ -29,4 +29,3 @@ class Console_TestListener extends PHPUnit_TestListener {
         echo(get_class($test).' : Starting '.$test->getName().' ...');
     }
 }
-?>

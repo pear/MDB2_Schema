@@ -196,4 +196,3 @@ class MDB2_Schema_Example
         setcookie('loaded', '1');
     }
 }
-?>

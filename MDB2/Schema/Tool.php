@@ -556,5 +556,3 @@ EOH
 
 
 }//class MDB2_Schema_Tool
-
-?>

@@ -822,5 +822,3 @@ class MDB2_Schema_Parser extends XML_Parser
         }
     }
 }
-
-?>
