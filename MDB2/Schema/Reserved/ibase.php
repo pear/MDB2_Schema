@@ -1,5 +1,4 @@
 <?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker: */
-// {{{ Disclaimer, Licence, copyrights
 // +----------------------------------------------------------------------+
 // | PHP versions 4 and 5                                                 |
 // +----------------------------------------------------------------------+
@@ -42,8 +41,6 @@
 // +----------------------------------------------------------------------+
 // | Author: Lorenzo Alberton <l.alberton@quipo.it>                       |
 // +----------------------------------------------------------------------+
-//
-// }}}
 // {{{ $GLOBALS['_MDB2_Schema_Reserved']['ibase']
 /**
  * Has a list of reserved words of Interbase/Firebird
