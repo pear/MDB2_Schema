@@ -1,8 +1,8 @@
 <?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker: */
 /**
- * PHP version 4, 5
+ * PHP versions 4 and 5
  *
- * Copyright (c) 1998-2008 Manuel Lemos, Tomas V.V.Cox,
+ * Copyright (c) 1998-2010 Manuel Lemos, Tomas V.V.Cox,
  * Stig. S. Bakken, Lukas Smith, Igor Feghali
  * All rights reserved.
  *
@@ -39,15 +39,12 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Lukas Smith <smith@pooteeweet.org>
- * Author: Igor Feghali <ifeghali@php.net>
- *
  * @category Database
  * @package  MDB2_Schema
  * @author   Lukas Smith <smith@pooteeweet.org>
  * @author   Igor Feghali <ifeghali@php.net>
  * @license  BSD http://www.opensource.org/licenses/bsd-license.php
- * @version  CVS: $Id$
+ * @version  SVN: $Id$
  * @link     http://pear.php.net/packages/MDB2_Schema
  */
 

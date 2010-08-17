@@ -2,7 +2,7 @@
 /**
  * PHP versions 4 and 5
  *
- * Copyright (c) 1998-2008 Manuel Lemos, Tomas V.V.Cox,
+ * Copyright (c) 1998-2010 Manuel Lemos, Tomas V.V.Cox,
  * Stig. S. Bakken, Lukas Smith, Igor Feghali
  * All rights reserved.
  *
@@ -39,20 +39,14 @@
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  *
- * Author: Christian Dickmann <dickmann@php.net>
- * Author: Igor Feghali <ifeghali@php.net>
- *
- * $Id$
- *
  * @category Database
  * @package  MDB2_Schema
  * @author   Christian Dickmann <dickmann@php.net>
  * @author   Igor Feghali <ifeghali@php.net>
  * @license  BSD http://www.opensource.org/licenses/bsd-license.php
- * @version  CVS: $Id$
+ * @version  SVN: $Id$
  * @link     http://pear.php.net/packages/MDB2_Schema
  */
-
 
 require_once 'XML/Parser.php';
 require_once 'MDB2/Schema/Validate.php';
