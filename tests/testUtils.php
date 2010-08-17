@@ -1,4 +1,4 @@
-<?php
+<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker: */
 
 /* Some utility functions for the test scripts */
 
