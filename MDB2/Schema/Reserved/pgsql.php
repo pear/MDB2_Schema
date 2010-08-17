@@ -1,7 +1,5 @@
 <?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker: */
 /**
- * PHP versions 4 and 5
- *
  * Copyright (c) 1998-2010 Manuel Lemos, Tomas V.V.Cox,
  * Stig. S. Bakken, Lukas Smith, Igor Feghali
  * All rights reserved.
@@ -38,6 +36,8 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
  * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
+ *
+ * PHP version 5
  *
  * @category Database
  * @package  MDB2_Schema
