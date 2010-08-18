@@ -119,29 +119,57 @@ $package->setExtends('MDB2');
 $package->clearDeps();
 $package->setPhpDep('4.3.2');
 $package->setPearInstallerDep('1.7.0');
-$package->addPackageDepWithChannel('required', 'MDB2', 'pear.php.net', '2.5.0b1');
-$package->addPackageDepWithChannel('required', 'XML_Parser', 'pear.php.net', '1.2.8');
-$package->addPackageDepWithChannel('optional', 'XML_DTD', 'pear.php.net', '0.5.1');
-$package->addPackageDepWithChannel('optional', 'XML_Serializer', 'pear.php.net', '0.18.0');
+$package->addPackageDepWithChannel(
+    'required', 'MDB2', 'pear.php.net', '2.5.0b1'
+);
+$package->addPackageDepWithChannel(
+    'required', 'XML_Parser', 'pear.php.net', '1.2.8'
+);
+$package->addPackageDepWithChannel(
+    'optional', 'XML_DTD', 'pear.php.net', '0.5.1'
+);
+$package->addPackageDepWithChannel(
+    'optional', 'XML_Serializer', 'pear.php.net', '0.18.0'
+);
 
-$package->addInstallAs('www/mdb2_schematool/action.php',    'mdb2_schematool/action.php');
-$package->addInstallAs('www/mdb2_schematool/class.inc.php', 'mdb2_schematool/class.inc.php');
-$package->addInstallAs('www/mdb2_schematool/index.php',     'mdb2_schematool/index.php');
-$package->addInstallAs('www/mdb2_schematool/result.php',    'mdb2_schematool/result.php');
-$package->addInstallAs('scripts/mdb2_schematool',           'mdb2_schematool');
+$package->addInstallAs(
+    'www/mdb2_schematool/action.php', 'mdb2_schematool/action.php'
+);
+$package->addInstallAs(
+    'www/mdb2_schematool/class.inc.php', 'mdb2_schematool/class.inc.php'
+);
+$package->addInstallAs(
+    'www/mdb2_schematool/index.php', 'mdb2_schematool/index.php'
+);
+$package->addInstallAs(
+    'www/mdb2_schematool/result.php', 'mdb2_schematool/result.php'
+);
+$package->addInstallAs(
+    'scripts/mdb2_schematool', 'mdb2_schematool'
+);
 
-$package->addReplacement('scripts/mdb2_schematool', 'pear-config', '@php_bin@', 'php_bin');
+$package->addReplacement(
+    'scripts/mdb2_schematool', 'pear-config', '@php_bin@', 'php_bin'
+);
 
-$package->updateMaintainer('lead', 'lsmith', 'Lukas Kahwe Smith', 'smith@pooteeweet.org', 'no');
-$package->updateMaintainer('lead', 'ifeghali', 'Igor Feghali', 'ifeghali@php.net');
-$package->updateMaintainer('lead', 'dufuz', 'Helgi Thormar', 'dufuz@php.net', 'no');
+$package->updateMaintainer(
+    'lead', 'lsmith', 'Lukas Kahwe Smith', 'smith@pooteeweet.org', 'no'
+);
+$package->updateMaintainer(
+    'lead', 'ifeghali', 'Igor Feghali', 'ifeghali@php.net'
+);
+$package->updateMaintainer(
+    'lead', 'dufuz', 'Helgi Thormar', 'dufuz@php.net', 'no'
+);
 
 $package->addRelease();
 $package->setReleaseVersion($version_release);
 $package->setAPIVersion($version_api);
 $package->setReleaseStability($state);
 $package->setAPIStability($state);
-$package->setLicense('BSD License', 'http://www.opensource.org/licenses/bsd-license.php');
+$package->setLicense(
+    'BSD License', 'http://www.opensource.org/licenses/bsd-license.php'
+);
 
 $package->setNotes($notes);
 $package->setSummary($summary);
@@ -149,7 +177,9 @@ $package->setDescription($description);
 
 $package->generateContents();
 
-if (isset($_GET['make']) || (isset($_SERVER['argv']) && @$_SERVER['argv'][1] == 'make')) {
+if (isset($_GET['make'])
+    || (isset($_SERVER['argv']) && @$_SERVER['argv'][1] == 'make')
+) {
     $package->writePackageFile();
 } else {
     $package->debugPackageFile();

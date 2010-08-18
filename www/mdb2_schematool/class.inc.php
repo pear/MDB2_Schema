@@ -48,11 +48,18 @@
  */
 
 /**
+ * An example of how to use MDB2_Schema
+ *
  * This is all rather ugly code, thats probably very much XSS exploitable etc.
  * However the idea was to keep the magic and dependencies low, to just
  * illustrate the MDB2_Schema API a bit.
+ *
+ * @category Database
+ * @package  MDB2_Schema
+ * @author   Igor Feghali <ifeghali@php.net>
+ * @license  BSD http://www.opensource.org/licenses/bsd-license.php
+ * @link     http://pear.php.net/packages/MDB2_Schema
  */
-
 class MDB2_Schema_Example
 {
     var $options = array(
@@ -84,7 +91,21 @@ class MDB2_Schema_Example
     var $dumptype = '';
     var $file = '';
 
-    function factory($input) {
+    /**
+     * Creates a MDB2_Schema_Example instance
+     *
+     * This wraper is required for user input validation. If everything goes
+     * well, save user's options and return an object.
+     *
+     * @param array $input mixed array with user actions information
+     *
+     * @return object PEAR_Error|MDB2_Schema_Example
+     *
+     * @access public
+     * @static
+     */
+    function factory($input)
+    {
         $obj = new MDB2_Schema_Example($input);
         if ($error = $obj->validateInput($input)) {
             return PEAR::raiseError($error);
@@ -95,6 +116,19 @@ class MDB2_Schema_Example
         }
     }
 
+    /**
+     * Sets MDB2_Schema_Example options according to user input
+     *
+     * If an option is missing, force its value to be FALSE. This is required to 
+     * catch unmarked checkboxes.
+     *
+     * @param array $options mixed array with user actions information
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
     function setOptions($options)
     {
         foreach ($this->options as $k => $v) {
@@ -123,6 +157,16 @@ class MDB2_Schema_Example
         );
     }
 
+    /**
+     * Validates user input
+     *
+     * @param array $input mixed array with user actions information
+     *
+     * @return string|boolean return string on error or boolean false
+     *
+     * @access public
+     * @static
+     */
     function validateInput($input)
     {
         if (!array_key_exists('action', $input)) {
@@ -170,7 +214,16 @@ class MDB2_Schema_Example
         return false;
     }
 
-    function saveCookies() {
+    /**
+     * Saves user preferences as browser cookies
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
+    function saveCookies()
+    {
         setcookie('use_transactions', $this->options['use_transactions']);
         setcookie('default_table_type', $this->options['default_table_type']);
         setcookie('log_line_break', $this->options['log_line_break']);

@@ -53,7 +53,7 @@
  * However the idea was to keep the magic and dependencies low, to just
  * illustrate the MDB2_Schema API a bit.
  */
-setcookie('error','');
+setcookie('error', '');
 
 require_once 'MDB2/Schema.php';
 require_once 'class.inc.php';
@@ -120,12 +120,14 @@ case 'update':
     if (PEAR::isError($definition)) {
         $error = $definition->getMessage() . ' ' . $definition->getUserInfo();
     } else {
-        $operation = $schema->dumpDatabase($definition, $dump_config, MDB2_SCHEMA_DUMP_ALL);
+        $operation = $schema->dumpDatabase(
+            $definition, $dump_config, MDB2_SCHEMA_DUMP_ALL
+        );
         if (PEAR::isError($operation)) {
             $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
         } else {
-            $operation = $schema->updateDatabase($data->file
-                , $data->file.'.old', array(), $data->disable_query
+            $operation = $schema->updateDatabase(
+                $data->file, $data->file.'.old', array(), $data->disable_query
             );
             if (PEAR::isError($operation)) {
                 $error = $operation->getMessage() . ' ' . $operation->getUserInfo();
@@ -197,9 +199,24 @@ case 'initialize':
     break;
 }
 
-include 'result.php';
+require 'result.php';
 $schema->disconnect();
 
+/**
+ * Aux function to print SQL queries (debug mode)
+ *
+ * @param object &$db     reference to an MDB2 database object
+ * @param string $scope   usually the method name that triggered the debug call:
+ *                        for example 'query', 'prepare', 'execute', 'parameters',
+ *                        'beginTransaction', 'commit', 'rollback'
+ * @param string $message message that should be appended to the debug variable
+ *
+ * @return void|string optionally return a modified message, this allows
+ *                     rewriting a query before being issued or prepared
+ *
+ * @access  public
+ * @see MDB2::MDB2_defaultDebugOutput()
+ */
 function printQueries(&$db, $scope, $message)
 {
     if ($scope == 'query') {

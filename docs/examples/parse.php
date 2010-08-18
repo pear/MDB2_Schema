@@ -47,8 +47,8 @@
  * @link     http://pear.php.net/packages/MDB2_Schema
  */
 
-#ini_set('include_path', '../../'.PATH_SEPARATOR.ini_get('include_path'));
-#ini_set('include_path', '../../../MDB2'.PATH_SEPARATOR.ini_get('include_path'));
+// ini_set('include_path', '../../'.PATH_SEPARATOR.ini_get('include_path'));
+// ini_set('include_path', '../../../MDB2'.PATH_SEPARATOR.ini_get('include_path'));
 
 require_once 'MDB2.php';
 
