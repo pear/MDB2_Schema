@@ -1,4 +1,4 @@
-<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker: */
+<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker tw=80: */
 /**
  * Copyright (c) 1998-2010 Manuel Lemos, Tomas V.V.Cox,
  * Stig. S. Bakken, Lukas Smith, Igor Feghali

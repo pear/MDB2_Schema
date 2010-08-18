@@ -1,4 +1,4 @@
-<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker: */
+<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker tw=80: */
 
 class Console_TestListener extends PHPUnit_TestListener {
     function addError(&$test, &$t) {

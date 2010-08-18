@@ -1,4 +1,4 @@
-<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker: */
+<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker tw=80: */
 
 // BC hack to define PATH_SEPARATOR for version of PHP prior 4.3
 if (!defined('PATH_SEPARATOR')) {
