@@ -54,7 +54,7 @@
     <body>
 
         <!-- BEGIN warnings -->
-        <h1>Warnings</h1>';
+        <h1>Warnings</h1>
         <pre>{warnings}</pre>
         <!-- END warnings -->
 
@@ -64,7 +64,7 @@
         <!-- END debug -->
 
         <!-- BEGIN show_structure -->
-        <h1>Database structure</h1>';
+        <h1>Database structure</h1>
         <pre>{definition}</pre>
         <!-- END show_structure -->
 
