@@ -55,17 +55,17 @@
 
         <!-- BEGIN warnings -->
         <h1>Warnings</h1>
-        <pre>{warnings}</pre>
+        <p>{warnings}</p>
         <!-- END warnings -->
 
         <!-- BEGIN debug -->
         <h1>Debug messages</h1>
-        <pre>{debug}</pre>
+        <p>{debug}</p>
         <!-- END debug -->
 
         <!-- BEGIN show_structure -->
         <h1>Database structure</h1>
-        <pre>{definition}</pre>
+        <p>{definition}</p>
         <!-- END show_structure -->
 
         <!-- BEGIN error -->
