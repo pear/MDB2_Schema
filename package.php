@@ -131,6 +131,9 @@ $package->addPackageDepWithChannel(
 $package->addPackageDepWithChannel(
     'optional', 'XML_Serializer', 'pear.php.net', '0.18.0'
 );
+$package->addPackageDepWithChannel(
+    'optional', 'HTML_Template_IT', 'pear.php.net', '1.3.0'
+);
 
 $package->addInstallAs(
     'www/mdb2_schematool/action.php', 'mdb2_schematool/action.php'

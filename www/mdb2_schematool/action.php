@@ -48,6 +48,9 @@
  * @link     http://pear.php.net/packages/MDB2_Schema
  */
 
+require_once 'MDB2/Schema.php';
+require_once 'class.inc.php';
+
 /**
  * This is all rather ugly code, thats probably very much XSS exploitable etc.
  * However the idea was to keep the magic and dependencies low, to just
@@ -55,20 +58,22 @@
  */
 setcookie('error', '');
 
-require_once 'MDB2/Schema.php';
-require_once 'class.inc.php';
-
 $data =& MDB2_Schema_Example::factory($_GET);
 if (PEAR::isError($data)) {
-    setcookie('error', $data->getMessage());
+    setcookie(
+        'error',
+        $data->getMessage() . ':' . $schema->getUserInfo()
+    );
     header('location: index.php');
     exit;
 }
 
 $schema =& MDB2_Schema::factory($data->dsn, $data->options);
 if (PEAR::isError($schema)) {
-    $error = $schema->getMessage() . ' ' . $schema->getUserInfo();
-    setcookie('error', $error);
+    setcookie(
+        'error',
+        $schema->getMessage() . ':' . $schema->getUserInfo()
+    );
     header('location: index.php');
     exit;
 }

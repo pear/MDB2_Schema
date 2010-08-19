@@ -1,5 +1,5 @@
-<?php /* vim: se et ts=4 sw=4 sts=4 fdm=marker tw=80: */
-/**
+<!-- vim: se et ts=4 sw=4 sts=4 fdm=marker tw=80 ft=html: -->
+<!--
  * Copyright (c) 1998-2010 Manuel Lemos, Tomas V.V.Cox,
  * Stig. S. Bakken, Lukas Smith, Igor Feghali
  * All rights reserved.
@@ -46,53 +46,36 @@
  * @license  BSD http://www.opensource.org/licenses/bsd-license.php
  * @version  SVN: $Id$
  * @link     http://pear.php.net/packages/MDB2_Schema
- */
+-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+    <head><title>MDB2_Schema Web Frontend</title></head>
+    <body>
 
-require_once "HTML/Template/IT.php";
+        <!-- BEGIN warnings -->
+        <h1>Warnings</h1>';
+        <pre>{warnings}</pre>
+        <!-- END warnings -->
 
-/**
- * This is all rather ugly code, thats probably very much XSS exploitable etc.
- * However the idea was to keep the magic and dependencies low, to just
- * illustrate the MDB2_Schema API a bit.
- */
+        <!-- BEGIN debug -->
+        <h1>Debug messages</h1>
+        <pre>{debug}</pre>
+        <!-- END debug -->
 
-/**
- * Configures template engine
- */
-$tpl = new HTML_Template_IT();
-$tpl->loadTemplatefile('result.tpl', true, true);
+        <!-- BEGIN show_structure -->
+        <h1>Database structure</h1>';
+        <pre>{definition}</pre>
+        <!-- END show_structure -->
 
-$warnings = $schema->getWarnings();
-if (count($warnings) > 0) {
-    $tpl->setCurrentBlock('warnings');
-    $tpl->setVariable('warnings', var_export($warnings, true));
-    $tpl->parseCurrentBlock('warnings');
-}
+        <!-- BEGIN error -->
+        <h1>Error</h1>
+        <div id="errors">
+            <ul>
+                <li>{error}</li>
+            </ul>
+        </div>
+        <!-- END error -->
 
-if ($schema->db->getOption('debug')) {
-    $tpl->setCurrentBlock('debug');
-    $tpl->setVariable('debug', $schema->db->getDebugOutput());
-    $tpl->parseCurrentBlock('debug');
-}
-
-if ($data->show_structure
-    && isset($definition)
-    && is_array($definition)
-) {
-    $tpl->setCurrentBlock('show_structure');
-    $tpl->setVariable('show_structure', var_export($definition, true));
-    $tpl->parseCurrentBlock('show_structure');
-}
-
-/**
- * Loads last error from cookies
- */
-if (isset($error) && $error) {
-    $tpl->setCurrentBlock('error');
-    $tpl->setVariable('error', $error);
-    $tpl->parseCurrentBlock('error');
-} else {
-    $data->saveCookies();
-}
-
-$tpl->show();
+    </body>
+</html>
