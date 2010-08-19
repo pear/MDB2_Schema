@@ -117,7 +117,7 @@ if (isset($_REQUEST['default_table_type']) && $_REQUEST['default_table_type']) {
     $tpl->setVariable('default_table_type', $_REQUEST['default_table_type']);
 }
 if (isset($_REQUEST['debug']) && $_REQUEST['debug']) {
-    $tpl->setVariable('debug', $_REQUEST['debug']);
+    $tpl->setVariable('debug', 'checked="checked"');
 }
 if (isset($_REQUEST['use_transactions']) && $_REQUEST['use_transactions']) {
     $tpl->setVariable('use_transactions', 'checked="checked"'); 
