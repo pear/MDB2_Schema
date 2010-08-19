@@ -72,6 +72,22 @@ class MDB2_Schema_Validate
     // }}}
     // {{{ constructor
 
+    /**
+     * PHP 5 constructor
+     *
+     * @param bool  $fail_on_invalid_names  array with reserved words per RDBMS
+     * @param array $valid_types            information of all valid fields 
+     *                                      types
+     * @param bool  $force_defaults         if true sets a default value to
+     *                                      field when not explicit
+     * @param int   $max_identifiers_length maximum allowed size for entities 
+     *                                      name
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
     function __construct($fail_on_invalid_names = true, $valid_types = array(),
         $force_defaults = true, $max_identifiers_length = null
     ) {
@@ -92,6 +108,22 @@ class MDB2_Schema_Validate
         $this->max_identifiers_length = $max_identifiers_length;
     }
 
+    /**
+     * PHP 4 compatible constructor
+     *
+     * @param bool  $fail_on_invalid_names  array with reserved words per RDBMS
+     * @param array $valid_types            information of all valid fields 
+     *                                      types
+     * @param bool  $force_defaults         if true sets a default value to
+     *                                      field when not explicit
+     * @param int   $max_identifiers_length maximum allowed size for entities 
+     *                                      name
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
     function MDB2_Schema_Validate($fail_on_invalid_names = true, $valid_types = array(),
         $force_defaults = true, $max_identifiers_length = null
     ) {
@@ -101,6 +133,16 @@ class MDB2_Schema_Validate
     // }}}
     // {{{ raiseError()
 
+    /**
+     * Pushes a MDB2_Schema_Error into stack and returns it
+     *
+     * @param int    $ecode MDB2_Schema's error code
+     * @param string $msg   textual message
+     *
+     * @return object
+     * @access private
+     * @static
+     */
     function &raiseError($ecode, $msg = null)
     {
         $error =& MDB2_Schema::raiseError($ecode, null, null, $msg);
@@ -930,8 +972,8 @@ class MDB2_Schema_Validate
     /**
      * Checks whether a given identifier is valid for current driver.
      *
-     * @param string $id    identifier to check
-     * @param string $type  whether identifier represents a table name, index, etc.
+     * @param string $id   identifier to check
+     * @param string $type whether identifier represents a table name, index, etc.
      *
      * @return bool|error object
      *

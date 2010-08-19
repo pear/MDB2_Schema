@@ -66,11 +66,33 @@ class MDB2_Schema_Writer
     // }}}
     // {{{ constructor
 
+    /**
+     * PHP 5 constructor
+     *
+     * @param array $valid_types information of all valid fields 
+     *                           types
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
     function __construct($valid_types = array())
     {
         $this->valid_types = $valid_types;
     }
 
+    /**
+     * PHP 4 compatible constructor
+     *
+     * @param array $valid_types information of all valid fields 
+     *                           types
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
     function MDB2_Schema_Writer($valid_types = array())
     {
         $this->__construct($valid_types);
@@ -84,15 +106,18 @@ class MDB2_Schema_Writer
      * callbacks etc.  Basically a wrapper for PEAR::raiseError
      * without the message string.
      *
-     * @param int|PEAR_Error $code    integer error code or and PEAR_Error instance
-     * @param int            $mode    error mode, see PEAR_Error docs
-     *                                error level (E_USER_NOTICE etc).  If error mode is
-     *                                PEAR_ERROR_CALLBACK, this is the callback function,
-     *                                either as a function name, or as an array of an
-     *                                object and method name.  For other error modes this
-     *                                parameter is ignored.
-     * @param string         $options Extra debug information.  Defaults to the last
-     *                                query and native error code.
+     * @param int|PEAR_Error $code     integer error code or and PEAR_Error 
+     *                                 instance
+     * @param int            $mode     error mode, see PEAR_Error docs error
+     *                                 level (E_USER_NOTICE etc).  If error mode
+     *                                 is PEAR_ERROR_CALLBACK, this is the
+     *                                 callback function, either as a function
+     *                                 name, or as an array of an object and
+     *                                 method name.  For other error modes this
+     *                                 parameter is ignored.
+     * @param string         $options  Extra debug information. Defaults to the
+     *                                 last query and native error code.
+     * @param string         $userinfo User-friendly error message
      *
      * @return object  a PEAR error object
      * @access  public

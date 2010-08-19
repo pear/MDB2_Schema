@@ -98,6 +98,26 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
 
     var $init = array();
 
+    /**
+     * PHP 5 constructor
+     *
+     * @param array $variables              mixed array with user defined schema
+     *                                      variables
+     * @param bool  $fail_on_invalid_names  array with reserved words per RDBMS
+     * @param array $structure              multi dimensional array with 
+     *                                      database schema and data
+     * @param array $valid_types            information of all valid fields 
+     *                                      types
+     * @param bool  $force_defaults         if true sets a default value to
+     *                                      field when not explicit
+     * @param int   $max_identifiers_length maximum allowed size for entities 
+     *                                      name
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
     function __construct($variables, $fail_on_invalid_names = true,
         $structure = false, $valid_types = array(), $force_defaults = true,
         $max_identifiers_length = null
@@ -123,6 +143,26 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         parent::XML_Unserializer($this->options);
     }
 
+    /**
+     * PHP 4 compatible constructor
+     *
+     * @param array $variables              mixed array with user defined schema
+     *                                      variables
+     * @param bool  $fail_on_invalid_names  array with reserved words per RDBMS
+     * @param array $structure              multi dimensional array with 
+     *                                      database schema and data
+     * @param array $valid_types            information of all valid fields 
+     *                                      types
+     * @param bool  $force_defaults         if true sets a default value to
+     *                                      field when not explicit
+     * @param int   $max_identifiers_length maximum allowed size for entities 
+     *                                      name
+     *
+     * @return void
+     *
+     * @access public
+     * @static
+     */
     function MDB2_Schema_Parser2($variables, $fail_on_invalid_names = true,
         $structure = false, $valid_types = array(), $force_defaults = true,
         $max_identifiers_length = null
@@ -130,6 +170,14 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         $this->__construct($variables, $fail_on_invalid_names, $structure, $valid_types, $force_defaults);
     }
 
+    /**
+     * Main method. Parses XML Schema File.
+     *
+     * @return bool|error object
+     *
+     * @access public
+     * @static
+     */
     function parse()
     {
         $result = $this->unserialize($this->filename, true);
@@ -142,6 +190,16 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         }
     }
 
+    /**
+     * Do the necessary stuff to set the input XML schema file
+     *
+     * @param string $filename full path to schema file
+     *
+     * @return boolean MDB2_OK on success
+     *
+     * @access public
+     * @static
+     */
     function setInputFile($filename)
     {
         $this->filename = $filename;
@@ -611,6 +669,16 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         return MDB2_OK;
     }
 
+    /**
+     * Pushes a MDB2_Schema_Error into stack and returns it
+     *
+     * @param string $msg   textual message
+     * @param int    $ecode MDB2_Schema's error code
+     *
+     * @return object
+     * @access private
+     * @static
+     */
     function &raiseError($msg = null, $ecode = MDB2_SCHEMA_ERROR_PARSE)
     {
         if (is_null($this->error)) {
