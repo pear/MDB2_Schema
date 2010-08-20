@@ -204,12 +204,6 @@ class MDB2_Schema_Parser2 extends XML_Unserializer
         return MDB2_OK;
     }
 
-    function renameKey(&$arr, $oKey, $nKey)
-    {
-        $arr[$nKey] = &$arr[$oKey];
-        unset($arr[$oKey]);
-    }
-
     /**
      * Enforce the default values for mandatory keys and ensure everything goes 
      * always in the same order (simulates the behaviour of the original 
