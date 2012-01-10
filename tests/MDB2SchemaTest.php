@@ -47,79 +47,18 @@
  * @link     http://pear.php.net/packages/MDB2_Schema
  */
 
-require_once 'MDB2/Schema.php';
+require_once dirname(__FILE__) . '/MDB2SchemaAbstract.php';
 
-class MDB2Test extends PHPUnit_TestCase {
-    //contains the dsn of the database we are testing
-    var $dsn;
-    //contains the options that should be used during testing
-    var $options;
-    //contains the name of the database we are testing
-    var $database;
-    //contains the MDB2_Schema object of the db once we have connected
-    var $schema;
-    //contains the name of the driver_test schema
-    var $driver_input_file = 'driver_test.schema';
-    //contains the name of the lob_test schema
-    var $lob_input_file = 'lob_test.schema';
-    //contains the name of the extension to use for backup schemas
-    var $backup_extension = '.before';
-    //contains the name of the extension to use for dump schemas
-    var $dump_extension = '.dump';
+class MDB2SchemaTest extends MDB2SchemaAbstract {
+    /**
+     * @dataProvider provider
+     */
+    public function testCreateDatabase($fp) {
+        $this->manualSetUp($fp);
 
-    function MDB2_Schema_Test($name) {
-        $this->PHPUnit_TestCase($name);
-    }
-
-    function setUp() {
-        $this->dsn = $GLOBALS['dsn'];
-        $this->options = $GLOBALS['options'];
-        $this->database = $GLOBALS['database'];
-        $backup_file = $this->driver_input_file.$this->backup_extension;
-        if (file_exists($backup_file)) {
-            unlink($backup_file);
-        }
-        $backup_file = $this->lob_input_file.$this->backup_extension;
-        if (file_exists($backup_file)) {
-            unlink($backup_file);
-        }
-        $this->schema =& MDB2_Schema::factory($this->dsn, $this->options);
-        if (PEAR::isError($this->schema)) {
-            $this->assertTrue(false, 'Could not connect to manager in setUp');
-            exit;
-        }
-    }
-
-    function tearDown() {
-        unset($this->dsn);
-        if (!PEAR::isError($this->schema)) {
-            $this->schema->disconnect();
-        }
-        unset($this->schema);
-    }
-
-    function methodExists(&$class, $name) {
-        if (is_object($class)
-            && array_key_exists(strtolower($name), array_change_key_case(array_flip(get_class_methods($class)), CASE_LOWER))
-        ) {
-            return true;
-        }
-        $this->assertTrue(false, 'method '. $name.' not implemented in '.get_class($class));
-        return false;
-    }
-
-    function testCreateDatabase() {
-        if (!$this->methodExists($this->schema->db->manager, 'dropDatabase')) {
-            return;
-        }
-        $this->schema->db->expectError('*');
-        $result = $this->schema->db->manager->dropDatabase($this->database);
-        $this->schema->db->popExpect();
-        if (PEAR::isError($result)) {
-            $this->assertTrue(false, 'Database dropping failed: please manually delete the database if needed');
-        }
-        if (!$this->methodExists($this->schema, 'updateDatabase')) {
-            return;
+        $action = 'updateDatabase';
+    	if (!$this->methodExists($this->schema, $action)) {
+            $this->markTestSkipped("Lacks $action method");
         }
         $result = $this->schema->updateDatabase(
             $this->driver_input_file,
@@ -140,13 +79,20 @@ class MDB2Test extends PHPUnit_TestCase {
                 array('create' => '0', 'name' => $this->database)
             );
         }
-        $this->assertFalse(PEAR::isError($result), 'Error creating database');
+        $this->checkResultForErrors($result, $action);
     }
 
-    function testUpdateDatabase() {
-        if (!$this->methodExists($this->schema, 'updateDatabase')) {
-            return;
+    /**
+     * @dataProvider provider
+     */
+    public function testUpdateDatabase($fp) {
+        $this->manualSetUp($fp);
+
+        $action = 'updateDatabase';
+    	if (!$this->methodExists($this->schema, $action)) {
+            $this->markTestSkipped("Lacks $action method");
         }
+
         $backup_file = $this->driver_input_file.$this->backup_extension;
         if (!file_exists($backup_file)) {
             copy($this->driver_input_file, $backup_file);
@@ -156,40 +102,47 @@ class MDB2Test extends PHPUnit_TestCase {
             $backup_file,
             array('create' =>'0', 'name' =>$this->database)
         );
-        if (!PEAR::isError($result)) {
-            $backup_file = $this->lob_input_file.$this->backup_extension;
-            if (!file_exists($backup_file)) {
-                copy($this->lob_input_file, $backup_file);
-            }
-            $result = $this->schema->updateDatabase(
-                $this->lob_input_file,
-                $backup_file,
-                array('create' =>'0', 'name' => $this->database)
-            );
+        $this->checkResultForErrors($result, $action);
+
+        $backup_file = $this->lob_input_file.$this->backup_extension;
+        if (!file_exists($backup_file)) {
+            copy($this->lob_input_file, $backup_file);
         }
-        $this->assertFalse(PEAR::isError($result), 'Error updating database');
+        $result = $this->schema->updateDatabase(
+            $this->lob_input_file,
+            $backup_file,
+            array('create' =>'0', 'name' => $this->database)
+        );
+        $this->checkResultForErrors($result, $action);
     }
     
-    function testDumpDatabase() {
-	if (!$this->methodExists($this->schema, 'getDefinitionFromDatabase')) {
-            return;
+    /**
+     * @dataProvider provider
+     */
+    public function testDumpDatabase($fp) {
+        $this->manualSetUp($fp);
+
+        $action = 'getDefinitionFromDatabase';
+    	if (!$this->methodExists($this->schema, $action)) {
+            $this->markTestSkipped("Lacks $action method");
         }
-	$definition = $this->schema->getDefinitionFromDatabase();
-        
-	$this->assertFalse(PEAR::isError($definition), 
-		           'Error getting definition from database');
- 		
-	if (!$this->methodExists($this->schema, 'dumpDatabase')) {
-            return;
+    	$definition = $this->schema->getDefinitionFromDatabase();
+        $this->checkResultForErrors($definition, $action);
+
+        $action = 'dumpDatabase';
+    	if (!$this->methodExists($this->schema, $action)) {
+            $this->markTestSkipped("Lacks $action method");
         }
         $dump_file = $this->lob_input_file.'.'.$this->dsn['phptype'].$this->dump_extension;
-	$result = $this->schema->dumpDatabase(
+	    $result = $this->schema->dumpDatabase(
             $definition, 
             array('output_mode' => 'file',
                   'output' => $dump_file,
                   'end_of_line' => "\n",
                   ),
             MDB2_SCHEMA_DUMP_ALL);
-        $this->assertFalse(PEAR::isError($result), 'Error dumping database');
+        @unlink($dump_file);
+        $this->checkResultForErrors($result, $action);
     }
 }
+
