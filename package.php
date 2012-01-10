@@ -48,6 +48,13 @@
  */
 
 require_once 'PEAR/PackageFileManager2.php';
+
+/**
+ * pear channel-discover pear.vardump.org
+ * pear install vd/PEAR_PackageFileManager_Git
+ */
+require_once 'PEAR/PackageFileManager/Git.php';
+
 PEAR::setErrorHandling(PEAR_ERROR_DIE);
 
 $summary = 'XML based database schema manager'; 
@@ -95,7 +102,7 @@ EOT;
 
 $packagefile = './package.xml';
 $options = array(
-    'filelistgenerator' => 'cvs',
+    'filelistgenerator' => 'git',
     'changelogoldtonew' => false,
     'simpleoutput'      => true,
     'baseinstalldir'    => '/',
