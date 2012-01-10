@@ -49,7 +49,7 @@
 
 require_once 'MDB2/Schema.php';
 
-class MDB2_Schema_TestCase extends PHPUnit_TestCase {
+class MDB2Test extends PHPUnit_TestCase {
     //contains the dsn of the database we are testing
     var $dsn;
     //contains the options that should be used during testing
