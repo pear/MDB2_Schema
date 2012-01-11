@@ -143,8 +143,8 @@ abstract class MDB2SchemaAbstract extends PHPUnit_Framework_TestCase {
     }
 
     public function dropTestTables() {
-        $this->schema->db->exec('DROP TABLE users');
-        $this->schema->db->exec('DROP TABLE files');
+        $this->schema->db->exec('DROP TABLE mdb2_schema_users');
+        $this->schema->db->exec('DROP TABLE mdb2_schema_files');
     }
 
     public function methodExists(&$class, $name) {

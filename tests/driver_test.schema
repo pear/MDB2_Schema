@@ -13,7 +13,7 @@
  
 
  <table>
-  <name>users</name>
+  <name>mdb2_schema_users</name>
   <declaration>
    <field> <name>user_name</name>     <type>text</type>      <length>12</length> <fixed>false</fixed>  </field>
    <field> <name>user_password</name> <type>text</type>      <length>8</length>  <fixed>true</fixed>   </field>
