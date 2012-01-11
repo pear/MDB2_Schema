@@ -117,7 +117,9 @@ abstract class MDB2SchemaAbstract extends PHPUnit_Framework_TestCase {
         $this->database = $this->schema->db->getDatabase();
 
         $this->schema->db->setDatabase($this->database);
-        $this->dropTestTables();
+        $this->schema->db->setOption('portability',
+                MDB2_PORTABILITY_ALL ^ MDB2_PORTABILITY_FIX_CASE);
+        $this->dropTables();
 
         $this->driver_input_file = __DIR__ . "/$this->driver_input_file";
         $this->lob_input_file = __DIR__ . "/$this->lob_input_file";
@@ -137,14 +139,23 @@ abstract class MDB2SchemaAbstract extends PHPUnit_Framework_TestCase {
         if (!$this->schema || MDB2::isError($this->schema)) {
             return;
         }
-        $this->dropTestTables();
+        $this->dropTables();
         $this->schema->disconnect();
         unset($this->schema);
     }
 
-    public function dropTestTables() {
-        $this->schema->db->exec('DROP TABLE mdb2_schema_users');
-        $this->schema->db->exec('DROP TABLE mdb2_schema_files');
+    public function dropTables() {
+        // Need to call connect because dump method calls disconnect.  Duh.
+        $db = MDB2::factory($this->dsn, $this->options);
+        $db->setOption('portability',
+                MDB2_PORTABILITY_ALL ^ MDB2_PORTABILITY_FIX_CASE);
+        $db->loadModule('Manager', null, true);
+
+        $tables = $db->manager->listTables();
+        $this->checkResultForErrors($tables, 'listTables() in dropTables()');
+        foreach ($tables as $table) {
+            $db->manager->dropTable($table);
+        }
     }
 
     public function methodExists(&$class, $name) {
