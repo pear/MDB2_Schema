@@ -1,0 +1,41 @@
+{
+    "authors": [
+        {
+            "email": "smith@pooteeweet.org",
+            "name": "Lukas Kahwe Smith",
+            "role": "Lead"
+        },
+        {
+            "email": "ifeghali@php.net",
+            "name": "Igor Feghali",
+            "role": "Lead"
+        },
+        {
+            "email": "dufuz@php.net",
+            "name": "Helgi Thormar",
+            "role": "Lead"
+        }
+    ],
+    "autoload": {
+        "psr-0": {
+            "MDB2_Schema": "./"
+        }
+    },
+    "description": "More info available on: http://pear.php.net/package/MDB2_Schema",
+    "include-path": [
+        "./"
+    ],
+    "license": "BSD License",
+    "name": "pear/mdb2_schema",
+    "support": {
+        "issues": "http://pear.php.net/bugs/search.php?cmd=display&package_name[]=MDB2_Schema",
+        "source": "https://github.com/pear/MDB2_Schema"
+    },
+    "type": "library",
+    "require": {
+        "pear/pear_exception": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "*"
+    }
+}
