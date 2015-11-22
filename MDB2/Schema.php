@@ -2747,7 +2747,7 @@ class MDB2_Schema extends PEAR
      * @return  bool  true if parameter is an error
      * @access  public
      */
-    function isError($data, $code = null)
+    public static function isError($data, $code = null)
     {
         if (is_a($data, 'MDB2_Schema_Error')) {
             if (is_null($code)) {
