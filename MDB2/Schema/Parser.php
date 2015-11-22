@@ -138,7 +138,7 @@ class MDB2_Schema_Parser extends XML_Parser
 
         $this->variables = $variables;
         $this->structure = $structure;
-        $this->val       =& new MDB2_Schema_Validate(
+        $this->val       = new MDB2_Schema_Validate(
             $fail_on_invalid_names,
             $valid_types,
             $force_defaults,
