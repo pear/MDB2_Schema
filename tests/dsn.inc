@@ -54,96 +54,96 @@ $skip = array(
 
 $dsns = array();
 
-if (!empty($_ENV['FBSQL_TEST_USER']) && !in_array('fbsql', $skip)
+if (getenv('FBSQL_TEST_USER') && !in_array('fbsql', $skip)
     && is_driver_available('fbsql') && extension_loaded('fbsql'))
 {
     $dsns['fbsql'] = array(
         'dsn' => array(
             'phptype' => 'fbsql',
-            'username' => $_ENV['FBSQL_TEST_USER'],
-            'password' => $_ENV['FBSQL_TEST_PASSWD'],
-            'database' => $_ENV['FBSQL_TEST_DB'],
+            'username' => getenv('FBSQL_TEST_USER'),
+            'password' => getenv('FBSQL_TEST_PASSWD'),
+            'database' => getenv('FBSQL_TEST_DB'),
 
-            'hostspec' => empty($_ENV['FBSQL_TEST_HOST'])
-                    ? null : $_ENV['FBSQL_TEST_HOST'],
+            'hostspec' => !getenv('FBSQL_TEST_HOST')
+                    ? null : getenv('FBSQL_TEST_HOST'),
         ),
         'options' => array(
         ),
     );
 }
 
-if (!empty($_ENV['IBASE_TEST_USER']) && !in_array('ibase', $skip)
+if (getenv('IBASE_TEST_USER') && !in_array('ibase', $skip)
     && is_driver_available('ibase') && extension_loaded('interbase'))
 {
     $dsns['ibase'] = array(
         'dsn' => array(
             'phptype' => 'ibase',
-            'username' => $_ENV['IBASE_TEST_USER'],
-            'password' => $_ENV['IBASE_TEST_PASSWD'],
-            'database' => $_ENV['IBASE_TEST_DB'],
+            'username' => getenv('IBASE_TEST_USER'),
+            'password' => getenv('IBASE_TEST_PASSWD'),
+            'database' => getenv('IBASE_TEST_DB'),
 
-            'hostspec' => empty($_ENV['IBASE_TEST_HOST'])
-                    ? null : $_ENV['IBASE_TEST_HOST'],
+            'hostspec' => !getenv('IBASE_TEST_HOST')
+                    ? null : getenv('IBASE_TEST_HOST'),
 
-            'buffers' => empty($_ENV['IBASE_TEST_BUFFERS'])
-                    ? null : $_ENV['IBASE_TEST_BUFFERS'],
+            'buffers' => !getenv('IBASE_TEST_BUFFERS')
+                    ? null : getenv('IBASE_TEST_BUFFERS'),
 
-            'dialect' => empty($_ENV['IBASE_TEST_DIALECT'])
-                    ? null : $_ENV['IBASE_TEST_DIALECT'],
+            'dialect' => !getenv('IBASE_TEST_DIALECT')
+                    ? null : getenv('IBASE_TEST_DIALECT'),
 
-            'role' => empty($_ENV['IBASE_TEST_ROLE'])
-                    ? null : $_ENV['IBASE_TEST_ROLE'],
+            'role' => !getenv('IBASE_TEST_ROLE')
+                    ? null : getenv('IBASE_TEST_ROLE'),
 
-            'dbsyntax' => empty($_ENV['IBASE_TEST_SYNTAX'])
-                    ? null : $_ENV['IBASE_TEST_SYNTAX'],
+            'dbsyntax' => !getenv('IBASE_TEST_SYNTAX')
+                    ? null : getenv('IBASE_TEST_SYNTAX'),
         ),
         'options' => array(
         ),
     );
 }
 
-if (!empty($_ENV['MSSQL_TEST_USER']) && !in_array('mssql', $skip)
+if (getenv('MSSQL_TEST_USER') && !in_array('mssql', $skip)
     && is_driver_available('mssql') && function_exists('mssql_connect'))
 {
     $dsns['mssql'] = array(
         'dsn' => array(
             'phptype' => 'mssql',
-            'username' => $_ENV['MSSQL_TEST_USER'],
-            'password' => $_ENV['MSSQL_TEST_PASSWD'],
-            'database' => $_ENV['MSSQL_TEST_DB'],
+            'username' => getenv('MSSQL_TEST_USER'),
+            'password' => getenv('MSSQL_TEST_PASSWD'),
+            'database' => getenv('MSSQL_TEST_DB'),
 
-            'hostspec' => empty($_ENV['MSSQL_TEST_HOST'])
-                    ? null : $_ENV['MSSQL_TEST_HOST'],
+            'hostspec' => !getenv('MSSQL_TEST_HOST')
+                    ? null : getenv('MSSQL_TEST_HOST'),
 
-            'port' => empty($_ENV['MSSQL_TEST_PORT'])
-                    ? null : $_ENV['MSSQL_TEST_PORT'],
+            'port' => !getenv('MSSQL_TEST_PORT')
+                    ? null : getenv('MSSQL_TEST_PORT'),
         ),
         'options' => array(
         ),
     );
 }
 
-if (!empty($_ENV['MYSQL_TEST_USER']) && !in_array('mysql', $skip)
+if (getenv('MYSQL_TEST_USER') && !in_array('mysql', $skip)
     && is_driver_available('mysql') && extension_loaded('mysql'))
 {
     $dsns['mysql'] = array(
         'dsn' => array(
             'phptype' => 'mysql',
-            'username' => $_ENV['MYSQL_TEST_USER'],
-            'password' => $_ENV['MYSQL_TEST_PASSWD'],
-            'database' => $_ENV['MYSQL_TEST_DB'],
+            'username' => getenv('MYSQL_TEST_USER'),
+            'password' => getenv('MYSQL_TEST_PASSWD'),
+            'database' => getenv('MYSQL_TEST_DB'),
 
-            'hostspec' => empty($_ENV['MYSQL_TEST_HOST'])
-                    ? null : $_ENV['MYSQL_TEST_HOST'],
+            'hostspec' => !getenv('MYSQL_TEST_HOST')
+                    ? null : getenv('MYSQL_TEST_HOST'),
 
-            'port' => empty($_ENV['MYSQL_TEST_PORT'])
-                    ? null : $_ENV['MYSQL_TEST_PORT'],
+            'port' => !getenv('MYSQL_TEST_PORT')
+                    ? null : getenv('MYSQL_TEST_PORT'),
 
-            'socket' => empty($_ENV['MYSQL_TEST_SOCKET'])
-                    ? null : $_ENV['MYSQL_TEST_SOCKET'],
+            'socket' => !getenv('MYSQL_TEST_SOCKET')
+                    ? null : getenv('MYSQL_TEST_SOCKET'),
 
             // Hack for MDB2's silly connect method logic.
-            'protocol' => empty($_ENV['MYSQL_TEST_SOCKET'])
+            'protocol' => !getenv('MYSQL_TEST_SOCKET')
                     ? null : 'unix',
         ),
         'options' => array(
@@ -152,24 +152,24 @@ if (!empty($_ENV['MYSQL_TEST_USER']) && !in_array('mysql', $skip)
     );
 }
 
-if (!empty($_ENV['MYSQL_TEST_USER']) && !in_array('mysqli', $skip)
+if (getenv('MYSQL_TEST_USER') && !in_array('mysqli', $skip)
     && is_driver_available('mysqli') && extension_loaded('mysqli'))
 {
     $dsns['mysqli'] = array(
         'dsn' => array(
             'phptype' => 'mysqli',
-            'username' => $_ENV['MYSQL_TEST_USER'],
-            'password' => $_ENV['MYSQL_TEST_PASSWD'],
-            'database' => $_ENV['MYSQL_TEST_DB'],
+            'username' => getenv('MYSQL_TEST_USER'),
+            'password' => getenv('MYSQL_TEST_PASSWD'),
+            'database' => getenv('MYSQL_TEST_DB'),
 
-            'hostspec' => empty($_ENV['MYSQL_TEST_HOST'])
-                    ? null : $_ENV['MYSQL_TEST_HOST'],
+            'hostspec' => !getenv('MYSQL_TEST_HOST')
+                    ? null : getenv('MYSQL_TEST_HOST'),
 
-            'port' => empty($_ENV['MYSQL_TEST_PORT'])
-                    ? null : $_ENV['MYSQL_TEST_PORT'],
+            'port' => !getenv('MYSQL_TEST_PORT')
+                    ? null : getenv('MYSQL_TEST_PORT'),
 
-            'socket' => empty($_ENV['MYSQL_TEST_SOCKET'])
-                    ? null : $_ENV['MYSQL_TEST_SOCKET'],
+            'socket' => !getenv('MYSQL_TEST_SOCKET')
+                    ? null : getenv('MYSQL_TEST_SOCKET'),
         ),
         'options' => array(
             'use_transactions' => true
@@ -177,71 +177,71 @@ if (!empty($_ENV['MYSQL_TEST_USER']) && !in_array('mysqli', $skip)
     );
 }
 
-if (!empty($_ENV['OCI8_TEST_USER']) && !in_array('oci8', $skip)
+if (getenv('OCI8_TEST_USER') && !in_array('oci8', $skip)
     && is_driver_available('oci8') && extension_loaded('oci8'))
 {
     $dsns['oci8'] = array(
         'dsn' => array(
             'phptype' => 'oci8',
-            'username' => empty($_ENV['OCI8_TEST_USER'])
-                    ? null : $_ENV['OCI8_TEST_USER'],
+            'username' => !getenv('OCI8_TEST_USER')
+                    ? null : getenv('OCI8_TEST_USER'),
 
-            'password' => empty($_ENV['OCI8_TEST_PASSWD'])
-                    ? null : $_ENV['OCI8_TEST_PASSWD'],
+            'password' => !getenv('OCI8_TEST_PASSWD')
+                    ? null : getenv('OCI8_TEST_PASSWD'),
 
-            'database' => empty($_ENV['OCI8_TEST_DB'])
-                    ? null : $_ENV['OCI8_TEST_DB'],
+            'database' => !getenv('OCI8_TEST_DB')
+                    ? null : getenv('OCI8_TEST_DB'),
 
-            'hostspec' => empty($_ENV['OCI8_TEST_HOST'])
-                    ? null : $_ENV['OCI8_TEST_HOST'],
+            'hostspec' => !getenv('OCI8_TEST_HOST')
+                    ? null : getenv('OCI8_TEST_HOST'),
 
-            'port' => empty($_ENV['OCI8_TEST_PORT'])
-                    ? null : $_ENV['OCI8_TEST_PORT'],
+            'port' => !getenv('OCI8_TEST_PORT')
+                    ? null : getenv('OCI8_TEST_PORT'),
 
-            'service' => empty($_ENV['OCI8_TEST_SERVICE'])
-                    ? null : $_ENV['OCI8_TEST_SERVICE'],
+            'service' => !getenv('OCI8_TEST_SERVICE')
+                    ? null : getenv('OCI8_TEST_SERVICE'),
         ),
         'options' => array(
         ),
     );
 }
 
-if (!empty($_ENV['PGSQL_TEST_USER']) && !in_array('pgsql', $skip)
+if (getenv('PGSQL_TEST_USER') && !in_array('pgsql', $skip)
     && is_driver_available('pgsql') && extension_loaded('pgsql'))
 {
     $dsns['pgsql'] = array(
         'dsn' => array(
             'phptype' => 'pgsql',
-            'username' => $_ENV['PGSQL_TEST_USER'],
-            'password' => $_ENV['PGSQL_TEST_PASSWD'],
-            'database' => $_ENV['PGSQL_TEST_DB'],
+            'username' => getenv('PGSQL_TEST_USER'),
+            'password' => getenv('PGSQL_TEST_PASSWD'),
+            'database' => getenv('PGSQL_TEST_DB'),
 
-            'hostspec' => empty($_ENV['PGSQL_TEST_HOST'])
-                    ? null : $_ENV['PGSQL_TEST_HOST'],
+            'hostspec' => !getenv('PGSQL_TEST_HOST')
+                    ? null : getenv('PGSQL_TEST_HOST'),
 
-            'port' => empty($_ENV['PGSQL_TEST_PORT'])
-                    ? null : $_ENV['PGSQL_TEST_PORT'],
+            'port' => !getenv('PGSQL_TEST_PORT')
+                    ? null : getenv('PGSQL_TEST_PORT'),
 
-            'socket' => empty($_ENV['PGSQL_TEST_SOCKET'])
-                    ? null : $_ENV['PGSQL_TEST_SOCKET'],
+            'socket' => !getenv('PGSQL_TEST_SOCKET')
+                    ? null : getenv('PGSQL_TEST_SOCKET'),
 
-            'protocol' => empty($_ENV['PGSQL_TEST_PROTOCOL'])
-                    ? null : $_ENV['PGSQL_TEST_PROTOCOL'],
+            'protocol' => !getenv('PGSQL_TEST_PROTOCOL')
+                    ? null : getenv('PGSQL_TEST_PROTOCOL'),
 
-            'options' => empty($_ENV['PGSQL_TEST_OPTIONS'])
-                    ? null : $_ENV['PGSQL_TEST_OPTIONS'],
+            'options' => !getenv('PGSQL_TEST_OPTIONS')
+                    ? null : getenv('PGSQL_TEST_OPTIONS'),
 
-            'tty' => empty($_ENV['PGSQL_TEST_TTY'])
-                    ? null : $_ENV['PGSQL_TEST_TTY'],
+            'tty' => !getenv('PGSQL_TEST_TTY')
+                    ? null : getenv('PGSQL_TEST_TTY'),
 
-            'connect_timeout' => empty($_ENV['PGSQL_TEST_CONNECT_TIMEOUT'])
-                    ? null : $_ENV['PGSQL_TEST_CONNECT_TIMEOUT'],
+            'connect_timeout' => !getenv('PGSQL_TEST_CONNECT_TIMEOUT')
+                    ? null : getenv('PGSQL_TEST_CONNECT_TIMEOUT'),
 
-            'sslmode' => empty($_ENV['PGSQL_TEST_SSL_MODE'])
-                    ? null : $_ENV['PGSQL_TEST_SSL_MODE'],
+            'sslmode' => !getenv('PGSQL_TEST_SSL_MODE')
+                    ? null : getenv('PGSQL_TEST_SSL_MODE'),
 
-            'service' => empty($_ENV['PGSQL_TEST_SERVICE'])
-                    ? null : $_ENV['PGSQL_TEST_SERVICE'],
+            'service' => !getenv('PGSQL_TEST_SERVICE')
+                    ? null : getenv('PGSQL_TEST_SERVICE'),
         ),
         'options' => array(
         ),
@@ -252,7 +252,7 @@ if (!empty($_ENV['PGSQL_TEST_USER']) && !in_array('pgsql', $skip)
 if (!in_array('sqlite', $skip)
     && is_driver_available('sqlite') && extension_loaded('sqlite'))
 {
-    if (empty($_ENV['SQLITE_TEST_DB'])) {
+    if (!getenv('SQLITE_TEST_DB')) {
         $dsns['sqlite'] = array(
             'dsn' => array(
                 'phptype' => 'sqlite',
@@ -265,7 +265,7 @@ if (!in_array('sqlite', $skip)
         $dsns['sqlite'] = array(
             'dsn' => array(
                 'phptype' => 'sqlite',
-                'database' => $_ENV['SQLITE_TEST_DB'],
+                'database' => getenv('SQLITE_TEST_DB'),
             ),
             'options' => array(
             ),
@@ -273,21 +273,21 @@ if (!in_array('sqlite', $skip)
     }
 }
 
-if (!empty($_ENV['SQLSRV_TEST_USER']) && !in_array('sqlsrv', $skip)
+if (getenv('SQLSRV_TEST_USER') && !in_array('sqlsrv', $skip)
     && is_driver_available('sqlsrv') && extension_loaded('sqlsrv'))
 {
     $dsns['sqlsrv'] = array(
         'dsn' => array(
             'phptype' => 'sqlsrv',
-            'username' => $_ENV['SQLSRV_TEST_USER'],
-            'password' => $_ENV['SQLSRV_TEST_PASSWD'],
-            'database' => $_ENV['SQLSRV_TEST_DB'],
+            'username' => getenv('SQLSRV_TEST_USER'),
+            'password' => getenv('SQLSRV_TEST_PASSWD'),
+            'database' => getenv('SQLSRV_TEST_DB'),
 
-            'hostspec' => empty($_ENV['SQLSRV_TEST_HOST'])
-                    ? null : $_ENV['SQLSRV_TEST_HOST'],
+            'hostspec' => !getenv('SQLSRV_TEST_HOST')
+                    ? null : getenv('SQLSRV_TEST_HOST'),
 
-            'port' => empty($_ENV['SQLSRV_TEST_PORT'])
-                    ? null : $_ENV['SQLSRV_TEST_PORT'],
+            'port' => !getenv('SQLSRV_TEST_PORT')
+                    ? null : getenv('SQLSRV_TEST_PORT'),
         ),
         'options' => array(
         ),
