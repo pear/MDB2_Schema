@@ -1,6 +1,5 @@
 <?php
 
-require_once 'PHPUnit/Autoload.php';
 require_once 'MDB2/Schema.php';
 require_once dirname(__FILE__) . '/dsn.inc';
 
