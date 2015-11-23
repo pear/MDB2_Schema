@@ -234,7 +234,7 @@ class MDB2_Schema extends PEAR
      * @access public
      * @see     MDB2::parseDSN
      */
-    public static function &factory(&$db, $options = array())
+    public static function factory(&$db, $options = array())
     {
         $obj = new MDB2_Schema();
 
@@ -281,7 +281,7 @@ class MDB2_Schema extends PEAR
 
         $this->disconnect();
         if (!MDB2::isConnection($db)) {
-            $db =& MDB2::factory($db, $db_options);
+            $db = MDB2::factory($db, $db_options);
         }
 
         if (PEAR::isError($db)) {
@@ -2728,7 +2728,7 @@ class MDB2_Schema extends PEAR
      */
     function &raiseError($code = null, $mode = null, $options = null, $userinfo = null)
     {
-        $err =& PEAR::raiseError(null, $code, $mode, $options,
+        $err = PEAR::raiseError(null, $code, $mode, $options,
                                 $userinfo, 'MDB2_Schema_Error', true);
         return $err;
     }
