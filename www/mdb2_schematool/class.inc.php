@@ -104,7 +104,7 @@ class MDB2_Schema_Example
      * @access public
      * @static
      */
-    function factory($input)
+    public static function factory($input)
     {
         $obj = new MDB2_Schema_Example($input);
         if ($error = $obj->validateInput($input)) {
