@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<package packagerversion="1.9.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
+<package packagerversion="1.10.1" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0 http://pear.php.net/dtd/tasks-1.0.xsd http://pear.php.net/dtd/package-2.0 http://pear.php.net/dtd/package-2.0.xsd">
  <name>MDB2_Schema</name>
  <channel>pear.php.net</channel>
  <extends>MDB2</extends>
@@ -27,8 +27,8 @@ PEAR::MDB and Metabase.</description>
   <email>dufuz@php.net</email>
   <active>no</active>
  </lead>
- <date>2012-01-10</date>
- <time>17:53:45</time>
+ <date>2015-11-26</date>
+ <time>10:14:42</time>
  <version>
   <release>0.8.6</release>
   <api>0.8.6</api>
@@ -39,10 +39,20 @@ PEAR::MDB and Metabase.</description>
  </stability>
  <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
  <notes>
-- PEAR dependency updated (Bug #15923)
-- XML_DTD dependency updated (past releases of XML_DTD doesn&apos;t works anymore. release 0.5.1 works only with PHP 5).
-- Fixed &apos;disable_queries&apos; and &apos;show_structure&apos; options that were malfunctioning in mdb2_schematool web version
-- Added an option to not drop obsolete tables when updating (Request #15278). It defaults not to drop, which reverts the behavior introduced in Release 0.8.3
+- PHP 7 support
+- Composer support
+- Update PHPUnit support and make unit tests more robust
+- Update dependencies
+- Remove renameKey()
+- Add some documentation (Bug #15189)
+- Improve PHPCS results (Bug #15064)
+- Fix saving debug checkbox state
+- Support max_identifiers_length (issue an error when identifier is longer than driver can handle)
+- Tables/sequences were not being marked to be removed when new definition didn&apos;t contains tables/sequences
+  * Following last release changes, sequences drops are now controlled by an option
+  * BC BREAK: drop_missing_tables option became drop_obsolete_objects (tables/sequences)
+- Make &quot;sequence-on XML&quot; element optional
+- Using HTML_Template_IT for mdb2_schematool templating
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
@@ -125,16 +135,17 @@ open todo items:
      <file name="result.tpl" role="www" />
     </dir> <!-- /www/mdb2_schematool -->
    </dir> <!-- /www -->
+   <file name="composer.json" role="data" />
    <file name="README" role="data" />
   </dir> <!-- / -->
  </contents>
  <dependencies>
   <required>
    <php>
-    <min>4.3.2</min>
+    <min>5.3.0</min>
    </php>
    <pearinstaller>
-    <min>1.7.0</min>
+    <min>1.10.0</min>
    </pearinstaller>
    <package>
     <name>MDB2</name>
@@ -144,7 +155,7 @@ open todo items:
    <package>
     <name>XML_Parser</name>
     <channel>pear.php.net</channel>
-    <min>1.2.8</min>
+    <min>1.3.6</min>
    </package>
   </required>
   <optional>
@@ -185,13 +196,23 @@ open todo items:
     <release>beta</release>
     <api>beta</api>
    </stability>
-   <date>2012-01-10</date>
+   <date>2015-11-26</date>
    <license uri="http://www.opensource.org/licenses/bsd-license.php">BSD License</license>
    <notes>
-- PEAR dependency updated (Bug #15923)
-- XML_DTD dependency updated (past releases of XML_DTD doesn&apos;t works anymore. release 0.5.1 works only with PHP 5).
-- Fixed &apos;disable_queries&apos; and &apos;show_structure&apos; options that were malfunctioning in mdb2_schematool web version
-- Added an option to not drop obsolete tables when updating (Request #15278). It defaults not to drop, which reverts the behavior introduced in Release 0.8.3
+- PHP 7 support
+- Composer support
+- Update PHPUnit support and make unit tests more robust
+- Update dependencies
+- Remove renameKey()
+- Add some documentation (Bug #15189)
+- Improve PHPCS results (Bug #15064)
+- Fix saving debug checkbox state
+- Support max_identifiers_length (issue an error when identifier is longer than driver can handle)
+- Tables/sequences were not being marked to be removed when new definition didn&apos;t contains tables/sequences
+  * Following last release changes, sequences drops are now controlled by an option
+  * BC BREAK: drop_missing_tables option became drop_obsolete_objects (tables/sequences)
+- Make &quot;sequence-on XML&quot; element optional
+- Using HTML_Template_IT for mdb2_schematool templating
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.

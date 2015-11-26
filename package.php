@@ -71,10 +71,20 @@ $version_release = '0.8.6';
 $state = 'beta';
 
 $notes = <<<EOT
-- PEAR dependency updated (Bug #15923)
-- XML_DTD dependency updated (past releases of XML_DTD doesn't works anymore. release 0.5.1 works only with PHP 5).
-- Fixed 'disable_queries' and 'show_structure' options that were malfunctioning in mdb2_schematool web version
-- Added an option to not drop obsolete tables when updating (Request #15278). It defaults not to drop, which reverts the behavior introduced in Release 0.8.3
+- PHP 7 support
+- Composer support
+- Update PHPUnit support and make unit tests more robust
+- Update dependencies
+- Remove renameKey()
+- Add some documentation (Bug #15189)
+- Improve PHPCS results (Bug #15064)
+- Fix saving debug checkbox state
+- Support max_identifiers_length (issue an error when identifier is longer than driver can handle)
+- Tables/sequences were not being marked to be removed when new definition didn't contains tables/sequences
+  * Following last release changes, sequences drops are now controlled by an option
+  * BC BREAK: drop_missing_tables option became drop_obsolete_objects (tables/sequences)
+- Make "sequence-on XML" element optional
+- Using HTML_Template_IT for mdb2_schematool templating
 
 open todo items:
 - Clean up output of getDefinitionFromDatabase(). Sync it with Parser and Parser2.
